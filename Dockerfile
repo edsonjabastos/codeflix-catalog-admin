@@ -7,6 +7,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ADD ./requirements.txt /
 RUN pip install -r /requirements.txt
 ENV PYTHONDONTWRITEBYTECODE 1
+# don't use above commando in production
 WORKDIR /app
 
 COPY . /app
