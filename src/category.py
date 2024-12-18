@@ -5,7 +5,7 @@ class Category:
     def __init__(
         self,
         name,
-        id: str = "",
+        id: uuid.UUID = None,
         description: str = "",
         is_active=True,
     ):
