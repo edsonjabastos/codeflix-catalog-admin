@@ -1,6 +1,8 @@
 from typing import List
-from core.category.application.category_repository import CategoryRepository
+from uuid import UUID
+from core.category.application.use_cases.category_repository import CategoryRepository
 from core.category.domain.category import Category
+from core.category.application.use_cases.exceptions import CategoryNotFound
 
 
 class InMemoryCategoryRepository(CategoryRepository):
@@ -9,3 +11,10 @@ class InMemoryCategoryRepository(CategoryRepository):
 
     def save(self, category: Category) -> None:
         self.categories.append(category)
+
+    def get_by_id(self, id: UUID) -> Category | None:
+        for category in self.categories:
+            if category.id == id:
+                return category
+
+        return None
