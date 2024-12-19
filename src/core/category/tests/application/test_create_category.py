@@ -8,7 +8,7 @@ from core.category.application.create_category import (
     CreateCategoryRequest,
     InvalidCategoryData,
 )
-from core.category.tests.infra.in_memory_category_repository import (
+from core.category.infra.in_memory_category_repository import (
     CategoryRepository,
 )
 
