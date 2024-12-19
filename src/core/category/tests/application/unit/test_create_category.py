@@ -1,13 +1,15 @@
-from unittest.mock import MagicMock
 from uuid import UUID
 
+from unittest.mock import MagicMock
 import pytest
+
 
 from core.category.application.create_category import (
     CreateCategory,
-    CreateCategoryRequest,
-    InvalidCategoryData,
+    CreateCategoryResponse,
 )
+from core.category.application.exceptions import InvalidCategoryData
+from core.category.application.create_category import CreateCategoryRequest
 from core.category.infra.in_memory_category_repository import (
     CategoryRepository,
 )
@@ -24,10 +26,13 @@ class TestCreateCategory:
             is_active=True,
         )
 
-        category_id: UUID = use_case.execute(create_category_request)
+        created_category_response: CreateCategoryResponse = use_case.execute(
+            create_category_request
+        )
 
-        assert category_id is not None
-        assert isinstance(category_id, UUID)
+        assert created_category_response is not None
+        assert isinstance(created_category_response, CreateCategoryResponse)
+        assert isinstance(created_category_response.id, UUID)
         assert mock_repository.save.called is True
 
     def test_create_category_with_invalid_data(self) -> None:
@@ -42,7 +47,9 @@ class TestCreateCategory:
         with pytest.raises(
             InvalidCategoryData, match="name cannot be empty"
         ) as exc_info:
-            use_case.execute(request=create_category_request)
+            use_case.execute(
+                request=create_category_request
+            )
 
         assert exc_info.type is InvalidCategoryData
         assert str(exc_info.value) == "name cannot be empty"

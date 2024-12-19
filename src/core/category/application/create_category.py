@@ -34,4 +34,5 @@ class CreateCategory:
 
         self.repository.save(category)
 
-        return category.id
+        category_response = CreateCategoryResponse(id=category.id)
+        return category_response
