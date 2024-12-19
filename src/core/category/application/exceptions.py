@@ -1,2 +1,0 @@
-class InvalidCategoryData(Exception):
-    pass
