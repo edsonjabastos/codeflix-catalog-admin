@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 
 class TestCategory:
-    
+
     def test_name_is_required(self) -> None:
         with pytest.raises(
             TypeError, match="missing 1 required positional argument: 'name'"
@@ -133,24 +133,44 @@ class TestActivateCategory:
 
 
 class TestDeactivateCategory:
-    
-        def test_deactivate_active_category(self) -> None:
-            category = Category("Movie", is_active=True)
-    
+
+    def test_deactivate_active_category(self) -> None:
+        category = Category("Movie", is_active=True)
+
+        category.deactivate()
+
+        assert category.is_active is False
+
+    def test_deactivate_inactive_category(self) -> None:
+        category = Category("Movie", is_active=False)
+
+        category.deactivate()
+
+        assert category.is_active is False
+
+    def test_validate_name_called_on_deactivate(self) -> None:
+        category = Category("Movie", is_active=True)
+
+        with patch.object(category, "validate_name") as mock_validate_name:
             category.deactivate()
-    
-            assert category.is_active is False
-    
-        def test_deactivate_inactive_category(self) -> None:
-            category = Category("Movie", is_active=False)
-    
-            category.deactivate()
-    
-            assert category.is_active is False
-    
-        def test_validate_name_called_on_deactivate(self) -> None:
-            category = Category("Movie", is_active=True)
-    
-            with patch.object(category, "validate_name") as mock_validate_name:
-                category.deactivate()
-                mock_validate_name.assert_called_once()
+            mock_validate_name.assert_called_once()
+
+
+class TestEquality:
+
+    def test_when_categories_have_same_id_and_class(self) -> None:
+        category_id = uuid.uuid4()
+        category1 = Category(id=category_id, name="Movie")
+        category2 = Category(id=category_id, name="Movie")
+
+        assert category1 == category2
+
+    def test_equality_with_different_class(self) -> None:
+        class FakeCategory: ...
+
+        common_id = uuid.uuid4()
+        category = Category(id=common_id, name="Movie")
+        fake_category = FakeCategory()
+        fake_category.id = common_id
+
+        assert category != fake_category
