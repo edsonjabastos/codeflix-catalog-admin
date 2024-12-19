@@ -1,7 +1,7 @@
 import pytest
 from uuid import UUID
 import uuid
-from category import Category
+from core.category.domain.category import Category
 from unittest.mock import patch
 
 
