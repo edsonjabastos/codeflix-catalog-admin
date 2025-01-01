@@ -1,7 +1,6 @@
 from typing import Any
 
 from unittest.mock import create_autospec
-from uuid import UUID
 
 from core.category.application.use_cases.get_category import (
     GetCategory,

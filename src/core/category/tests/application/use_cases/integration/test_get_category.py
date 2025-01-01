@@ -1,4 +1,3 @@
-from unittest.mock import MagicMock
 from uuid import UUID, uuid4
 
 import pytest
@@ -10,7 +9,6 @@ from core.category.application.use_cases.get_category import (
 )
 from core.category.application.use_cases.exceptions import (
     CategoryNotFound,
-    InvalidCategoryData,
 )
 from core.category.domain.category import Category
 from core.category.infra.in_memory_category_repository import (

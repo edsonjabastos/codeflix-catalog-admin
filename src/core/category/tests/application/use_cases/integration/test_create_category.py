@@ -1,5 +1,4 @@
 from unittest.mock import MagicMock
-from uuid import UUID
 
 import pytest
 
