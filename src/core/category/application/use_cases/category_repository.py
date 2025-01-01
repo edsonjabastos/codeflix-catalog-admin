@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 from core.category.domain.category import Category
 
 
@@ -8,5 +9,5 @@ class CategoryRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, id: int) -> Category | None:
+    def get_by_id(self, id: UUID) -> Category | None:
         raise NotImplementedError
