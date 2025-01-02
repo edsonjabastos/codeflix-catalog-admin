@@ -2,7 +2,7 @@ from unittest.mock import create_autospec
 from uuid import uuid4
 
 import pytest
-from core.category.application.use_cases.category_repository import CategoryRepository
+from core.category.domain.category_repository import CategoryRepository
 from core.category.application.use_cases.exceptions import CategoryNotFound
 from core.category.application.use_cases.update_category import (
     UpdateCategory,

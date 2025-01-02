@@ -1,0 +1,1 @@
+from core.category.domain.category_repository import CategoryRepository

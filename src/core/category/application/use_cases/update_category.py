@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from os import name
 
-from core.category.application.use_cases.category_repository import CategoryRepository
+from core.category.domain.category_repository import CategoryRepository
 from core.category.application.use_cases.exceptions import CategoryNotFound
 
 
