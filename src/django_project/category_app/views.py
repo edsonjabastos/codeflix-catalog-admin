@@ -12,13 +12,13 @@ class CategoryViewSet(viewsets.ViewSet):
             status=HTTP_200_OK,
             data=[
                 {
-                    "id": "9bcf7e5a-3f4c-4f8a-8f9b-1b7e5f3b7c9b",
+                    "id": "6fd173e3-9fd2-4443-add0-ee83c27d4936",
                     "name": "Movie",
                     "description": "Movie category",
                     "is_active": True,
                 },
                 {
-                    "id": "9bcf7e5a-3f4c-4f8a-8f9b-1b7e5f3b7c9b",
+                    "id": "c8b17960-69c0-4254-a569-3715cfbfc114",
                     "name": "Documentary",
                     "description": "Documentary category",
                     "is_active": True,
