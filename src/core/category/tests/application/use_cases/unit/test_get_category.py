@@ -1,5 +1,3 @@
-from typing import Any
-
 from unittest.mock import create_autospec
 
 from core.category.application.use_cases.get_category import (
