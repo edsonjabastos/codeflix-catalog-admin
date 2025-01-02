@@ -8,7 +8,7 @@ from core.category.application.use_cases.exceptions import CategoryNotFound
 
 @dataclass
 class GetCategoryRequest:
-    id: int
+    id: UUID
 
 
 @dataclass

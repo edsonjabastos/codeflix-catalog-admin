@@ -21,7 +21,7 @@ class TestGetCategory:
             description="Movie description",
             is_active=True,
         )
-        mock_repository: Any = create_autospec(CategoryRepository)
+        mock_repository: CategoryRepository = create_autospec(CategoryRepository)
         mock_repository.get_by_id.return_value = category_movie
         use_case: GetCategory = GetCategory(repository=mock_repository)
         get_category_request: GetCategoryRequest = GetCategoryRequest(
