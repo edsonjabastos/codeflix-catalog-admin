@@ -11,15 +11,29 @@ class InMemoryCategoryRepository(CategoryRepository):
     def save(self, category: Category) -> None:
         self.categories.append(category)
 
-    def get_by_id(self, id: UUID) -> Category | None:
-        for category in self.categories:
-            if category.id == id:
-                return category
-
         return None
+
+    def get_by_id(self, id: UUID) -> Category | None:
+
+        return next(
+            (category for category in self.categories if category.id == id), None
+        )
 
     def delete(self, id: UUID) -> None:
         category: Category = self.get_by_id(id=id)
-        self.categories.remove(category)
+        if category:
+            self.categories.remove(category)
 
-        return
+        return None
+
+    def update(self, category: Category) -> None:
+        category_to_be_updated: Category = self.get_by_id(id=category.id)
+        if category_to_be_updated:
+            # self.delete(id=category.id) # alternative way to update
+            # self.save(category)
+            category_to_be_updated_index: int = self.categories.index(
+                category_to_be_updated
+            )
+            self.categories[category_to_be_updated_index] = category
+
+        return None
