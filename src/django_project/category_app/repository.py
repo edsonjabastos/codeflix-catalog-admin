@@ -44,3 +44,10 @@ class DjangoORMCategoryRepository(CategoryRepository):
             )
             for category in self.category_model.objects.all()
         ]
+
+    def update(self, category: Category):
+        self.category_model.objects.filter(pk=category.id).update(
+            name=category.name,
+            description=category.description,
+            is_active=category.is_active,
+        )
