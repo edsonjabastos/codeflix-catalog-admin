@@ -37,3 +37,7 @@ class InMemoryCategoryRepository(CategoryRepository):
             self.categories[category_to_be_updated_index] = category
 
         return None
+
+    def list(self) -> List[Category]:
+        
+        return [category for category in self.categories]
