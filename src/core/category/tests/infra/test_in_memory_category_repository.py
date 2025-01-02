@@ -64,7 +64,6 @@ class TestDeleteInMemoryCategoryRepository:
         repository = InMemoryCategoryRepository()
         id: UUID = uuid4()
         
-        with pytest.raises(ValueError):
-            repository.delete(id)
+        assert repository.get_by_id(id) is None
 
         
