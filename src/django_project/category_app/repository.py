@@ -8,10 +8,10 @@ from django_project.category_app.models import Category as CategoryModel
 
 
 class DjangoORMCategoryRepository(CategoryRepository):
-    def __init__(self, category_model: CategoryModel):
-        self.category_model = category_model
+    def __init__(self, category_model: CategoryModel | None = None):
+        self.category_model: CategoryModel | None = category_model or CategoryModel
 
-    def save(self, category: Category):
+    def save(self, category: Category) -> None:
         self.category_model.objects.create(
             id=category.id,
             name=category.name,
@@ -19,7 +19,7 @@ class DjangoORMCategoryRepository(CategoryRepository):
             is_active=category.is_active,
         )
 
-    def get_by_id(self, id: UUID) -> Category:
+    def get_by_id(self, id: UUID) -> Category | None:
         try:
             category = self.category_model.objects.get(id=id)
             return Category(
@@ -31,7 +31,7 @@ class DjangoORMCategoryRepository(CategoryRepository):
         except self.category_model.DoesNotExist:
             return None
 
-    def delete(self, id: UUID):
+    def delete(self, id: UUID) -> None:
         self.category_model.objects.filter(id=id).delete()
 
     def list(self) -> List[Category]:
@@ -45,7 +45,7 @@ class DjangoORMCategoryRepository(CategoryRepository):
             for category in self.category_model.objects.all()
         ]
 
-    def update(self, category: Category):
+    def update(self, category: Category) -> None:
         self.category_model.objects.filter(pk=category.id).update(
             name=category.name,
             description=category.description,
