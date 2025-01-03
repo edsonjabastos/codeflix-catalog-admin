@@ -15,7 +15,7 @@ class TestSave:
             name="Movie",
             description="Movie category",
         )
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
 
         assert CategoryModel.objects.count() == 0
         assert category_repository.list() == []
@@ -37,7 +37,7 @@ class TestGetById:
             name="Movie",
             description="Movie category",
         )
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category_repository.save(category)
 
         category_from_database = category_repository.get_by_id(category.id)
@@ -48,7 +48,7 @@ class TestGetById:
         assert category_from_database.is_active == category.is_active
 
     def test_get_category_by_id_not_found(self):
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category = category_repository.get_by_id(uuid4())
 
         assert category is None
@@ -62,7 +62,7 @@ class TestDelete:
             name="Movie",
             description="Movie category",
         )
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category_repository.save(category)
 
         assert CategoryModel.objects.count() == 1
@@ -70,7 +70,7 @@ class TestDelete:
         assert CategoryModel.objects.count() == 0
 
     def test_delete_category_not_found(self):
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category_repository.delete(uuid4())
         assert CategoryModel.objects.count() == 0
 
@@ -79,7 +79,7 @@ class TestDelete:
 class TestList:
 
     def test_list_categories(self):
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
 
         assert category_repository.list() == []
 
@@ -118,7 +118,7 @@ class TestUpdate:
             name="Movie",
             description="Movie category",
         )
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category_repository.save(category)
 
         new_category = Category(
@@ -140,7 +140,7 @@ class TestUpdate:
             name="Movie",
             description="Movie category",
         )
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category_repository.update(category)
 
         assert CategoryModel.objects.count() == 0
@@ -151,7 +151,7 @@ class TestUpdate:
             name="Movie",
             description="Movie category",
         )
-        category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+        category_repository = DjangoORMCategoryRepository()
         category_repository.save(category)
 
         new_category = Category(
@@ -173,7 +173,7 @@ class TestUpdate:
     #         name="Movie",
     #         description="Movie category",
     #     )
-    #     category_repository = DjangoORMCategoryRepository(category_model=CategoryModel)
+    #     category_repository = DjangoORMCategoryRepository()
     #     category_repository.save(category)
 
     #     new_category = Category(
