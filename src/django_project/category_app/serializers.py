@@ -40,3 +40,7 @@ class UpdateCategoryRequestSerializer(Serializer):
     name: CharField = CharField(max_length=255, allow_blank=False)
     description: CharField = CharField()
     is_active: BooleanField = BooleanField()
+
+class DeleteCategoryRequestSerializer(Serializer):
+    id: UUIDField = UUIDField()
+    
