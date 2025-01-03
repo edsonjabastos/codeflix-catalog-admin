@@ -14,6 +14,11 @@ from core.category.application.use_cases.list_category import (
     ListCategoryRequest,
 )
 from django_project.category_app.repository import DjangoORMCategoryRepository
+from django_project.category_app.serializers import (
+    ListCategoryResponseSerializer,
+    RetrieveCategoryRequestSerializer,
+    RetrieveCategoryResponseSerializer,
+)
 
 
 class CategoryViewSet(viewsets.ViewSet):
@@ -23,42 +28,29 @@ class CategoryViewSet(viewsets.ViewSet):
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
         output = use_case.execute(input)
 
-        categories = [
-            {
-                "id": str(category.id),
-                "name": category.name,
-                "description": category.description,
-                "is_active": category.is_active,
-            }
-            for category in output.data
-        ]
+        serializer = ListCategoryResponseSerializer(instance=output)
 
         return Response(
             status=HTTP_200_OK,
-            data=categories,
+            data=serializer.data,
         )
 
-    def retrieve(self, request: Request, pk: str) -> Response:
-        try:
-            input = UUID(pk)
-        except ValueError:
-            return Response(status=HTTP_400_BAD_REQUEST)
+    def retrieve(self, request: Request, pk: str | None = None) -> Response:
+        serializer = RetrieveCategoryRequestSerializer(data={"id": pk})
+        serializer.is_valid(raise_exception=True)
 
         use_case = GetCategory(repository=DjangoORMCategoryRepository())
 
         try:
-            result = use_case.execute(request=GetCategoryRequest(id=input))
+            result = use_case.execute(
+                request=GetCategoryRequest(id=serializer.validated_data["id"])
+            )
         except CategoryNotFound:
             return Response(status=HTTP_404_NOT_FOUND)
 
-        category = {
-            "id": str(result.id),
-            "name": result.name,
-            "description": result.description,
-            "is_active": result.is_active,
-        }
+        output = RetrieveCategoryResponseSerializer(instance=result)
 
         return Response(
             status=HTTP_200_OK,
-            data=category,
+            data=output.data,
         )
