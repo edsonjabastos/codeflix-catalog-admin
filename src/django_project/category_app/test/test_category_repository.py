@@ -83,31 +83,31 @@ class TestList:
 
         assert category_repository.list() == []
 
-        category1 = Category(
+        movie_category = Category(
             name="Movie",
             description="Movie category",
         )
-        category2 = Category(
+        documentary_category = Category(
             name="Documentary",
             description="Documentary category",
         )
-        category_repository.save(category1)
-        category_repository.save(category2)
+        category_repository.save(movie_category)
+        category_repository.save(documentary_category)
 
         categories = category_repository.list()
         assert len(categories) == 2
 
-        category1_from_database = categories[0]
-        assert category1_from_database.id == category1.id
-        assert category1_from_database.name == category1.name
-        assert category1_from_database.description == category1.description
-        assert category1_from_database.is_active == category1.is_active
+        movie_category_from_db = categories[0]
+        assert movie_category_from_db.id == movie_category.id
+        assert movie_category_from_db.name == movie_category.name
+        assert movie_category_from_db.description == movie_category.description
+        assert movie_category_from_db.is_active == movie_category.is_active
 
-        category2_from_database = categories[1]
-        assert category2_from_database.id == category2.id
-        assert category2_from_database.name == category2.name
-        assert category2_from_database.description == category2.description
-        assert category2_from_database.is_active == category2.is_active
+        documentary_category_from_database = categories[1]
+        assert documentary_category_from_database.id == documentary_category.id
+        assert documentary_category_from_database.name == documentary_category.name
+        assert documentary_category_from_database.description == documentary_category.description
+        assert documentary_category_from_database.is_active == documentary_category.is_active
 
 
 @pytest.mark.django_db
