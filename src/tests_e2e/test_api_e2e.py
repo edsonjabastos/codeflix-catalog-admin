@@ -1,16 +1,24 @@
 from typing import Any
 import pytest
 from rest_framework.test import APIClient
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+)
 
 
 @pytest.mark.django_db
 class TestUserCanCreateAndEditCategory:
+
     def test_user_can_create_and_edit_category(self):
         api_client: APIClient = APIClient()
 
         # list categories
         list_response: Any = api_client.get("/api/categories/")
-        assert list_response.status_code == 200
+        assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {"data": []}
 
         # create category
@@ -22,14 +30,14 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         created_category_id: str = create_response.data["id"]
-        assert create_response.status_code == 201
+        assert create_response.status_code == HTTP_201_CREATED
         assert create_response.data == {
             "id": created_category_id,
         }
 
         # check created category in list
         list_response: Any = api_client.get("/api/categories/")
-        assert list_response.status_code == 200
+        assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {
             "data": [
                 {
@@ -43,7 +51,7 @@ class TestUserCanCreateAndEditCategory:
 
         # get created category
         get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
-        assert get_response.status_code == 200
+        assert get_response.status_code == HTTP_200_OK
         assert get_response.data == {
             "data": {
                 "id": created_category_id,
@@ -62,12 +70,12 @@ class TestUserCanCreateAndEditCategory:
                 "is_active": False,
             },
         )
-        assert edit_response.status_code == 204
+        assert edit_response.status_code == HTTP_204_NO_CONTENT
         assert edit_response.data == None
 
         # check edited category in list
         list_response: Any = api_client.get("/api/categories/")
-        assert list_response.status_code == 200
+        assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {
             "data": [
                 {
@@ -81,7 +89,7 @@ class TestUserCanCreateAndEditCategory:
 
         # get edited category
         get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
-        assert get_response.status_code == 200
+        assert get_response.status_code == HTTP_200_OK
         assert get_response.data == {
             "data": {
                 "id": created_category_id,
@@ -96,7 +104,7 @@ class TestUserCanCreateAndEditCategory:
 
         # list categories
         list_response: Any = api_client.get("/api/categories/")
-        assert list_response.status_code == 200
+        assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {"data": []}
 
         # create category
@@ -108,14 +116,14 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         created_category_id: str = create_response.data["id"]
-        assert create_response.status_code == 201
+        assert create_response.status_code == HTTP_201_CREATED
         assert create_response.data == {
             "id": created_category_id,
         }
 
         # check created category in list
         list_response: Any = api_client.get("/api/categories/")
-        assert list_response.status_code == 200
+        assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {
             "data": [
                 {
@@ -129,7 +137,7 @@ class TestUserCanCreateAndEditCategory:
 
         # get created category
         get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
-        assert get_response.status_code == 200
+        assert get_response.status_code == HTTP_200_OK
         assert get_response.data == {
             "data": {
                 "id": created_category_id,
@@ -143,14 +151,13 @@ class TestUserCanCreateAndEditCategory:
         delete_response: Any = api_client.delete(
             f"/api/categories/{created_category_id}/"
         )
-        assert delete_response.status_code == 204
+        assert delete_response.status_code == HTTP_204_NO_CONTENT
         assert delete_response.data == None
 
         # check deleted category in list
         list_response: Any = api_client.get("/api/categories/")
-        assert list_response.status_code == 200
+        assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {"data": []}
-
 
     def test_user_cannot_create_category_and_edit_incorrectly(self):
         api_client: APIClient = APIClient()
@@ -164,7 +171,7 @@ class TestUserCanCreateAndEditCategory:
                 "is_active": "incorrect",
             },
         )
-        assert create_response.status_code == 400
+        assert create_response.status_code == HTTP_400_BAD_REQUEST
         assert create_response.data == {
             "name": ["This field may not be blank."],
             "is_active": ["Must be a valid boolean."],
@@ -179,7 +186,7 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         created_category_id: str = create_response.data["id"]
-        assert create_response.status_code == 201
+        assert create_response.status_code == HTTP_201_CREATED
         assert create_response.data == {
             "id": created_category_id,
         }
@@ -193,8 +200,119 @@ class TestUserCanCreateAndEditCategory:
                 "is_active": "incorrect",
             },
         )
-        assert edit_response.status_code == 400
+        assert edit_response.status_code == HTTP_400_BAD_REQUEST
         assert edit_response.data == {
             "name": ["This field may not be blank."],
             "is_active": ["Must be a valid boolean."],
+        }
+
+    def test_user_can_partial_edit_category(self):
+        api_client: APIClient = APIClient()
+
+        # create category
+        create_response: Any = api_client.post(
+            "/api/categories/",
+            data={
+                "name": "Movie",
+                "description": "Movie description",
+            },
+        )
+        created_category_id: str = create_response.data["id"]
+        assert create_response.status_code == HTTP_201_CREATED
+        assert create_response.data == {
+            "id": created_category_id,
+        }
+
+        # check created category in list
+        list_response: Any = api_client.get("/api/categories/")
+        assert list_response.status_code == HTTP_200_OK
+        assert list_response.data == {
+            "data": [
+                {
+                    "id": created_category_id,
+                    "name": "Movie",
+                    "description": "Movie description",
+                    "is_active": True,
+                }
+            ]
+        }
+
+        # partial edit name created category
+        edit_response: Any = api_client.patch(
+            f"/api/categories/{created_category_id}/",
+            data={
+                "name": "Series",
+            },
+        )
+        assert edit_response.status_code == HTTP_204_NO_CONTENT
+        assert edit_response.data == None
+
+        # check edited category in list
+        list_response: Any = api_client.get("/api/categories/")
+        assert list_response.status_code == HTTP_200_OK
+        assert list_response.data == {
+            "data": [
+                {
+                    "id": created_category_id,
+                    "name": "Series",
+                    "description": "Movie description",
+                    "is_active": True,
+                }
+            ]
+        }
+
+        # get edited category
+        get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
+        assert get_response.status_code == HTTP_200_OK
+        assert get_response.data == {
+            "data": {
+                "id": created_category_id,
+                "name": "Series",
+                "description": "Movie description",
+                "is_active": True,
+            }
+        }
+
+        # partial edit description created category
+        edit_response: Any = api_client.patch(
+            f"/api/categories/{created_category_id}/",
+            data={
+                "description": "Series description",
+            },
+        )
+        assert edit_response.status_code == HTTP_204_NO_CONTENT
+        assert edit_response.data == None
+
+        # check edited category in list
+        get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
+        assert get_response.status_code == HTTP_200_OK
+        assert get_response.data == {
+            "data": {
+                "id": created_category_id,
+                "name": "Series",
+                "description": "Series description",
+                "is_active": True,
+            }
+        }
+
+        # partial edit is_active created category
+        edit_response: Any = api_client.patch(
+            f"/api/categories/{created_category_id}/",
+            data={
+                "is_active": False,
+            },
+        )
+        assert edit_response.status_code == HTTP_204_NO_CONTENT
+        assert edit_response.data == None
+
+        # check edited category in list
+        get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
+        assert get_response.status_code == HTTP_200_OK
+        assert get_response.data == {
+            "data": {
+                "id": created_category_id,
+                "name": "Series",
+                "description": "Series description",
+                "is_active": False,
+            }
         }
