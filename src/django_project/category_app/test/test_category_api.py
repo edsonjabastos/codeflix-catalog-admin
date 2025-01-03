@@ -1,8 +1,14 @@
+from calendar import c
 from typing import Any
 from uuid import UUID, uuid4
 import pytest
 from rest_framework.test import APIClient
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_201_CREATED,
+)
 
 from core.category.domain.category import Category
 from django_project.category_app.repository import DjangoORMCategoryRepository
@@ -101,3 +107,47 @@ class TestCategoryRetrieveAPI:
 
         assert response.status_code == HTTP_200_OK
         assert response.data == expected_data
+
+
+@pytest.mark.django_db
+class TestCategoryCreateAPI:
+    def test_create_category_with_invalid_data(self) -> None:
+        url: str = "/api/categories/"
+        data: dict = {
+            "name": "",
+            "description": "Movie description",
+        }
+        response: Any = APIClient().post(url, data)
+
+        assert response.status_code == HTTP_400_BAD_REQUEST
+
+    def test_create_category(
+        self,
+        category_movie: Category,
+        category_repository: DjangoORMCategoryRepository,
+    ) -> None:
+        url: str = "/api/categories/"
+        data: dict = {
+            "name": category_movie.name,
+            "description": category_movie.description,
+        }
+        response: Any = APIClient().post(url, data)
+
+        assert response.status_code == HTTP_201_CREATED
+        created_category_id: UUID = UUID(response.data["id"])
+
+        assert category_repository.get_by_id(created_category_id) == Category(
+            id=UUID(response.data["id"]),
+            name=category_movie.name,
+            description=category_movie.description,
+            is_active=category_movie.is_active,
+        )
+
+        assert category_repository.list() == [
+            Category(
+                id=UUID(response.data["id"]),
+                name=category_movie.name,
+                description=category_movie.description,
+                is_active=category_movie.is_active,
+            )
+        ]
