@@ -1,5 +1,5 @@
 import uuid
-from uuid import UUID
+from uuid import UUID, uuid4
 from dataclasses import dataclass, field
 
 
@@ -8,7 +8,7 @@ class Category:
     name: str
     description: str = ""
     is_active: bool = True
-    id: UUID = field(default_factory=uuid.uuid4)
+    id: UUID = field(default_factory=uuid4)
 
     def __post_init__(self):
         self.validate_name()
