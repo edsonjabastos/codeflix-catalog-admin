@@ -1,31 +1,42 @@
-from calendar import c
-from rest_framework import serializers
+from rest_framework.serializers import (
+    Serializer,
+    UUIDField,
+    CharField,
+    BooleanField,
+)
 
 
-class CategoryResponseSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
-    name = serializers.CharField(max_length=255)
-    description = serializers.CharField()
-    is_active = serializers.BooleanField()
+class CategoryResponseSerializer(Serializer):
+    id: UUIDField = UUIDField()
+    name: CharField = CharField(max_length=255)
+    description: CharField = CharField()
+    is_active: BooleanField = BooleanField()
 
 
-class ListCategoryResponseSerializer(serializers.Serializer):
-    data = CategoryResponseSerializer(many=True)
+class ListCategoryResponseSerializer(Serializer):
+    data: CategoryResponseSerializer = CategoryResponseSerializer(many=True)
 
 
-class RetrieveCategoryRequestSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class RetrieveCategoryRequestSerializer(Serializer):
+    id: UUIDField = UUIDField()
 
 
-class RetrieveCategoryResponseSerializer(serializers.Serializer):
-    data = CategoryResponseSerializer(source="*")
+class RetrieveCategoryResponseSerializer(Serializer):
+    data: CategoryResponseSerializer = CategoryResponseSerializer(source="*")
 
 
-class CreateCategoryRequestSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)
-    description = serializers.CharField()
-    is_active = serializers.BooleanField(default=True)
+class CreateCategoryRequestSerializer(Serializer):
+    name: CharField = CharField(max_length=255, allow_blank=False)
+    description: CharField = CharField()
+    is_active: BooleanField = BooleanField(default=True)
 
 
-class CreateCategoryResponseSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+class CreateCategoryResponseSerializer(Serializer):
+    id: UUIDField = UUIDField()
+
+
+class UpdateCategoryRequestSerializer(Serializer):
+    id: UUIDField = UUIDField()
+    name: CharField = CharField(max_length=255, allow_blank=False)
+    description: CharField = CharField()
+    is_active: BooleanField = BooleanField()
