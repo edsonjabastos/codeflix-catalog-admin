@@ -38,6 +38,7 @@ from django_project.category_app.serializers import (
     CreateCategoryRequestSerializer,
     DeleteCategoryRequestSerializer,
     ListCategoryResponseSerializer,
+    PatchCategoryRequestSerializer,
     RetrieveCategoryRequestSerializer,
     RetrieveCategoryResponseSerializer,
     CreateCategoryResponseSerializer,
@@ -117,6 +118,28 @@ class CategoryViewSet(viewsets.ViewSet):
         use_case: UpdateCategory = UpdateCategory(
             repository=DjangoORMCategoryRepository()
         )
+        try:
+            use_case.execute(request=input)
+        except CategoryNotFound:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        return Response(status=HTTP_204_NO_CONTENT)
+
+    def partial_update(self, request: Request, pk: UUID) -> Response:
+        print(request.data)
+        serializer: PatchCategoryRequestSerializer = PatchCategoryRequestSerializer(
+            data={**request.data, "id": pk}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        input: UpdateCategoryRequest = UpdateCategoryRequest(
+            **serializer.validated_data
+        )
+
+        use_case: UpdateCategory = UpdateCategory(
+            repository=DjangoORMCategoryRepository()
+        )
+
         try:
             use_case.execute(request=input)
         except CategoryNotFound:
