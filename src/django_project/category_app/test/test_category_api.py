@@ -43,22 +43,25 @@ class TestCategoryListAPI:
         url: str = "/api/categories/"
         response: Any = APIClient().get(url)
 
-        expected_data = [
-            {
-                "id": str(category_movie.id),
-                "name": category_movie.name,
-                "description": category_movie.description,
-                "is_active": category_movie.is_active,
-            },
-            {
-                "id": str(category_documentary.id),
-                "name": category_documentary.name,
-                "description": category_documentary.description,
-                "is_active": category_documentary.is_active,
-            },
-        ]
+        expected_data = {
+            "data": [
+                {
+                    "id": str(category_movie.id),
+                    "name": category_movie.name,
+                    "description": category_movie.description,
+                    "is_active": category_movie.is_active,
+                },
+                {
+                    "id": str(category_documentary.id),
+                    "name": category_documentary.name,
+                    "description": category_documentary.description,
+                    "is_active": category_documentary.is_active,
+                },
+            ]
+        }
 
         assert response.status_code == HTTP_200_OK
+        assert len(response.data["data"]) == 2
         assert response.data == expected_data
 
 
@@ -88,10 +91,12 @@ class TestCategoryRetrieveAPI:
         response: Any = APIClient().get(url)
 
         expected_data = {
-            "id": str(category_movie.id),
-            "name": category_movie.name,
-            "description": category_movie.description,  # + " false positive test",
-            "is_active": category_movie.is_active,
+            "data": {
+                "id": str(category_movie.id),
+                "name": category_movie.name,
+                "description": category_movie.description,  # + " false positive test",
+                "is_active": category_movie.is_active,
+            }
         }
 
         assert response.status_code == HTTP_200_OK
