@@ -1,3 +1,4 @@
+from typing import Any, Set
 from uuid import UUID, uuid4
 from dataclasses import dataclass, field
 
@@ -6,7 +7,7 @@ from dataclasses import dataclass, field
 class Genre:
     name: str
     is_active: bool = True
-    categories: set[UUID] = field(default_factory=set)
+    categories: Set[UUID] = field(default_factory=set)
     id: UUID = field(default_factory=uuid4)
 
     def __post_init__(self):
@@ -18,7 +19,7 @@ class Genre:
     def __repr__(self) -> str:
         return f"<Genre {self.name} ({self.id})>"
 
-    def __eq__(self, other: any) -> bool:
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Genre):
             return False
         return self.id == other.id
