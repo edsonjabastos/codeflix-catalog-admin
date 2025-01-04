@@ -4,12 +4,14 @@ from uuid import UUID
 from core.genre.domain.genre import Genre
 from core.genre.domain.genre_repository import GenreRepository
 
+
 @dataclass
 class GenreOutput:
     id: UUID
     name: str
     is_active: bool
     categories: Set[UUID]
+
 
 class ListGenre:
     def __init__(self, genre_repository: GenreRepository):
@@ -22,9 +24,8 @@ class ListGenre:
     class Output:
         data: List[GenreOutput]
 
-
     def execute(self, input: Input) -> Output:
-        genres = self.genre_repository.list()
+        genres: List[Genre] = self.genre_repository.list()
         return self.Output(
             data=[
                 GenreOutput(
