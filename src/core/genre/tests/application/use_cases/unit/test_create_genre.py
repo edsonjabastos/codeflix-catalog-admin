@@ -112,10 +112,12 @@ class TestCreateGenre:
         )
         use_case.genre_repository.save.assert_called_once()
 
-    def test_create_genre_withouth_categories(self, mock_genre_repository) -> None:
+    def test_create_genre_withouth_categories(
+        self, mock_genre_repository, mock_empty_category_repository
+    ):
         use_case: CreateGenre = CreateGenre(
             genre_repository=mock_genre_repository,
-            category_repository=create_autospec(CategoryRepository),
+            category_repository=mock_empty_category_repository,
         )
         input: CreateGenre.Input = CreateGenre.Input(name="Action")
         output: CreateGenre.Output = use_case.execute(input=input)
