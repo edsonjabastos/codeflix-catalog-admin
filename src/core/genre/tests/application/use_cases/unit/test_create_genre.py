@@ -52,27 +52,76 @@ class TestCreateGenre:
         mock_empty_category_repository: CategoryRepository,
         mock_genre_repository: GenreRepository,
     ) -> None:
-        use_case = CreateGenre(
+        use_case: CreateGenre = CreateGenre(
             genre_repository=mock_genre_repository,
             category_repository=mock_empty_category_repository,
         )
         not_registered_category_id = uuid4()
-        # input = CreateGenre.Input(
-        #     name="Action", categories={not_registered_category_id}
-        # )
+        input: CreateGenre.Input = CreateGenre.Input(
+            name="Action", categories={not_registered_category_id}
+        )
         with pytest.raises(
             RelatedCategoriesNotFound, match="Categories with provided IDs not found: "
         ) as exc_info:
-            use_case.execute(
-                CreateGenre.Input(
-                    name="Action", categories={not_registered_category_id}
-                )
-            )
+            use_case.execute(input=input)
 
         assert str(not_registered_category_id) in str(exc_info.value)
 
-    def test_create_genre_with_invalid_data(self) -> None: ...
+    def test_create_genre_with_invalid_data(
+        self,
+        movie_category,
+        mock_category_repository_with_categories,
+        mock_genre_repository,
+    ) -> None:
+        use_case: CreateGenre = CreateGenre(
+            genre_repository=mock_genre_repository,
+            category_repository=mock_category_repository_with_categories,
+        )
+        input: CreateGenre.Input = CreateGenre.Input(
+            name="",
+            categories={movie_category.id},
+        )
+        with pytest.raises(InvalidGenre, match="name cannot be empty"):
+            use_case.execute(input=input)
 
-    def test_create_genre_with_valid_data(self) -> None: ...
+    def test_create_genre_with_valid_data(
+        self,
+        movie_category,
+        documentary_category,
+        mock_category_repository_with_categories,
+        mock_genre_repository,
+    ) -> None:
+        use_case: CreateGenre = CreateGenre(
+            genre_repository=mock_genre_repository,
+            category_repository=mock_category_repository_with_categories,
+        )
+        input: CreateGenre.Input = CreateGenre.Input(
+            name="Action",
+            categories={movie_category.id, documentary_category.id},
+        )
+        output: CreateGenre.Output = use_case.execute(input=input)
 
-    def test_create_genre_withouth_categories(self) -> None: ...
+        assert isinstance(output.id, UUID)
+        mock_genre_repository.save.assert_called_once()
+        mock_genre_repository.save.assert_called_with(
+            Genre(
+                id=output.id,
+                name="Action",
+                categories={movie_category.id, documentary_category.id},
+            )
+        )
+        use_case.genre_repository.save.assert_called_once()
+
+    def test_create_genre_withouth_categories(self, mock_genre_repository) -> None:
+        use_case: CreateGenre = CreateGenre(
+            genre_repository=mock_genre_repository,
+            category_repository=create_autospec(CategoryRepository),
+        )
+        input: CreateGenre.Input = CreateGenre.Input(name="Action")
+        output: CreateGenre.Output = use_case.execute(input=input)
+
+        assert isinstance(output.id, UUID)
+        mock_genre_repository.save.assert_called_once()
+        mock_genre_repository.save.assert_called_with(
+            Genre(id=output.id, name="Action")
+        )
