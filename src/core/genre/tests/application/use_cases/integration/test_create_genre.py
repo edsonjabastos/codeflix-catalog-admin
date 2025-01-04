@@ -1,5 +1,4 @@
 from uuid import UUID, uuid4
-from unittest.mock import create_autospec
 
 import pytest
 
