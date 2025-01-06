@@ -119,7 +119,7 @@ class CategoryViewSet(viewsets.ViewSet):
             repository=DjangoORMCategoryRepository()
         )
         try:
-            use_case.execute(request=input)
+            use_case.execute(input=input)
         except CategoryNotFound:
             return Response(status=HTTP_404_NOT_FOUND)
 
@@ -141,7 +141,7 @@ class CategoryViewSet(viewsets.ViewSet):
         )
 
         try:
-            use_case.execute(request=input)
+            use_case.execute(input=input)
         except CategoryNotFound:
             return Response(status=HTTP_404_NOT_FOUND)
 
