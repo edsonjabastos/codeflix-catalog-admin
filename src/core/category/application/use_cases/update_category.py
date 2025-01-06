@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from os import name
 
+from core.category.domain.category import Category
 from core.category.domain.category_repository import CategoryRepository
 from core.category.application.use_cases.exceptions import CategoryNotFound
 
@@ -17,27 +18,27 @@ class UpdateCategory:
     def __init__(self, repository: CategoryRepository):
         self.repository: CategoryRepository = repository
 
-    def execute(self, request: UpdateCategoryRequest):
-        category = self.repository.get_by_id(request.id)
+    def execute(self, input: UpdateCategoryRequest):
+        category: Category = self.repository.get_by_id(input.id)
 
         if category is None:
             raise CategoryNotFound(
-                f"Category not found with the given id {request.id} while updating"
+                f"Category not found with the given id {input.id} while updating"
             )
 
-        current_name = category.name
-        current_description = category.description
+        current_name: str = category.name
+        current_description: str = category.description
 
-        if request.name is not None:
-            current_name = request.name
+        if input.name is not None:
+            current_name = input.name
 
-        if request.description is not None:
-            current_description = request.description
+        if input.description is not None:
+            current_description = input.description
 
-        if request.is_active is True:
+        if input.is_active is True:
             category.activate()
 
-        if request.is_active is False:
+        if input.is_active is False:
             category.deactivate()
 
         try:
@@ -50,4 +51,4 @@ class UpdateCategory:
             description=current_description,
         )
 
-        self.repository.update(category)
+        self.repository.update(category=category)
