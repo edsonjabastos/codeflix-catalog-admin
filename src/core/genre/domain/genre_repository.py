@@ -19,9 +19,9 @@ class GenreRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, genre_id: UUID) -> Genre:
+    def get_by_id(self, id: UUID) -> Genre:
         raise NotImplementedError
 
     @abstractmethod
-    def delete(self, genre_id: UUID) -> None:
+    def delete(self, id: UUID) -> None:
         raise NotImplementedError
