@@ -49,8 +49,7 @@ class TestUpdateCategory:
         assert category.description == "New Movie description"
         assert category.is_active is True
         assert category.id == update_category_request.id
-        mock_repository.update.assert_called_once_with(category)
-        pass
+        mock_repository.update.assert_called_once_with(category=category)
 
     def test_can_deactivate_category(self) -> None:
         category: Category = Category(
@@ -134,7 +133,10 @@ class TestUpdateCategory:
 
         use_case: UpdateCategory = UpdateCategory(repository=mock_repository)
         update_category_request = UpdateCategoryRequest(
-            id=category.id, name="New Movies", description="New Movie description", is_active=False
+            id=category.id,
+            name="New Movies",
+            description="New Movie description",
+            is_active=False,
         )
         use_case.execute(update_category_request)
 
@@ -143,4 +145,3 @@ class TestUpdateCategory:
         assert category.is_active is False
         assert category.id == update_category_request.id
         mock_repository.update.assert_called_once_with(category)
-        
