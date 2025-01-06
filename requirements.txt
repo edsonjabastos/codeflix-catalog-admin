@@ -1,3 +1,5 @@
 Django
 djangorestframework
 pytest-django
+django-extensions
+ipython
