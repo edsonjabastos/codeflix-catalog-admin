@@ -235,3 +235,72 @@ class TestDelete:
         genre_repository.delete(saved_action_genre.id)
         assert GenreModel.objects.count() == 0
 
+
+@pytest.mark.django_db
+class TestList:
+
+    def test_list_genres(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        action_genre: Genre = Genre(name="Action")
+        comedy_genre: Genre = Genre(name="Comedy")
+        drama_genre: Genre = Genre(name="Drama")
+
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+        genre_repository.save(comedy_genre)
+        genre_repository.save(drama_genre)
+
+        assert GenreModel.objects.count() == 3
+        genres = genre_repository.list()
+        assert len(genres) == 3
+        assert action_genre in genres
+        assert comedy_genre in genres
+        assert drama_genre in genres
+
+    def test_list_genres_with_one_related_category(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        category_repository: DjangoORMCategoryRepository = DjangoORMCategoryRepository()
+
+        movie_category: Category = Category(
+            name="Movie", description="Movies description"
+        )
+        category_repository.save(movie_category)
+
+        action_genre: Genre = Genre(name="Action")
+        action_genre.add_category(movie_category.id)
+        comedy_genre: Genre = Genre(name="Comedy")
+        comedy_genre.add_category(movie_category.id)
+        drama_genre: Genre = Genre(name="Drama")
+        drama_genre.add_category(movie_category.id)
+
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+        genre_repository.save(comedy_genre)
+        genre_repository.save(drama_genre)
+
+        assert GenreModel.objects.count() == 3
+        genres = genre_repository.list()
+        assert len(genres) == 3
+        assert action_genre in genres
+        assert comedy_genre in genres
+        assert drama_genre in genres
+
+        action_genre_model: GenreModel = GenreModel.objects.get(name="Action")
+        comedy_genre_model: GenreModel = GenreModel.objects.get(name="Comedy")
+        drama_genre_model: GenreModel = GenreModel.objects.get(name="Drama")
+
+        related_category: Category = action_genre_model.categories.first()
+        assert related_category.name == "Movie"
+        assert related_category.description == "Movies description"
+        assert related_category.id == movie_category.id
+
+        related_category = comedy_genre_model.categories.first()
+        assert related_category.name == "Movie"
+        assert related_category.description == "Movies description"
+        assert related_category.id == movie_category.id
+
+        related_category = drama_genre_model.categories.first()
+        assert related_category.name == "Movie"
+        assert related_category.description == "Movies description"
+        assert related_category.id == movie_category.id
+
