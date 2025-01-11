@@ -304,3 +304,146 @@ class TestList:
         assert related_category.description == "Movies description"
         assert related_category.id == movie_category.id
 
+
+@pytest.mark.django_db
+class TestUpdate:
+
+    def test_update_genre(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        action_genre: Genre = Genre(name="Action")
+
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+        assert GenreModel.objects.count() == 1
+
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+        updated_action_genre: Genre = Genre(
+            id=saved_action_genre.id, name="Action Updated"
+        )
+        genre_repository.update(updated_action_genre)
+
+        updated_action_genre_model: GenreModel = GenreModel.objects.get(
+            id=saved_action_genre.id
+        )
+        assert updated_action_genre_model.name == "Action Updated"
+
+    def test_update_genre_with_one_related_category(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        category_repository: DjangoORMCategoryRepository = DjangoORMCategoryRepository()
+
+        movie_category: Category = Category(
+            name="Movie", description="Movies description"
+        )
+        category_repository.save(movie_category)
+
+        action_genre: Genre = Genre(name="Action")
+        action_genre.add_category(movie_category.id)
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+
+        assert GenreModel.objects.count() == 1
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+
+        updated_action_genre: Genre = Genre(
+            id=saved_action_genre.id, name="Action Updated"
+        )
+        updated_action_genre.add_category(movie_category.id)
+        genre_repository.update(updated_action_genre)
+
+        updated_action_genre_model: GenreModel = GenreModel.objects.get(
+            id=saved_action_genre.id
+        )
+        assert updated_action_genre_model.name == "Action Updated"
+
+        related_category: Category = updated_action_genre_model.categories.first()
+        assert related_category.name == "Movie"
+        assert related_category.description == "Movies description"
+        assert related_category.id == movie_category.id
+
+    def test_update_genre_with_two_related_categories(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        category_repository: DjangoORMCategoryRepository = DjangoORMCategoryRepository()
+
+        movie_category: Category = Category(
+            name="Movie", description="Movies description"
+        )
+        series_category: Category = Category(
+            name="Series", description="Series description"
+        )
+        document_category: Category = Category(
+            name="Documentary", description="Documentary description"
+        )
+        category_repository.save(movie_category)
+        category_repository.save(series_category)
+        category_repository.save(document_category)
+
+        action_genre: Genre = Genre(name="Action")
+        action_genre.add_category(movie_category.id)
+        action_genre.add_category(series_category.id)
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+
+        assert GenreModel.objects.count() == 1
+
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+        updated_action_genre: Genre = Genre(
+            id=saved_action_genre.id, name="Action Updated"
+        )
+
+        updated_action_genre.add_category(document_category.id)
+        genre_repository.update(updated_action_genre)
+
+        updated_action_genre_model: GenreModel = GenreModel.objects.get(
+            id=saved_action_genre.id
+        )
+
+        assert updated_action_genre_model.name == "Action Updated"
+        assert updated_action_genre_model.is_active == True
+        related_categories = updated_action_genre_model.categories.all()
+        assert related_categories.count() == 1
+
+        movie_related_category: Category = related_categories.get(name="Documentary")
+        assert movie_related_category.name == "Documentary"
+        assert movie_related_category.description == "Documentary description"
+        assert movie_related_category.id == document_category.id
+
+    def test_update_genre_not_found(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        non_existent_id = uuid4()
+        updated_action_genre: Genre = Genre(id=non_existent_id, name="Action Updated")
+        assert genre_repository.update(updated_action_genre) == None
+
+    def test_update_genre_with_one_related_category_not_found(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        non_existent_id = uuid4()
+        updated_action_genre: Genre = Genre(id=non_existent_id, name="Action Updated")
+        updated_action_genre.add_category(non_existent_id)
+        assert genre_repository.update(updated_action_genre) == None
+
+    def test_update_genre_with_invalid_empty_name(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        action_genre: Genre = Genre(name="Action")
+        genre_repository.save(action_genre)
+
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+        with pytest.raises(ValueError, match="name cannot be empty"):
+            updated_action_genre: Genre = Genre(id=saved_action_genre.id, name="")
+            genre_repository.update(updated_action_genre)
+
+        assert GenreModel.objects.first().name == "Action"
+
+    def test_update_genre_with_invalid_large_name(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        action_genre: Genre = Genre(name="Action")
+        genre_repository.save(action_genre)
+
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+        with pytest.raises(
+            ValueError, match="name cannot be longer than 255 characters"
+        ):
+            updated_action_genre: Genre = Genre(
+                id=saved_action_genre.id, name="a" * 256
+            )
+            genre_repository.update(updated_action_genre)
+
+        assert GenreModel.objects.first().name == "Action"
