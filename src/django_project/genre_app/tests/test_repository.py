@@ -175,3 +175,63 @@ class TestGetById:
         assert genre_repository.get_by_id(str(non_existent_id)) == None
 
 
+@pytest.mark.django_db
+class TestDelete:
+
+    def test_delete_genre(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        action_genre: Genre = Genre(name="Action")
+
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+        assert GenreModel.objects.count() == 1
+
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+        genre_repository.delete(saved_action_genre.id)
+        assert GenreModel.objects.count() == 0
+
+    def test_delete_genre_with_one_related_category(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        category_repository: DjangoORMCategoryRepository = DjangoORMCategoryRepository()
+
+        movie_category: Category = Category(
+            name="Movie", description="Movies description"
+        )
+        category_repository.save(movie_category)
+
+        action_genre: Genre = Genre(name="Action")
+        action_genre.add_category(movie_category.id)
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+
+        assert GenreModel.objects.count() == 1
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+
+        genre_repository.delete(saved_action_genre.id)
+        assert GenreModel.objects.count() == 0
+
+    def test_delete_genre_with_two_related_categories(self):
+        genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
+        category_repository: DjangoORMCategoryRepository = DjangoORMCategoryRepository()
+
+        movie_category: Category = Category(
+            name="Movie", description="Movies description"
+        )
+        series_category: Category = Category(
+            name="Series", description="Series description"
+        )
+        category_repository.save(movie_category)
+        category_repository.save(series_category)
+
+        action_genre: Genre = Genre(name="Action")
+        action_genre.add_category(movie_category.id)
+        action_genre.add_category(series_category.id)
+        assert GenreModel.objects.count() == 0
+        genre_repository.save(action_genre)
+
+        assert GenreModel.objects.count() == 1
+        saved_action_genre: GenreModel = GenreModel.objects.first()
+
+        genre_repository.delete(saved_action_genre.id)
+        assert GenreModel.objects.count() == 0
+
