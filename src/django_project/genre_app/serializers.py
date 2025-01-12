@@ -35,3 +35,7 @@ class CreateGenreInputSerializer(Serializer):
 
 class CreateGenreResponseSerializer(Serializer):
     id: UUIDField = UUIDField()
+
+
+class DeleteGenreInputtSerializer(Serializer):
+    id: UUIDField = UUIDField()
