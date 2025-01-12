@@ -39,3 +39,10 @@ class CreateGenreResponseSerializer(Serializer):
 
 class DeleteGenreInputtSerializer(Serializer):
     id: UUIDField = UUIDField()
+
+
+class UpdateGenreInputSerializer(Serializer):
+    id: UUIDField = UUIDField()
+    name: CharField = CharField(max_length=255, allow_blank=False)
+    is_active: BooleanField = BooleanField()
+    categories: SetField = SetField(child=UUIDField())
