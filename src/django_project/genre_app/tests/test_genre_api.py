@@ -1,6 +1,6 @@
 from typing import Any, List
 
-# from uuid import UUID, uuid4
+from uuid import UUID, uuid4
 import pytest
 from rest_framework.test import APIClient
 from rest_framework.status import (
@@ -147,3 +147,76 @@ class TestCreateAPI:
             category_movie.id,
             category_documentary.id,
         }
+
+    def test_create_genre_with_invalid_category(
+        self,
+        category_movie: Category,
+        category_repository: DjangoORMCategoryRepository,
+    ) -> None:
+        category_repository.save(category_movie)
+        non_registered_category_id: str = uuid4()
+
+        url: str = "/api/genres/"
+        data: dict[str, Any] = {
+            "name": "Romance",
+            "is_active": True,
+            "categories": [str(category_movie.id), str(non_registered_category_id)],
+        }
+        response: Any = APIClient().post(url, data=data)
+
+        assert response.status_code == HTTP_400_BAD_REQUEST
+        assert response.data == {
+            "error": f"Categories with provided IDs not found: {non_registered_category_id}"
+        }
+
+    def test_create_genre_with_invalid_empty_name(
+        self, category_movie: Category, category_repository: DjangoORMCategoryRepository
+    ) -> None:
+        category_repository.save(category_movie)
+
+        url: str = "/api/genres/"
+        data: dict[str, Any] = {
+            "name": "",
+            "is_active": True,
+            "categories": [str(category_movie.id)],
+        }
+        response: Any = APIClient().post(url, data=data)
+
+        assert response.status_code == HTTP_400_BAD_REQUEST
+        # assert response.data == {"error": "name cannot be empty"}
+        assert response.data == {"name": ["This field may not be blank."]}
+
+    def test_create_genre_with_invalid_large_name(
+        self, category_movie: Category, category_repository: DjangoORMCategoryRepository
+    ) -> None:
+        category_repository.save(category_movie)
+
+        url: str = "/api/genres/"
+        data: dict[str, Any] = {
+            "name": "a" * 256,
+            "is_active": True,
+            "categories": [str(category_movie.id)],
+        }
+        response: Any = APIClient().post(url, data=data)
+
+        assert response.status_code == HTTP_400_BAD_REQUEST
+        # assert response.data == {"error": "name cannot be larger than 255 characters"}
+        assert response.data == {
+            "name": ["Ensure this field has no more than 255 characters."]
+        }
+
+    def test_create_genre_with_invalid_uuid_category(
+        self, category_movie: Category, category_repository: DjangoORMCategoryRepository
+    ) -> None:
+        category_repository.save(category_movie)
+
+        url: str = "/api/genres/"
+        data: dict[str, Any] = {
+            "name": "Romance",
+            "is_active": True,
+            "categories": ["invalid_uuid"],
+        }
+        response: Any = APIClient().post(url, data=data)
+
+        assert response.status_code == HTTP_400_BAD_REQUEST
+        assert response.data == {"categories": {0: ["Must be a valid UUID."]}}
