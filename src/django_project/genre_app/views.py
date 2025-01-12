@@ -37,6 +37,8 @@ from django_project.genre_app.repository import DjangoORMGenreRepository
 from django_project.genre_app.serializers import (
     # CreateGenreRequestSerializer,
     # DeleteGenreRequestSerializer,
+    CreateGenreInputSerializer,
+    CreateGenreResponseSerializer,
     ListGenreOutputSerializer,
     # PatchGenreRequestSerializer,
     # RetrieveGenreRequestSerializer,
@@ -62,29 +64,29 @@ class GenreViewSet(viewsets.ViewSet):
             data=serializer.data,
         )
 
-    # def create(self, request: Request) -> Response:
-    #     serializer: CreateGenreInputSerializer = CreateGenreInputSerializer(
-    #         data=request.data
-    #     )
-    #     serializer.is_valid(raise_exception=True)
-    #     input: CreateGenre.Input = CreateGenre.Input(**serializer.validated_data)
+    def create(self, request: Request) -> Response:
+        serializer: CreateGenreInputSerializer = CreateGenreInputSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        input: CreateGenre.Input = CreateGenre.Input(**serializer.validated_data)
 
-    #     use_case: CreateGenre = CreateGenre(
-    #         genre_repository=DjangoORMGenreRepository(),
-    #         category_repository=DjangoORMCategoryRepository(),
-    #     )
-    #     try:
-    #         output = use_case.execute(input=input)
-    #     except (InvalidGenre, RelatedCategoriesNotFound) as e:
-    #         return Response(
-    #             status=HTTP_400_BAD_REQUEST,
-    #             data={"error": str(e)},
-    #         )
+        use_case: CreateGenre = CreateGenre(
+            genre_repository=DjangoORMGenreRepository(),
+            category_repository=DjangoORMCategoryRepository(),
+        )
+        try:
+            output = use_case.execute(input=input)
+        except (InvalidGenre, RelatedCategoriesNotFound) as e:
+            return Response(
+                status=HTTP_400_BAD_REQUEST,
+                data={"error": str(e)},
+            )
 
-    #     return Response(
-    #         status=HTTP_201_CREATED,
-    #         data=CreateGenreResponseSerializer(instance=output).data,
-    #     )
+        return Response(
+            status=HTTP_201_CREATED,
+            data=CreateGenreResponseSerializer(instance=output).data,
+        )
 
     # def retrieve(self, request: Request, pk: str | None = None) -> Response:
     #     serializer: RetrieveGenreRequestSerializer = RetrieveGenreRequestSerializer(
