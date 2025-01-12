@@ -220,3 +220,35 @@ class TestCreateAPI:
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {"categories": {0: ["Must be a valid UUID."]}}
+
+
+@pytest.mark.django_db
+class TestDeleteAPI:
+
+    def test_delete_genre(
+        self,
+        genre_romance: Genre,
+        genre_repository: DjangoORMGenreRepository,
+    ) -> None:
+        genre_repository.save(genre_romance)
+
+        url: str = f"/api/genres/{genre_romance.id}/"
+        response: Any = APIClient().delete(url)
+
+        assert response.status_code == HTTP_204_NO_CONTENT
+        assert response.data is None
+        assert genre_repository.get_by_id(genre_romance.id) is None
+
+    def test_delete_genre_not_found(self) -> None:
+        url: str = f"/api/genres/{uuid4()}/"
+        response: Any = APIClient().delete(url)
+
+        assert response.status_code == HTTP_404_NOT_FOUND
+        assert response.data is None
+
+    def test_delete_genre_with_invalid_uuid(self) -> None:
+        url: str = "/api/genres/invalid_uuid/"
+        response: Any = APIClient().delete(url)
+
+        assert response.status_code == HTTP_400_BAD_REQUEST
+        assert response.data == {"id": ["Must be a valid UUID."]}
