@@ -143,8 +143,7 @@ class TestCreateAPI:
 
         assert created_genre.name == "Romance"
         assert created_genre.is_active is True
-        assert created_genre.categories.count() == 2
-        assert set(created_genre.categories.values_list("id", flat=True)) == {
+        assert created_genre.categories == {
             category_movie.id,
             category_documentary.id,
         }
