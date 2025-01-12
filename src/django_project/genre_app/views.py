@@ -39,6 +39,7 @@ from django_project.genre_app.serializers import (
     # DeleteGenreRequestSerializer,
     CreateGenreInputSerializer,
     CreateGenreResponseSerializer,
+    DeleteGenreInputtSerializer,
     ListGenreOutputSerializer,
     # PatchGenreRequestSerializer,
     # RetrieveGenreRequestSerializer,
@@ -87,6 +88,22 @@ class GenreViewSet(viewsets.ViewSet):
             status=HTTP_201_CREATED,
             data=CreateGenreResponseSerializer(instance=output).data,
         )
+
+    def destroy(self, request: Request, pk: UUID) -> Response:
+        serializer: DeleteGenreInputtSerializer = DeleteGenreInputtSerializer(
+            data={"id": pk}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        input: DeleteGenre.Input = DeleteGenre.Input(**serializer.validated_data)
+        use_case: DeleteGenre = DeleteGenre(repository=DjangoORMGenreRepository())
+
+        try:
+            use_case.execute(input=input)
+        except GenreNotFound:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        return Response(status=HTTP_204_NO_CONTENT)
 
     # def retrieve(self, request: Request, pk: str | None = None) -> Response:
     #     serializer: RetrieveGenreRequestSerializer = RetrieveGenreRequestSerializer(
@@ -140,22 +157,6 @@ class GenreViewSet(viewsets.ViewSet):
 
     #     try:
     #         use_case.execute(input=input)
-    #     except GenreNotFound:
-    #         return Response(status=HTTP_404_NOT_FOUND)
-
-    #     return Response(status=HTTP_204_NO_CONTENT)
-
-    # def destroy(self, request: Request, pk: UUID) -> Response:
-    #     serializer: DeleteGenreRequestSerializer = DeleteGenreRequestSerializer(
-    #         data={"id": pk}
-    #     )
-    #     serializer.is_valid(raise_exception=True)
-
-    #     input: DeleteGenreRequest = DeleteGenreRequest(**serializer.validated_data)
-    #     use_case: DeleteGenre = DeleteGenre(repository=DjangoORMGenreRepository())
-
-    #     try:
-    #         use_case.execute(request=input)
     #     except GenreNotFound:
     #         return Response(status=HTTP_404_NOT_FOUND)
 
