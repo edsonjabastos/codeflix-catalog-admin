@@ -172,7 +172,7 @@ class TestGetById:
     def test_get_genre_by_id_not_found(self):
         genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
         non_existent_id = uuid4()
-        assert genre_repository.get_by_id(str(non_existent_id)) == None
+        assert genre_repository.get_by_id(str(non_existent_id)) is None
 
 
 @pytest.mark.django_db
@@ -411,14 +411,14 @@ class TestUpdate:
         genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
         non_existent_id = uuid4()
         updated_action_genre: Genre = Genre(id=non_existent_id, name="Action Updated")
-        assert genre_repository.update(updated_action_genre) == None
+        assert genre_repository.update(updated_action_genre) is None
 
     def test_update_genre_with_one_related_category_not_found(self):
         genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()
         non_existent_id = uuid4()
         updated_action_genre: Genre = Genre(id=non_existent_id, name="Action Updated")
         updated_action_genre.add_category(non_existent_id)
-        assert genre_repository.update(updated_action_genre) == None
+        assert genre_repository.update(updated_action_genre) is None
 
     def test_update_genre_with_invalid_empty_name(self):
         genre_repository: DjangoORMGenreRepository = DjangoORMGenreRepository()

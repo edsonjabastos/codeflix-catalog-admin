@@ -71,7 +71,7 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         assert edit_response.status_code == HTTP_204_NO_CONTENT
-        assert edit_response.data == None
+        assert edit_response.data is None
 
         # check edited category in list
         list_response: Any = api_client.get("/api/categories/")
@@ -152,7 +152,7 @@ class TestUserCanCreateAndEditCategory:
             f"/api/categories/{created_category_id}/"
         )
         assert delete_response.status_code == HTTP_204_NO_CONTENT
-        assert delete_response.data == None
+        assert delete_response.data is None
 
         # check deleted category in list
         list_response: Any = api_client.get("/api/categories/")
@@ -245,7 +245,7 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         assert edit_response.status_code == HTTP_204_NO_CONTENT
-        assert edit_response.data == None
+        assert edit_response.data is None
 
         # check edited category in list
         list_response: Any = api_client.get("/api/categories/")
@@ -281,7 +281,7 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         assert edit_response.status_code == HTTP_204_NO_CONTENT
-        assert edit_response.data == None
+        assert edit_response.data is None
 
         # check edited category in list
         get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
@@ -303,7 +303,7 @@ class TestUserCanCreateAndEditCategory:
             },
         )
         assert edit_response.status_code == HTTP_204_NO_CONTENT
-        assert edit_response.data == None
+        assert edit_response.data is None
 
         # check edited category in list
         get_response: Any = api_client.get(f"/api/categories/{created_category_id}/")
