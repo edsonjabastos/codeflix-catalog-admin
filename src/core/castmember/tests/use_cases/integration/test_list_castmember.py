@@ -12,15 +12,15 @@ from core.castmember.infra.in_memory_castmember_repository import (
 
 
 @pytest.fixture
-def mock_castmember_repository() -> CastMemberRepository:
+def castmember_repository() -> CastMemberRepository:
     return InMemoryCastMemberRepository()
 
 
 @pytest.fixture
 def list_castmember_use_case(
-    mock_castmember_repository: CastMemberRepository,
+    castmember_repository: CastMemberRepository,
 ) -> ListCastMember:
-    return ListCastMember(castmember_repository=mock_castmember_repository)
+    return ListCastMember(castmember_repository=castmember_repository)
 
 
 @pytest.fixture
