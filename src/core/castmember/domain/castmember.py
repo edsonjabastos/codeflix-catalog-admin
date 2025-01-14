@@ -22,16 +22,10 @@ class CastMember:
             raise ValueError("invalid type")
 
     def update(self, name: str, type: CastMemberType) -> None:
-        current_name = self.name
-        current_type = self.type
         self.name = name
         self.type = type
-        try:
-            self.validate()
-        except ValueError as e:
-            self.name = current_name
-            self.type = current_type
-            raise e
+
+        self.validate()
 
     def __str__(self) -> str:
         return f"{self.name} - {self.type}"
