@@ -1,4 +1,3 @@
-from math import e
 from typing import Set
 from uuid import UUID
 from dataclasses import dataclass, field
