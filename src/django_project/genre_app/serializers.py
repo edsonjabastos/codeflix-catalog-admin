@@ -7,7 +7,7 @@ from rest_framework.serializers import (
 )
 
 
-class GenreGenreOutputSerializer(Serializer):
+class GenreOutputSerializer(Serializer):
     id: UUIDField = UUIDField()
     name: CharField = CharField(max_length=255, allow_blank=False)
     is_active: BooleanField = BooleanField()
@@ -15,7 +15,7 @@ class GenreGenreOutputSerializer(Serializer):
 
 
 class ListGenreOutputSerializer(Serializer):
-    data: GenreGenreOutputSerializer = GenreGenreOutputSerializer(many=True)
+    data: GenreOutputSerializer = GenreOutputSerializer(many=True)
 
 
 # can be done with serializer method field too
