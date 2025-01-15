@@ -10,7 +10,8 @@ class Entity(ABC):
     id: UUID = field(default_factory=uuid4)
     notification: Notification = field(default_factory=Notification)
 
-    def __eq__(self, other: any) -> bool:
+    def __eq__(self, other: "Entity") -> bool:
+        print(other, self.__class__)
         if not isinstance(other, self.__class__):
             return False
         return self.id == other.id
