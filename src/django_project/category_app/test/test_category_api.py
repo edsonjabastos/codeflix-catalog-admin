@@ -53,16 +53,16 @@ class TestCategoryListAPI:
         expected_data = {
             "data": [
                 {
-                    "id": str(category_movie.id),
-                    "name": category_movie.name,
-                    "description": category_movie.description,
-                    "is_active": category_movie.is_active,
-                },
-                {
                     "id": str(category_documentary.id),
                     "name": category_documentary.name,
                     "description": category_documentary.description,
                     "is_active": category_documentary.is_active,
+                },
+                {
+                    "id": str(category_movie.id),
+                    "name": category_movie.name,
+                    "description": category_movie.description,
+                    "is_active": category_movie.is_active,
                 },
             ]
         }

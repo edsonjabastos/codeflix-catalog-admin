@@ -1,8 +1,7 @@
-from dataclasses import dataclass, field
-from uuid import UUID, uuid4
+from dataclasses import dataclass
 
 from core.castmember.domain.value_objects import CastMemberType
-from src.core._shared.entity import Entity
+from core._shared.entity import Entity
 
 
 @dataclass(eq=False)
