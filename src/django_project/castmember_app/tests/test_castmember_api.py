@@ -15,7 +15,7 @@ from rest_framework.test import APIClient
 from core.castmember.domain.castmember import CastMember
 from src.core.castmember.domain.value_objects import CastMemberType
 from django_project.castmember_app.repository import DjangoORMCastMemberRepository
-from django_project.castmember_app.models import CastMember as CastMemberModel
+from django_project.castmember_app.models import CastMember as CastMemberORM
 
 
 @pytest.fixture
@@ -102,7 +102,7 @@ class TestCreateAPI:
         assert response.data["id"]
 
         created_castmember_id: str = response.data["id"]
-        created_castmember: CastMemberModel = castmember_repository.get_by_id(
+        created_castmember: CastMemberORM = castmember_repository.get_by_id(
             created_castmember_id
         )
 
@@ -127,7 +127,7 @@ class TestCreateAPI:
         assert response.data["id"]
 
         created_castmember_id: str = response.data["id"]
-        created_castmember: CastMemberModel = castmember_repository.get_by_id(
+        created_castmember: CastMemberORM = castmember_repository.get_by_id(
             created_castmember_id
         )
 

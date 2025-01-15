@@ -5,6 +5,7 @@ from core.category.domain.category_repository import CategoryRepository
 from core.category.domain.category import Category
 
 from django_project.category_app.models import Category as CategoryORM
+from django.db import transaction
 
 
 class DjangoORMCategoryRepository(CategoryRepository):
@@ -12,8 +13,10 @@ class DjangoORMCategoryRepository(CategoryRepository):
         self.category_orm: CategoryORM | None = category_orm or CategoryORM
 
     def save(self, category: Category) -> None:
-        category_orm = CategoryModelMapper.to_model(category)
-        category_orm.save()
+        with transaction.atomic():
+            category_orm = CategoryModelMapper.to_model(category)
+            category_orm.save()
+        return None
         # self.category_model.objects.create(
         #     id=category.id,
         #     name=category.name,
@@ -51,11 +54,18 @@ class DjangoORMCategoryRepository(CategoryRepository):
         ]
 
     def update(self, category: Category) -> None:
-        self.category_orm.objects.filter(pk=category.id).update(
-            name=category.name,
-            description=category.description,
-            is_active=category.is_active,
-        )
+        try:
+            self.category_orm.objects.get(pk=category.id)
+        except self.category_orm.DoesNotExist:
+            return None
+
+        with transaction.atomic():
+            self.category_orm.objects.filter(pk=category.id).update(
+                name=category.name,
+                description=category.description,
+                is_active=category.is_active,
+            )
+        return None
 
 
 class CategoryModelMapper:

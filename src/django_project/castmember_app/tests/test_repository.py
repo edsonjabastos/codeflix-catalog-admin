@@ -5,7 +5,7 @@ from core.castmember.domain.value_objects import CastMemberType
 from django_project.category_app.models import Category
 from django_project.category_app.repository import DjangoORMCategoryRepository
 from django_project.castmember_app.repository import DjangoORMCastMemberRepository
-from django_project.castmember_app.models import CastMember as CastMemberModel
+from django_project.castmember_app.models import CastMember as CastMemberORM
 
 
 @pytest.mark.django_db
@@ -17,11 +17,11 @@ class TestSave:
             DjangoORMCastMemberRepository()
         )
 
-        CastMemberModel.objects.count() == 0
+        CastMemberORM.objects.count() == 0
         castmember_repository.save(jhon_castmember)
 
-        assert CastMemberModel.objects.count() == 1
-        jhon_castmember_model: CastMemberModel = CastMemberModel.objects.first()
+        assert CastMemberORM.objects.count() == 1
+        jhon_castmember_model: CastMemberORM = CastMemberORM.objects.first()
         assert jhon_castmember_model.id == jhon_castmember.id
         assert jhon_castmember_model.name == "Jhon"
         assert jhon_castmember_model.type == jhon_castmember.type
@@ -35,19 +35,19 @@ class TestSave:
             DjangoORMCastMemberRepository()
         )
 
-        CastMemberModel.objects.count() == 0
+        CastMemberORM.objects.count() == 0
         castmember_repository.save(jhon_castmember)
         castmember_repository.save(jane_castmember)
 
-        assert CastMemberModel.objects.count() == 2
-        jhon_castmember_model: CastMemberModel = CastMemberModel.objects.get(
+        assert CastMemberORM.objects.count() == 2
+        jhon_castmember_model: CastMemberORM = CastMemberORM.objects.get(
             name="Jhon"
         )
         assert jhon_castmember_model.id == jhon_castmember.id
         assert jhon_castmember_model.name == "Jhon"
         assert jhon_castmember_model.type == jhon_castmember.type
 
-        jane_castmember_model: CastMemberModel = CastMemberModel.objects.get(
+        jane_castmember_model: CastMemberORM = CastMemberORM.objects.get(
             name="Jane"
         )
         assert jane_castmember_model.id == jane_castmember.id
@@ -66,13 +66,13 @@ class TestDelete:
             name="Jhon", type=CastMemberType.ACTOR
         )
 
-        assert CastMemberModel.objects.count() == 0
+        assert CastMemberORM.objects.count() == 0
         castmember_repository.save(action_castmember)
-        assert CastMemberModel.objects.count() == 1
+        assert CastMemberORM.objects.count() == 1
 
-        saved_action_castmember: CastMemberModel = CastMemberModel.objects.first()
+        saved_action_castmember: CastMemberORM = CastMemberORM.objects.first()
         castmember_repository.delete(saved_action_castmember.id)
-        assert CastMemberModel.objects.count() == 0
+        assert CastMemberORM.objects.count() == 0
 
     def test_delete_castmember_not_found(self):
         castmember_repository: DjangoORMCastMemberRepository = (
@@ -99,12 +99,12 @@ class TestList:
             name="Christopher Nolan", type=CastMemberType.DIRECTOR
         )
 
-        assert CastMemberModel.objects.count() == 0
+        assert CastMemberORM.objects.count() == 0
         castmember_repository.save(sylvie_castmember)
         castmember_repository.save(jim_castmember)
         castmember_repository.save(chris_castmember)
 
-        assert CastMemberModel.objects.count() == 3
+        assert CastMemberORM.objects.count() == 3
         castmembers = castmember_repository.list()
         assert len(castmembers) == 3
         assert sylvie_castmember in castmembers
@@ -124,8 +124,8 @@ class TestUpdate:
         )
         castmember_repository.save(sylvie_castmember)
 
-        assert CastMemberModel.objects.count() == 1
-        saved_sylvie_castmember: CastMemberModel = CastMemberModel.objects.first()
+        assert CastMemberORM.objects.count() == 1
+        saved_sylvie_castmember: CastMemberORM = CastMemberORM.objects.first()
 
         updated_sylvie_castmember: CastMember = CastMember(
             id=saved_sylvie_castmember.id,
@@ -154,8 +154,8 @@ class TestUpdate:
         )
         castmember_repository.save(sylvie_castmember)
 
-        saved_action_castmember: CastMemberModel = CastMemberModel.objects.first()
-        saved_action_castmember: CastMemberModel = CastMemberModel.objects.first()
+        saved_action_castmember: CastMemberORM = CastMemberORM.objects.first()
+        saved_action_castmember: CastMemberORM = CastMemberORM.objects.first()
         with pytest.raises(ValueError, match="name cannot be empty"):
             updated_action_castmember: CastMember = CastMember(
                 id=saved_action_castmember.id,
@@ -164,9 +164,9 @@ class TestUpdate:
             )
             castmember_repository.update(updated_action_castmember)
 
-        assert CastMemberModel.objects.first().name == "Sylvester Stallone"
-        assert CastMemberModel.objects.first().type == "ACTOR"
-        assert CastMemberModel.objects.first().id == saved_action_castmember.id
+        assert CastMemberORM.objects.first().name == "Sylvester Stallone"
+        assert CastMemberORM.objects.first().type == "ACTOR"
+        assert CastMemberORM.objects.first().id == saved_action_castmember.id
 
     def test_update_castmember_with_invalid_large_name(self):
         castmember_repository: DjangoORMCastMemberRepository = (
@@ -177,7 +177,7 @@ class TestUpdate:
         )
         castmember_repository.save(sylvie_castmember)
 
-        saved_action_castmember: CastMemberModel = CastMemberModel.objects.first()
+        saved_action_castmember: CastMemberORM = CastMemberORM.objects.first()
 
         with pytest.raises(
             ValueError, match="name cannot be longer than 255 characters"
@@ -187,8 +187,8 @@ class TestUpdate:
             )
             castmember_repository.update(updated_action_castmember)
 
-        assert CastMemberModel.objects.first().name == "Sylvester Stallone"
-        assert CastMemberModel.objects.first().type == "ACTOR"
+        assert CastMemberORM.objects.first().name == "Sylvester Stallone"
+        assert CastMemberORM.objects.first().type == "ACTOR"
 
     def test_update_castmember_with_invalid_type(self):
         castmember_repository: DjangoORMCastMemberRepository = (
@@ -199,12 +199,12 @@ class TestUpdate:
         )
         castmember_repository.save(action_castmember)
 
-        saved_action_castmember: CastMemberModel = CastMemberModel.objects.first()
+        saved_action_castmember: CastMemberORM = CastMemberORM.objects.first()
         with pytest.raises(ValueError, match="invalid type"):
             updated_action_castmember: CastMember = CastMember(
                 id=saved_action_castmember.id, name="Sylvester Stallone", type="INVALID"
             )
             castmember_repository.update(updated_action_castmember)
 
-        assert CastMemberModel.objects.first().name == "Sylvester Stallone"
-        assert CastMemberModel.objects.first().type == "ACTOR"
+        assert CastMemberORM.objects.first().name == "Sylvester Stallone"
+        assert CastMemberORM.objects.first().type == "ACTOR"
