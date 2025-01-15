@@ -89,12 +89,12 @@ class TestCastMemberStr:
     def test_cast_member_str(self) -> None:
         cast_member = CastMember(name="John Doe", type=CastMemberType.ACTOR)
 
-        assert str(cast_member) == "John Doe - CastMemberType.ACTOR"
+        assert str(cast_member) == "John Doe - ACTOR"
 
     def test_cast_member_str_with_director(self) -> None:
         cast_member = CastMember(name="John Doe", type=CastMemberType.DIRECTOR)
 
-        assert str(cast_member) == "John Doe - CastMemberType.DIRECTOR"
+        assert str(cast_member) == "John Doe - DIRECTOR"
 
 
 class TestCastMemberRepr:
