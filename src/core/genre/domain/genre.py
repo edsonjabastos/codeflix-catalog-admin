@@ -1,14 +1,14 @@
 from typing import Any, Set
 from uuid import UUID, uuid4
 from dataclasses import dataclass, field
+from src.core._shared.entity import Entity
 
 
-@dataclass
-class Genre:
+@dataclass(eq=False)
+class Genre(Entity):
     name: str
     is_active: bool = True
     categories: Set[UUID] = field(default_factory=set)
-    id: UUID = field(default_factory=uuid4)
 
     def __post_init__(self):
         self.validate_name()
@@ -19,11 +19,6 @@ class Genre:
     def __repr__(self) -> str:
         return f"<Genre {self.name} ({self.id})>"
 
-    def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, Genre):
-            return False
-        return self.id == other.id
-
     def update_name(self, name: str) -> None:
         self.name = name
 
@@ -31,9 +26,12 @@ class Genre:
 
     def validate_name(self) -> None:
         if not self.name:
-            raise ValueError("name cannot be empty")
+            self.notification.add_error("name cannot be empty")
         if len(self.name) > 255:
-            raise ValueError("name cannot be longer than 255 characters")
+            self.notification.add_error("name cannot be longer than 255 characters")
+
+        if self.notification.has_errors:
+            raise ValueError(self.notification.messages)
 
     def activate(self) -> None:
         self.is_active = True
