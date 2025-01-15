@@ -175,7 +175,7 @@ class TestEquality:
     def test_when_categories_have_same_id_and_class(self) -> None:
         category_id = uuid.uuid4()
         category1 = Category(id=category_id, name="Movie")
-        category2 = Category(id=category_id, name="Movie")
+        category2 = Category(id=category_id, name="Documentary")
 
         assert category1 == category2
 
