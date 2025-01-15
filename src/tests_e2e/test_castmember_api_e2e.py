@@ -16,13 +16,13 @@ class TestUserCanCreateAndEditCastMember:
         api_client: APIClient = APIClient()
 
         # list castmembers
-        list_response: Any = api_client.get("/api/castmembers/")
+        list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {"data": []}
 
         # create castmember
         create_response: Any = api_client.post(
-            "/api/castmembers/",
+            "/api/cast_members/",
             data={
                 "name": "Jackie Chan",
                 "type": "ACTOR",
@@ -35,7 +35,7 @@ class TestUserCanCreateAndEditCastMember:
         }
 
         # check created castmember in list
-        list_response: Any = api_client.get("/api/castmembers/")
+        list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {
             "data": [
@@ -48,7 +48,7 @@ class TestUserCanCreateAndEditCastMember:
         }
 
         # get created castmember
-        # get_response: Any = api_client.get(f"/api/castmembers/{created_castmember_id}/")
+        # get_response: Any = api_client.get(f"/api/cast_members/{created_castmember_id}/")
         # assert get_response.status_code == HTTP_200_OK
         # assert get_response.data == {
         #     "data": {
@@ -60,7 +60,7 @@ class TestUserCanCreateAndEditCastMember:
 
         # edit created castmember
         edit_response: Any = api_client.put(
-            f"/api/castmembers/{created_castmember_id}/",
+            f"/api/cast_members/{created_castmember_id}/",
             data={
                 "name": "Jackie Chan",
                 "type": "DIRECTOR",
@@ -70,7 +70,7 @@ class TestUserCanCreateAndEditCastMember:
         assert edit_response.data is None
 
         # check edited castmember in list
-        list_response: Any = api_client.get("/api/castmembers/")
+        list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {
             "data": [
@@ -83,7 +83,7 @@ class TestUserCanCreateAndEditCastMember:
         }
 
         # get edited castmember
-        # get_response: Any = api_client.get(f"/api/castmembers/{created_castmember_id}/")
+        # get_response: Any = api_client.get(f"/api/cast_members/{created_castmember_id}/")
         # assert get_response.status_code == HTTP_200_OK
         # assert get_response.data == {
         #     "data": {
@@ -97,13 +97,13 @@ class TestUserCanCreateAndEditCastMember:
         api_client: APIClient = APIClient()
 
         # list castmembers
-        list_response: Any = api_client.get("/api/castmembers/")
+        list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {"data": []}
 
         # create castmember
         create_response: Any = api_client.post(
-            "/api/castmembers/",
+            "/api/cast_members/",
             data={
                 "name": "Robert Downey Jr.",
                 "type": "ACTOR",
@@ -116,7 +116,7 @@ class TestUserCanCreateAndEditCastMember:
         }
 
         # check created castmember in list
-        list_response: Any = api_client.get("/api/castmembers/")
+        list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {
             "data": [
@@ -129,7 +129,7 @@ class TestUserCanCreateAndEditCastMember:
         }
 
         # get created castmember
-        # get_response: Any = api_client.get(f"/api/castmembers/{created_castmember_id}/")
+        # get_response: Any = api_client.get(f"/api/cast_members/{created_castmember_id}/")
         # assert get_response.status_code == HTTP_200_OK
         # assert get_response.data == {
         #     "data": {
@@ -142,13 +142,13 @@ class TestUserCanCreateAndEditCastMember:
 
         # delete created castmember
         delete_response: Any = api_client.delete(
-            f"/api/castmembers/{created_castmember_id}/"
+            f"/api/cast_members/{created_castmember_id}/"
         )
         assert delete_response.status_code == HTTP_204_NO_CONTENT
         assert delete_response.data is None
 
         # check deleted castmember in list
-        list_response: Any = api_client.get("/api/castmembers/")
+        list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
         assert list_response.data == {"data": []}
 
@@ -157,7 +157,7 @@ class TestUserCanCreateAndEditCastMember:
 
         # create castmember with incorrect data
         create_response: Any = api_client.post(
-            "/api/castmembers/",
+            "/api/cast_members/",
             data={
                 "name": "",
                 "type": "incorrect",
@@ -171,7 +171,7 @@ class TestUserCanCreateAndEditCastMember:
 
         # create castmember
         create_response: Any = api_client.post(
-            "/api/castmembers/",
+            "/api/cast_members/",
             data={
                 "name": "Emma Watson",
                 "type": "ACTOR",
@@ -185,7 +185,7 @@ class TestUserCanCreateAndEditCastMember:
 
         # edit created castmember with incorrect data
         edit_response: Any = api_client.put(
-            f"/api/castmembers/{created_castmember_id}/",
+            f"/api/cast_members/{created_castmember_id}/",
             data={
                 "name": "a" * 256,
                 "type": "incorrect",

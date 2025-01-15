@@ -26,7 +26,7 @@ from django_project.castmember_app.views import CastMemberViewSet
 router = DefaultRouter()
 router.register(r'api/categories', CategoryViewSet, basename='category')
 router.register(r'api/genres', GenreViewSet, basename='genre')
-router.register(r'api/castmembers', CastMemberViewSet, basename='castmember')
+router.register(r'api/cast_members', CastMemberViewSet, basename='castmember')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

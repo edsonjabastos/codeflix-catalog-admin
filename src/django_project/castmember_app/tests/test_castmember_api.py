@@ -45,7 +45,7 @@ class TestListAPI:
         castmember_repository.save(pedro_castmember)
         castmember_repository.save(chris_castmember)
 
-        url: str = "/api/castmembers/"
+        url: str = "/api/cast_members/"
         response: Any = APIClient().get(url)
 
         # expected_response: dict[str, List[dict[str, Any]]] = {
@@ -90,7 +90,7 @@ class TestCreateAPI:
         castmember_repository: DjangoORMCastMemberRepository,
     ) -> None:
 
-        url: str = "/api/castmembers/"
+        url: str = "/api/cast_members/"
         data: dict[str, Any] = {
             "name": "Pedro Pascal",
             "type": "ACTOR",
@@ -115,7 +115,7 @@ class TestCreateAPI:
         castmember_repository: DjangoORMCastMemberRepository,
     ) -> None:
 
-        url: str = "/api/castmembers/"
+        url: str = "/api/cast_members/"
         data: dict[str, Any] = {
             "name": "Christopher Nolan",
             "type": "DIRECTOR",
@@ -139,7 +139,7 @@ class TestCreateAPI:
         self,
     ) -> None:
 
-        url: str = "/api/castmembers/"
+        url: str = "/api/cast_members/"
         data: dict[str, Any] = {
             "name": "",
             "type": "ACTOR",
@@ -154,7 +154,7 @@ class TestCreateAPI:
         self,
     ) -> None:
 
-        url: str = "/api/castmembers/"
+        url: str = "/api/cast_members/"
         data: dict[str, Any] = {
             "name": "a" * 256,
             "type": "ACTOR",
@@ -171,7 +171,7 @@ class TestCreateAPI:
         self,
     ) -> None:
         invalid_type: str = "INVALID_TYPE"
-        url: str = "/api/castmembers/"
+        url: str = "/api/cast_members/"
         data: dict[str, Any] = {
             "name": "Pedro Pascal",
             "type": invalid_type,
@@ -192,7 +192,7 @@ class TestDeleteAPI:
     ) -> None:
         castmember_repository.save(pedro_castmember)
 
-        url: str = f"/api/castmembers/{pedro_castmember.id}/"
+        url: str = f"/api/cast_members/{pedro_castmember.id}/"
         response: Any = APIClient().delete(url)
 
         assert response.status_code == HTTP_204_NO_CONTENT
@@ -200,14 +200,14 @@ class TestDeleteAPI:
         assert castmember_repository.get_by_id(pedro_castmember.id) is None
 
     def test_delete_castmember_not_found(self) -> None:
-        url: str = f"/api/castmembers/{uuid4()}/"
+        url: str = f"/api/cast_members/{uuid4()}/"
         response: Any = APIClient().delete(url)
 
         assert response.status_code == HTTP_404_NOT_FOUND
         assert response.data is None
 
     def test_delete_castmember_with_invalid_uuid(self) -> None:
-        url: str = "/api/castmembers/invalid_uuid/"
+        url: str = "/api/cast_members/invalid_uuid/"
         response: Any = APIClient().delete(url)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
@@ -224,7 +224,7 @@ class TestUpdateAPI:
     ) -> None:
         castmember_repository.save(pedro_castmember)
 
-        url = f"/api/castmembers/{pedro_castmember.id}/"
+        url = f"/api/cast_members/{pedro_castmember.id}/"
         data = {
             "name": "Pedro Delphi",
             "type": "ACTOR",
@@ -242,7 +242,7 @@ class TestUpdateAPI:
         castmember_repository: DjangoORMCastMemberRepository,
     ) -> None:
         castmember_repository.save(pedro_castmember)
-        url = f"/api/castmembers/{pedro_castmember.id}/"
+        url = f"/api/cast_members/{pedro_castmember.id}/"
         data = {
             "name": "",
             "type": "ACTOR",
@@ -258,7 +258,7 @@ class TestUpdateAPI:
         castmember_repository: DjangoORMCastMemberRepository,
     ) -> None:
         castmember_repository.save(pedro_castmember)
-        url = f"/api/castmembers/{pedro_castmember.id}/"
+        url = f"/api/cast_members/{pedro_castmember.id}/"
         data = {
             "name": "a" * 256,
             "type": "ACTOR",
@@ -278,7 +278,7 @@ class TestUpdateAPI:
         castmember_repository.save(pedro_castmember)
 
         invalid_type: str = "INVALID_TYPE"
-        url = f"/api/castmembers/{pedro_castmember.id}/"
+        url = f"/api/cast_members/{pedro_castmember.id}/"
         data = {
             "name": "Romance",
             "type": invalid_type,
@@ -289,7 +289,7 @@ class TestUpdateAPI:
         assert response.data == {"type": [f'"{invalid_type}" is not a valid choice.']}
 
     def test_when_castmember_does_not_exist_then_return_404(self) -> None:
-        url = f"/api/castmembers/{uuid4()}/"
+        url = f"/api/cast_members/{uuid4()}/"
         data = {
             "name": "John Travolta",
             "type": "ACTOR",
