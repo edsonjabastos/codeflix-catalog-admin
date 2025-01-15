@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from django_project.category_app.models import Category as CategoryModel
+from django_project.category_app.models import Category as CategoryORM
 from django_project.category_app.models import Category
 from django_project.category_app.repository import DjangoORMCategoryRepository
 
@@ -17,12 +17,12 @@ class TestSave:
         )
         category_repository = DjangoORMCategoryRepository()
 
-        assert CategoryModel.objects.count() == 0
+        assert CategoryORM.objects.count() == 0
         assert category_repository.list() == []
         category_repository.save(category)
-        assert CategoryModel.objects.count() == 1
+        assert CategoryORM.objects.count() == 1
 
-        category_from_database = CategoryModel.objects.get()
+        category_from_database = CategoryORM.objects.get()
         assert category_from_database.id == category.id
         assert category_from_database.name == category.name
         assert category_from_database.description == category.description
@@ -65,14 +65,14 @@ class TestDelete:
         category_repository = DjangoORMCategoryRepository()
         category_repository.save(category)
 
-        assert CategoryModel.objects.count() == 1
+        assert CategoryORM.objects.count() == 1
         category_repository.delete(category.id)
-        assert CategoryModel.objects.count() == 0
+        assert CategoryORM.objects.count() == 0
 
     def test_delete_category_not_found(self):
         category_repository = DjangoORMCategoryRepository()
         category_repository.delete(uuid4())
-        assert CategoryModel.objects.count() == 0
+        assert CategoryORM.objects.count() == 0
 
 
 @pytest.mark.django_db
@@ -128,7 +128,7 @@ class TestUpdate:
         )
         category_repository.update(new_category)
 
-        category_from_database = CategoryModel.objects.get()
+        category_from_database = CategoryORM.objects.get()
         assert category_from_database.id == new_category.id
         assert category_from_database.name == new_category.name
         assert category_from_database.description == new_category.description
@@ -143,7 +143,7 @@ class TestUpdate:
         category_repository = DjangoORMCategoryRepository()
         category_repository.update(category)
 
-        assert CategoryModel.objects.count() == 0
+        assert CategoryORM.objects.count() == 0
 
     def test_update_category_with_invalid_id(self):
         category = Category(
@@ -161,7 +161,7 @@ class TestUpdate:
         )
         category_repository.update(new_category)
 
-        category_from_database = CategoryModel.objects.get()
+        category_from_database = CategoryORM.objects.get()
         assert category_from_database.id == category.id
         assert category_from_database.id != new_category.id
         assert category_from_database.name == category.name
