@@ -1,4 +1,3 @@
-from re import U
 from uuid import UUID
 from rest_framework import viewsets
 from rest_framework.request import Request
