@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from django_project.castmember_app.models import CastMember as CastMemberModel
+
+
+class CastMemberAdmin(admin.ModelAdmin): ...
+
+
+admin.site.register(CastMemberModel, CastMemberAdmin)
