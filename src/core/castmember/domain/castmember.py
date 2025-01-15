@@ -18,7 +18,7 @@ class CastMember:
             raise ValueError("name cannot be empty")
         if len(self.name) > 255:
             raise ValueError("name cannot be longer than 255 characters")
-        if not isinstance(self.type, CastMemberType):
+        if not self.type in CastMemberType:
             raise ValueError("invalid type")
 
     def update(self, name: str, type: CastMemberType) -> None:
