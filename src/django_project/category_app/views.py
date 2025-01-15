@@ -1,4 +1,3 @@
-from re import U
 from uuid import UUID
 from rest_framework import viewsets
 from rest_framework.request import Request
@@ -49,9 +48,10 @@ from django_project.category_app.serializers import (
 class CategoryViewSet(viewsets.ViewSet):
 
     def list(self, request: Request) -> Response:
-        input: ListCategoryRequest = ListCategoryRequest()
+        order_by = request.query_params.get("order_by", "name")
+        input: ListCategoryRequest = ListCategoryRequest(order_by=order_by)
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
-        output: ListCategoryResponse = use_case.execute(input)
+        output: ListCategoryResponse = use_case.execute(request=input)
 
         serializer: ListCategoryResponseSerializer = ListCategoryResponseSerializer(
             instance=output

@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from uuid import UUID, uuid4
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from src.core._shared.notification import Notification
+from core._shared.notification import Notification
 
 
 @dataclass(kw_only=True)

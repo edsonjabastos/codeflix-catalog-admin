@@ -1,7 +1,7 @@
-from typing import Any, Set
-from uuid import UUID, uuid4
+from typing import Set
+from uuid import UUID
 from dataclasses import dataclass, field
-from src.core._shared.entity import Entity
+from core._shared.entity import Entity
 
 
 @dataclass(eq=False)

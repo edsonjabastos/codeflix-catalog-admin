@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.core._shared.entity import Entity
+from core._shared.entity import Entity
 
 
 @dataclass(eq=False)

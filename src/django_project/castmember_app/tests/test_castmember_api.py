@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from uuid import UUID, uuid4
 import pytest
@@ -13,7 +13,7 @@ from rest_framework.status import (
 import pytest
 from rest_framework.test import APIClient
 from core.castmember.domain.castmember import CastMember
-from src.core.castmember.domain.value_objects import CastMemberType
+from core.castmember.domain.value_objects import CastMemberType
 from django_project.castmember_app.repository import DjangoORMCastMemberRepository
 from django_project.castmember_app.models import CastMember as CastMemberORM
 

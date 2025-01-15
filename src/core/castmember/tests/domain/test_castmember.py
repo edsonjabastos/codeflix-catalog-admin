@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import patch
-from uuid import uuid4, UUID
+from uuid import uuid4
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.value_objects import CastMemberType
 
