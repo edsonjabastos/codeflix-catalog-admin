@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CastMemberType(Enum):
+class CastMemberType(StrEnum):
     ACTOR = "ACTOR"
     DIRECTOR = "DIRECTOR"
