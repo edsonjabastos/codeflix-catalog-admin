@@ -2,6 +2,8 @@ import uuid
 from uuid import UUID, uuid4
 from dataclasses import dataclass, field
 
+from src.core.category.domain.notification import Notification
+
 
 @dataclass
 class Category:
@@ -9,6 +11,8 @@ class Category:
     description: str = ""
     is_active: bool = True
     id: UUID = field(default_factory=uuid4)
+
+    notification: Notification = field(default_factory=Notification)
 
     def __post_init__(self):
         self.validate_name()
@@ -32,9 +36,21 @@ class Category:
 
     def validate_name(self) -> None:
         if not self.name:
-            raise ValueError("name cannot be empty")
+            # raise ValueError("name cannot be empty")
+            self.notification.add_error("name cannot be empty")
+
         if len(self.name) > 255:
-            raise ValueError("name cannot be longer than 255 characters")
+            # raise ValueError("name cannot be longer than 255 characters")
+            self.notification.add_error("name cannot be longer than 255 characters")
+
+        if len(self.description) > 1024:
+            # raise ValueError("description cannot be longer than 1024 characters")
+            self.notification.add_error(
+                "description cannot be longer than 1024 characters"
+            )
+
+        if self.notification.has_errors:
+            raise ValueError(self.notification.messages)
 
     def activate(self) -> None:
         self.is_active = True
