@@ -15,7 +15,7 @@ from rest_framework.test import APIClient
 from core.category.domain.category import Category
 from core.genre.domain.genre import Genre
 from django_project.category_app.repository import DjangoORMCategoryRepository
-from django_project.genre_app.models import Genre as GenreModel
+from django_project.genre_app.models import Genre as GenreORM
 from django_project.genre_app.repository import DjangoORMGenreRepository
 
 
@@ -139,7 +139,7 @@ class TestCreateAPI:
         assert response.data["id"]
 
         created_genre_id: str = response.data["id"]
-        created_genre: GenreModel = genre_repository.get_by_id(created_genre_id)
+        created_genre: GenreORM = genre_repository.get_by_id(created_genre_id)
 
         assert created_genre.name == "Romance"
         assert created_genre.is_active is True
