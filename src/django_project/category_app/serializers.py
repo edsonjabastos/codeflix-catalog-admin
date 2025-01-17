@@ -3,6 +3,7 @@ from rest_framework.serializers import (
     UUIDField,
     CharField,
     BooleanField,
+    IntegerField,
 )
 
 
@@ -13,8 +14,15 @@ class CategoryResponseSerializer(Serializer):
     is_active: BooleanField = BooleanField()
 
 
+class ListCategoryOutputMetaSerializer(Serializer):
+    current_page: IntegerField = IntegerField()
+    per_page: IntegerField = IntegerField()
+    total: IntegerField = IntegerField()
+
+
 class ListCategoryResponseSerializer(Serializer):
     data: CategoryResponseSerializer = CategoryResponseSerializer(many=True)
+    meta: ListCategoryOutputMetaSerializer = ListCategoryOutputMetaSerializer()
 
 
 class RetrieveCategoryRequestSerializer(Serializer):
