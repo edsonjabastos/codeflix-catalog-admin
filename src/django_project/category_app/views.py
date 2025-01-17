@@ -48,8 +48,11 @@ from django_project.category_app.serializers import (
 class CategoryViewSet(viewsets.ViewSet):
 
     def list(self, request: Request) -> Response:
-        order_by = request.query_params.get("order_by", "name")
-        input: ListCategoryRequest = ListCategoryRequest(order_by=order_by)
+        order_by: str = request.query_params.get("order_by", "name")
+        current_page: int = int(request.query_params.get("current_page", 1))
+        input: ListCategoryRequest = ListCategoryRequest(
+            order_by=order_by, current_page=current_page
+        )
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
         output: ListCategoryResponse = use_case.execute(request=input)
 
