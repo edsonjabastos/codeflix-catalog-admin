@@ -19,7 +19,10 @@ class TestUserCanCreateAndEditCategory:
         # list categories
         list_response: Any = api_client.get("/api/categories/")
         assert list_response.status_code == HTTP_200_OK
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {"current_page": 1, "per_page": 2, "total": 0},
+        }
 
         # create category
         create_response: Any = api_client.post(
@@ -46,7 +49,12 @@ class TestUserCanCreateAndEditCategory:
                     "description": "Movie description",
                     "is_active": True,
                 }
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            },
         }
 
         # get created category
@@ -84,7 +92,12 @@ class TestUserCanCreateAndEditCategory:
                     "description": "Series description",
                     "is_active": False,
                 }
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            },
         }
 
         # get edited category
@@ -105,7 +118,10 @@ class TestUserCanCreateAndEditCategory:
         # list categories
         list_response: Any = api_client.get("/api/categories/")
         assert list_response.status_code == HTTP_200_OK
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {"current_page": 1, "per_page": 2, "total": 0},
+        }
 
         # create category
         create_response: Any = api_client.post(
@@ -132,7 +148,12 @@ class TestUserCanCreateAndEditCategory:
                     "description": "Movie description",
                     "is_active": True,
                 }
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            },
         }
 
         # get created category
@@ -157,7 +178,10 @@ class TestUserCanCreateAndEditCategory:
         # check deleted category in list
         list_response: Any = api_client.get("/api/categories/")
         assert list_response.status_code == HTTP_200_OK
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {"current_page": 1, "per_page": 2, "total": 0},
+        }
 
     def test_user_cannot_create_category_and_edit_incorrectly(self):
         api_client: APIClient = APIClient()
@@ -234,7 +258,12 @@ class TestUserCanCreateAndEditCategory:
                     "description": "Movie description",
                     "is_active": True,
                 }
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            },
         }
 
         # partial edit name created category
@@ -258,7 +287,12 @@ class TestUserCanCreateAndEditCategory:
                     "description": "Movie description",
                     "is_active": True,
                 }
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 1,
+            },
         }
 
         # get edited category

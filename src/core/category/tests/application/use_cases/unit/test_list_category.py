@@ -5,6 +5,7 @@ from core.category.application.use_cases.list_category import (
     ListCategory,
     ListCategoryRequest,
     ListCategoryResponse,
+    ListOutputMeta,
 )
 from core.category.domain.category import Category
 
@@ -18,8 +19,9 @@ class TestListCategory:
         use_case = ListCategory(repository=mock_repository)
         request = ListCategoryRequest()
         response = use_case.execute(request)
+        default_meta = ListOutputMeta(current_page=1, per_page=2, total=0)
 
-        assert response == ListCategoryResponse(data=[])
+        assert response == ListCategoryResponse(data=[], meta=default_meta)
 
     def test_when_categories_in_repository_then_return_list_of_categories(self) -> None:
         category_movies = Category(
@@ -34,6 +36,8 @@ class TestListCategory:
         use_case = ListCategory(repository=mock_repository)
         request = ListCategoryRequest()
         response = use_case.execute(request)
+        total = len(mock_repository.list())
+        meta = ListOutputMeta(current_page=1, per_page=2, total=total)
 
         assert response == ListCategoryResponse(
             data=[
@@ -49,5 +53,6 @@ class TestListCategory:
                     description=category_series.description,
                     is_active=category_series.is_active,
                 ),
-            ]
+            ],
+            meta=meta,
         )

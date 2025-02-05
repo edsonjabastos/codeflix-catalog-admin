@@ -64,7 +64,12 @@ class TestCategoryListAPI:
                     "description": category_movie.description,
                     "is_active": category_movie.is_active,
                 },
-            ]
+            ],
+            "meta": {
+                "current_page": 1,
+                "per_page": 2,
+                "total": 2,
+            },
         }
 
         assert response.status_code == HTTP_200_OK
