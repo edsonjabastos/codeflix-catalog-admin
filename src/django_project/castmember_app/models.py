@@ -1,4 +1,4 @@
-from django.db.models import TextChoices, UUIDField, CharField, Model
+from django.db.models import UUIDField, CharField, Model
 from uuid import uuid4
 
 from core.castmember.domain.value_objects import CastMemberType
