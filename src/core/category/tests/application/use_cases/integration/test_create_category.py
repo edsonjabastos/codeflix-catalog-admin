@@ -39,7 +39,7 @@ class TestCreateCategory:
         assert persisted_category.id == create_category_response.id
 
     def test_create_category_with_invalid_data(self) -> None:
-        magic_mocked_repository: MagicMock = MagicMock(
+        magic_mocked_repository: InMemoryCategoryRepository = MagicMock(
             InMemoryCategoryRepository()
         )
         use_case: CreateCategory = CreateCategory(repository=magic_mocked_repository)
