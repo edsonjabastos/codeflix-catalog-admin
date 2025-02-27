@@ -2,8 +2,6 @@ from uuid import uuid4
 import pytest
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.value_objects import CastMemberType
-from django_project.category_app.models import Category
-from django_project.category_app.repository import DjangoORMCategoryRepository
 from django_project.castmember_app.repository import DjangoORMCastMemberRepository
 from django_project.castmember_app.models import CastMember as CastMemberORM
 
