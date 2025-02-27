@@ -1,6 +1,5 @@
 from uuid import uuid4, UUID
 
-import pytest
 from core.category.domain.category import Category
 from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 
@@ -63,7 +62,5 @@ class TestDeleteInMemoryCategoryRepository:
     def test_do_nothing_when_category_not_found(self) -> None:
         repository = InMemoryCategoryRepository()
         id: UUID = uuid4()
-        
-        assert repository.get_by_id(id) is None
 
-        
+        assert repository.get_by_id(id) is None
