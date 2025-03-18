@@ -5,7 +5,7 @@ import pytest
 from core.category.domain.category import Category
 from core.category.domain.category_repository import CategoryRepository
 from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
-from core.genre.application.use_cases.list_genre import GenreOutput, ListGenre
+from core.genre.application.use_cases.list_genre import ListGenre
 from core.genre.application.exceptions import (
     InvalidGenre,
     RelatedCategoriesNotFound,
@@ -70,21 +70,22 @@ class TestListGenre:
         output: ListGenre.Output = use_case.execute(input=ListGenre.Input())
 
         assert len(output.data) == 2
-        assert output == ListGenre.Output(
+        assert output == ListGenre.ListOutput(
             data=[
-                GenreOutput(
+                ListGenre.Output(
                     id=romantic_genre.id,
                     name=romantic_genre.name,
                     is_active=romantic_genre.is_active,
                     categories={movie_category.id},
                 ),
-                GenreOutput(
+                ListGenre.Output(
                     id=sport_genre.id,
                     name=sport_genre.name,
                     is_active=sport_genre.is_active,
                     categories={movie_category.id, documentary_category.id},
                 ),
-            ]
+            ],
+            meta=ListGenre.OutputMeta(current_page=1, per_page=2, total=2),
         )
 
     def test_list_genres_with_associated_categories(self):
@@ -109,19 +110,20 @@ class TestListGenre:
         use_case = ListGenre(genre_repository=genre_repository)
         output = use_case.execute(ListGenre.Input())
 
-        assert output == ListGenre.Output(
+        assert output == ListGenre.ListOutput(
             data=[
-                GenreOutput(
+                ListGenre.Output(
                     id=genre_drama.id,
                     name="Drama",
                     categories={cat_1.id, cat_2.id},
                     is_active=True,
                 ),
-                GenreOutput(
+                ListGenre.Output(
                     id=genre_romance.id,
                     name="Romance",
                     categories=set(),
                     is_active=True,
                 ),
-            ]
+            ],
+            meta=ListGenre.OutputMeta(current_page=1, per_page=2, total=2),
         )
