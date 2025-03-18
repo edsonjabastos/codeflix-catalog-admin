@@ -74,12 +74,12 @@ class TestListAPI:
         assert response.data["data"]
         assert len(response.data["data"]) == 2
 
-        assert response.data["data"][0]["id"] == str(pedro_castmember.id)
-        assert response.data["data"][0]["name"] == "Pedro Pascal"
-        assert response.data["data"][0]["type"] == "ACTOR"
-        assert response.data["data"][1]["id"] == str(chris_castmember.id)
-        assert response.data["data"][1]["name"] == "Christopher Nolan"
-        assert response.data["data"][1]["type"] == "DIRECTOR"
+        assert response.data["data"][1]["id"] == str(pedro_castmember.id)
+        assert response.data["data"][1]["name"] == "Pedro Pascal"
+        assert response.data["data"][1]["type"] == "ACTOR"
+        assert response.data["data"][0]["id"] == str(chris_castmember.id)
+        assert response.data["data"][0]["name"] == "Christopher Nolan"
+        assert response.data["data"][0]["type"] == "DIRECTOR"
 
 
 @pytest.mark.django_db
