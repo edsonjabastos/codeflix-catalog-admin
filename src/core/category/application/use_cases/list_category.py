@@ -4,42 +4,40 @@ from uuid import UUID
 from core.category.domain.category_repository import CategoryRepository
 
 
-@dataclass
-class CategoryOutput:
-    id: UUID
-    name: str
-    description: str
-    is_active: bool
-
-
-@dataclass
-class ListCategoryRequest:
-    order_by: str = "name"
-    current_page: int = 1
-
-
-@dataclass
-class ListOutputMeta:
-    current_page: int
-    per_page: int
-    total: int
-
-
-@dataclass
-class ListCategoryResponse:
-    data: list[CategoryOutput]
-    meta: ListOutputMeta = field(default_factory=ListOutputMeta)
-
-
 class ListCategory:
     def __init__(self, repository: CategoryRepository):
         self.repository: CategoryRepository = repository
 
-    def execute(self, request: ListCategoryRequest) -> ListCategoryResponse:
+    @dataclass
+    class Output:
+        id: UUID
+        name: str
+        description: str
+        is_active: bool
+
+    @dataclass
+    class Input:
+        order_by: str = "name"
+        current_page: int = 1
+
+    @dataclass
+    class OutputMeta:
+        current_page: int
+        per_page: int
+        total: int
+
+    @dataclass
+    class ListOutput:
+        data: list["ListCategory.Output"]
+        meta: "ListCategory.OutputMeta" = field(
+            default_factory="ListCategory.ListOutputMeta"
+        )
+
+    def execute(self, request: Input) -> ListOutput:
         categories = self.repository.list()
         sorted_categories: List = sorted(
             [
-                CategoryOutput(
+                self.Output(
                     id=category.id,
                     name=category.name,
                     description=category.description,
@@ -54,9 +52,9 @@ class ListCategory:
         categories_page = sorted_categories[
             page_offset : page_offset + DEFAULT_PAGE_SIZE
         ]
-        return ListCategoryResponse(
+        return self.ListOutput(
             data=categories_page,
-            meta=ListOutputMeta(
+            meta=ListCategory.OutputMeta(
                 current_page=request.current_page,
                 per_page=DEFAULT_PAGE_SIZE,
                 total=len(sorted_categories),

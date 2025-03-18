@@ -1,12 +1,6 @@
 from unittest.mock import create_autospec
 from core.category.domain.category_repository import CategoryRepository
-from core.category.application.use_cases.list_category import (
-    CategoryOutput,
-    ListCategory,
-    ListCategoryRequest,
-    ListCategoryResponse,
-    ListOutputMeta,
-)
+from core.category.application.use_cases.list_category import ListCategory
 from core.category.domain.category import Category
 
 
@@ -17,11 +11,11 @@ class TestListCategory:
         mock_repository.list.return_value = []
 
         use_case = ListCategory(repository=mock_repository)
-        request = ListCategoryRequest()
+        request = ListCategory.Input()
         response = use_case.execute(request)
-        default_meta = ListOutputMeta(current_page=1, per_page=2, total=0)
+        default_meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=0)
 
-        assert response == ListCategoryResponse(data=[], meta=default_meta)
+        assert response == ListCategory.ListOutput(data=[], meta=default_meta)
 
     def test_when_categories_in_repository_then_return_list_of_categories(self) -> None:
         category_movies = Category(
@@ -34,20 +28,20 @@ class TestListCategory:
         mock_repository.list.return_value = [category_movies, category_series]
 
         use_case = ListCategory(repository=mock_repository)
-        request = ListCategoryRequest()
+        request = ListCategory.Input()
         response = use_case.execute(request)
         total = len(mock_repository.list())
-        meta = ListOutputMeta(current_page=1, per_page=2, total=total)
+        meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=total)
 
-        assert response == ListCategoryResponse(
+        assert response == ListCategory.ListOutput(
             data=[
-                CategoryOutput(
+                ListCategory.Output(
                     id=category_movies.id,
                     name=category_movies.name,
                     description=category_movies.description,
                     is_active=category_movies.is_active,
                 ),
-                CategoryOutput(
+                ListCategory.Output(
                     id=category_series.id,
                     name=category_series.name,
                     description=category_series.description,

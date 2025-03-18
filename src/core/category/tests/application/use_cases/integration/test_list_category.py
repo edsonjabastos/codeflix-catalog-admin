@@ -1,11 +1,4 @@
-from re import L
-from core.category.application.use_cases.list_category import (
-    CategoryOutput,
-    ListCategory,
-    ListCategoryRequest,
-    ListCategoryResponse,
-    ListOutputMeta,
-)
+from core.category.application.use_cases.list_category import ListCategory
 from core.category.domain.category import Category
 from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 
@@ -16,11 +9,11 @@ class TestListCategory:
         repository: InMemoryCategoryRepository = InMemoryCategoryRepository()
 
         use_case: ListCategory = ListCategory(repository=repository)
-        request: ListCategoryRequest = ListCategoryRequest()
-        response: ListCategoryResponse = use_case.execute(request)
-        default_meta = ListOutputMeta(current_page=1, per_page=2, total=0)
+        request: ListCategory.Input = ListCategory.Input()
+        response: ListCategory.ListOutput = use_case.execute(request)
+        default_meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=0)
 
-        assert response == ListCategoryResponse(data=[], meta=default_meta)
+        assert response == ListCategory.ListOutput(data=[], meta=default_meta)
 
     def test_return_list_of_categories_when_categories_in_repository(self) -> None:
         category_movies = Category(
@@ -34,20 +27,20 @@ class TestListCategory:
         )
 
         use_case: ListCategory = ListCategory(repository=repository)
-        request: ListCategoryRequest = ListCategoryRequest()
-        response: ListCategoryResponse = use_case.execute(request)
+        request: ListCategory.Input = ListCategory.Input()
+        response: ListCategory.ListOutput = use_case.execute(request)
         total = len(repository.categories)
-        default_meta = ListOutputMeta(current_page=1, per_page=2, total=total)
+        default_meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=total)
 
-        assert response == ListCategoryResponse(
+        assert response == ListCategory.ListOutput(
             data=[
-                CategoryOutput(
+                ListCategory.Output(
                     id=category_movies.id,
                     name=category_movies.name,
                     description=category_movies.description,
                     is_active=category_movies.is_active,
                 ),
-                CategoryOutput(
+                ListCategory.Output(
                     id=category_series.id,
                     name=category_series.name,
                     description=category_series.description,
