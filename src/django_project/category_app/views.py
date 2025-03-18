@@ -50,7 +50,7 @@ class CategoryViewSet(viewsets.ViewSet):
             order_by=order_by, current_page=current_page
         )
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
-        output: ListCategory.ListOutput = use_case.execute(request=input)
+        output: ListCategory.ListOutput = use_case.execute(input=input)
 
         serializer: ListCategoryResponseSerializer = ListCategoryResponseSerializer(
             instance=output

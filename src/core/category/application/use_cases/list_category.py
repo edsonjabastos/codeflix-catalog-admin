@@ -9,16 +9,16 @@ class ListCategory:
         self.repository: CategoryRepository = repository
 
     @dataclass
+    class Input:
+        order_by: str = "name"
+        current_page: int = 1
+
+    @dataclass
     class Output:
         id: UUID
         name: str
         description: str
         is_active: bool
-
-    @dataclass
-    class Input:
-        order_by: str = "name"
-        current_page: int = 1
 
     @dataclass
     class OutputMeta:
@@ -33,7 +33,7 @@ class ListCategory:
             default_factory="ListCategory.ListOutputMeta"
         )
 
-    def execute(self, request: Input) -> ListOutput:
+    def execute(self, input: Input) -> ListOutput:
         categories = self.repository.list()
         sorted_categories: List = sorted(
             [
@@ -45,17 +45,17 @@ class ListCategory:
                 )
                 for category in categories
             ],
-            key=lambda category: getattr(category, request.order_by),
+            key=lambda category: getattr(category, input.order_by),
         )
         DEFAULT_PAGE_SIZE = 2
-        page_offset = (request.current_page - 1) * DEFAULT_PAGE_SIZE
+        page_offset = (input.current_page - 1) * DEFAULT_PAGE_SIZE
         categories_page = sorted_categories[
             page_offset : page_offset + DEFAULT_PAGE_SIZE
         ]
         return self.ListOutput(
             data=categories_page,
             meta=ListCategory.OutputMeta(
-                current_page=request.current_page,
+                current_page=input.current_page,
                 per_page=DEFAULT_PAGE_SIZE,
                 total=len(sorted_categories),
             ),
