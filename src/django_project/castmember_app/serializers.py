@@ -1,9 +1,9 @@
-import re
 from rest_framework.serializers import (
     Serializer,
     UUIDField,
     CharField,
     ChoiceField,
+    IntegerField,
 )
 
 # from django_project.castmember_app.models import CastMemberType
@@ -31,9 +31,15 @@ class CastMemberOutputSerializer(Serializer):
     type: CastMemberTypeField = CastMemberTypeField(required=True)
 
 
+class ListCastMemberOutputMetaSerializer(Serializer):
+    current_page: IntegerField = IntegerField()
+    per_page: IntegerField = IntegerField()
+    total: IntegerField = IntegerField()
+
+
 class ListCastMemberOutputSerializer(Serializer):
     data: CastMemberOutputSerializer = CastMemberOutputSerializer(many=True)
-
+    meta: ListCastMemberOutputMetaSerializer = ListCastMemberOutputMetaSerializer()
 
 class CreateCastMemberInputSerializer(Serializer):
     name: CharField = CharField(max_length=255, allow_blank=False)
