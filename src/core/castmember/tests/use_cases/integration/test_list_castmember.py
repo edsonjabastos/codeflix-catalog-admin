@@ -17,7 +17,7 @@ def castmember_repository() -> CastMemberRepository:
 def list_castmember_use_case(
     castmember_repository: CastMemberRepository,
 ) -> ListCastMember:
-    return ListCastMember(castmember_repository=castmember_repository)
+    return ListCastMember(repository=castmember_repository)
 
 
 @pytest.fixture
@@ -44,8 +44,8 @@ class TestListCastMember:
         jhon_castmember: CastMember,
         jane_castmember: CastMember,
     ) -> None:
-        list_castmember_use_case.castmember_repository.save(jhon_castmember)
-        list_castmember_use_case.castmember_repository.save(jane_castmember)
+        list_castmember_use_case.repository.save(jhon_castmember)
+        list_castmember_use_case.repository.save(jane_castmember)
 
         input: ListCastMember.Input = ListCastMember.Input()
 
