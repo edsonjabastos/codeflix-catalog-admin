@@ -10,50 +10,38 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
 )
 
-from core.genre.application.use_cases.create_genre import (
-    CreateGenre,
-)
-from core.genre.application.use_cases.delete_genre import (
-    DeleteGenre,
-)
+from core.genre.application.use_cases.create_genre import CreateGenre
+from core.genre.application.use_cases.delete_genre import DeleteGenre
 from core.genre.application.exceptions import (
     GenreNotFound,
     InvalidGenre,
     RelatedCategoriesNotFound,
 )
 
-# from core.genre.application.use_cases.get_genre import (
-#     GetGenre,
-# )
-from core.genre.application.use_cases.list_genre import (
-    ListGenre,
-)
-from core.genre.application.use_cases.update_genre import (
-    UpdateGenre,
-)
+from core.genre.application.use_cases.list_genre import ListGenre
+from core.genre.application.use_cases.update_genre import UpdateGenre
 from django_project.category_app.repository import DjangoORMCategoryRepository
 from django_project.genre_app.repository import DjangoORMGenreRepository
 from django_project.genre_app.serializers import (
-    # CreateGenreRequestSerializer,
-    # DeleteGenreRequestSerializer,
     CreateGenreInputSerializer,
     CreateGenreResponseSerializer,
     DeleteGenreInputtSerializer,
     ListGenreOutputSerializer,
     UpdateGenreInputSerializer,
-    # PatchGenreRequestSerializer,
-    # RetrieveGenreRequestSerializer,
-    # RetrieveGenreResponseSerializer,
-    # CreateGenreResponseSerializer,
-    # UpdateGenreRequestSerializer,
 )
+from config import DEFAULT_PAGE_SIZE
 
 
 class GenreViewSet(viewsets.ViewSet):
 
     def list(self, request: Request) -> Response:
-        use_case = ListGenre(genre_repository=DjangoORMGenreRepository())
-        input: ListGenre.Input = ListGenre.Input()
+        order_by: str = request.query_params.get("order_by", "name")
+        current_page: int = int(request.query_params.get("current_page", 1))
+        page_size: int = int(request.query_params.get("page_size", DEFAULT_PAGE_SIZE))
+        input: ListGenre.Input = ListGenre.Input(
+            order_by=order_by, current_page=current_page, page_size=page_size
+        )
+        use_case = ListGenre(repository=DjangoORMGenreRepository())
         output: ListGenre.Output = use_case.execute(input)
 
         serializer: ListGenreOutputSerializer = ListGenreOutputSerializer(
