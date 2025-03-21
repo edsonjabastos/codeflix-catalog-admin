@@ -4,6 +4,7 @@ from rest_framework.serializers import (
     CharField,
     BooleanField,
     ListField,
+    IntegerField,
 )
 
 
@@ -14,11 +15,17 @@ class GenreOutputSerializer(Serializer):
     categories: ListField = ListField(child=UUIDField())
 
 
+class ListGenreOutputMetaSerializer(Serializer):
+    current_page: IntegerField = IntegerField()
+    per_page: IntegerField = IntegerField()
+    total: IntegerField = IntegerField()
+
+
 class ListGenreOutputSerializer(Serializer):
     data: GenreOutputSerializer = GenreOutputSerializer(many=True)
+    meta: ListGenreOutputMetaSerializer = ListGenreOutputMetaSerializer()
 
 
-# can be done with serializer method field too
 class SetField(ListField):
     def to_internal_value(self, data):
         return set(super().to_internal_value(data))
