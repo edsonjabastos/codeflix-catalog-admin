@@ -18,7 +18,10 @@ class TestUserCanCreateAndEditCastMember:
         # list castmembers
         list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {"current_page": 1, "per_page": 2, "total": 0},
+        }
 
         # create castmember
         create_response: Any = api_client.post(
@@ -44,7 +47,8 @@ class TestUserCanCreateAndEditCastMember:
                     "name": "Jackie Chan",
                     "type": "ACTOR",
                 }
-            ]
+            ],
+            "meta": {"current_page": 1, "per_page": 2, "total": 1},
         }
 
         # get created castmember
@@ -79,7 +83,8 @@ class TestUserCanCreateAndEditCastMember:
                     "name": "Jackie Chan",
                     "type": "DIRECTOR",
                 }
-            ]
+            ],
+            "meta": {"current_page": 1, "per_page": 2, "total": 1},
         }
 
         # get edited castmember
@@ -99,7 +104,10 @@ class TestUserCanCreateAndEditCastMember:
         # list castmembers
         list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {"current_page": 1, "per_page": 2, "total": 0},
+        }
 
         # create castmember
         create_response: Any = api_client.post(
@@ -125,7 +133,8 @@ class TestUserCanCreateAndEditCastMember:
                     "name": "Robert Downey Jr.",
                     "type": "ACTOR",
                 }
-            ]
+            ],
+            "meta": {"current_page": 1, "per_page": 2, "total": 1},
         }
 
         # get created castmember
@@ -150,7 +159,10 @@ class TestUserCanCreateAndEditCastMember:
         # check deleted castmember in list
         list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
-        assert list_response.data == {"data": []}
+        assert list_response.data == {
+            "data": [],
+            "meta": {"current_page": 1, "per_page": 2, "total": 0},
+        }
 
     def test_user_cannot_create_castmember_and_edit_incorrectly(self):
         api_client: APIClient = APIClient()
