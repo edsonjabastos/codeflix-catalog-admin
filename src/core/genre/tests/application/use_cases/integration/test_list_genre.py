@@ -1,15 +1,10 @@
-from uuid import UUID, uuid4
-
 import pytest
 
 from core.category.domain.category import Category
 from core.category.domain.category_repository import CategoryRepository
 from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 from core.genre.application.use_cases.list_genre import ListGenre
-from core.genre.application.exceptions import (
-    InvalidGenre,
-    RelatedCategoriesNotFound,
-)
+
 from core.genre.domain.genre import Genre
 from core.genre.domain.genre_repository import GenreRepository
 from core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
@@ -42,7 +37,7 @@ class TestListGenre:
         self, genre_repository: GenreRepository
     ) -> None:
         use_case: ListGenre = ListGenre(
-            genre_repository=genre_repository,
+            repository=genre_repository,
         )
 
         output: ListGenre.Output = use_case.execute(input=ListGenre.Input())
@@ -64,7 +59,7 @@ class TestListGenre:
         genre_repository.save(sport_genre)
 
         use_case: ListGenre = ListGenre(
-            genre_repository=genre_repository,
+            repository=genre_repository,
         )
 
         output: ListGenre.Output = use_case.execute(input=ListGenre.Input())
@@ -107,7 +102,7 @@ class TestListGenre:
         genre_romance = Genre(name="Romance")
         genre_repository.save(genre_romance)
 
-        use_case = ListGenre(genre_repository=genre_repository)
+        use_case = ListGenre(repository=genre_repository)
         output = use_case.execute(ListGenre.Input())
 
         assert output == ListGenre.ListOutput(
