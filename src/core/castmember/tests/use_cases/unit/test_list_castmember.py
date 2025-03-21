@@ -43,7 +43,7 @@ class TestListCastMember:
             jane_castmember,
         ]
         use_case: ListCastMember = ListCastMember(
-            castmember_repository=mock_castmember_repository
+            repository=mock_castmember_repository
         )
         input: ListCastMember.Input = ListCastMember.Input()
         output: ListCastMember.ListOutput = use_case.execute(input=input)
@@ -73,7 +73,7 @@ class TestListCastMember:
     ) -> None:
         mock_castmember_repository.list.return_value = []
         use_case: ListCastMember = ListCastMember(
-            castmember_repository=mock_castmember_repository
+            repository=mock_castmember_repository
         )
         input: ListCastMember.Input = ListCastMember.Input()
         output: ListCastMember.ListOutput = use_case.execute(input=input)
