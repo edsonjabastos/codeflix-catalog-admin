@@ -15,7 +15,7 @@ class TestListGenre:
         mock_repository: GenreRepository = create_autospec(GenreRepository)
         mock_repository.list.return_value = []
 
-        use_case: ListGenre = ListGenre(genre_repository=mock_repository)
+        use_case: ListGenre = ListGenre(repository=mock_repository)
         request: ListGenre.Input = ListGenre.Input()
         response: ListGenre.Output = use_case.execute(request)
 
@@ -48,7 +48,7 @@ class TestListGenre:
         mock_repository: GenreRepository = create_autospec(GenreRepository)
         mock_repository.list.return_value = [sports_genre, romance_genre, special_genre]
 
-        use_case: ListGenre = ListGenre(genre_repository=mock_repository)
+        use_case: ListGenre = ListGenre(repository=mock_repository)
         input: ListGenre.Input = ListGenre.Input()
         response: ListGenre.Output = use_case.execute(input)
 
