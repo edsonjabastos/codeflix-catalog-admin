@@ -39,6 +39,7 @@ from django_project.category_app.serializers import (
     CreateCategoryResponseSerializer,
     UpdateCategoryRequestSerializer,
 )
+from config import DEFAULT_PAGE_SIZE
 
 
 class CategoryViewSet(viewsets.ViewSet):
@@ -46,8 +47,9 @@ class CategoryViewSet(viewsets.ViewSet):
     def list(self, request: Request) -> Response:
         order_by: str = request.query_params.get("order_by", "name")
         current_page: int = int(request.query_params.get("current_page", 1))
+        page_size: int = int(request.query_params.get("page_size", DEFAULT_PAGE_SIZE))
         input: ListCategory.Input = ListCategory.Input(
-            order_by=order_by, current_page=current_page
+            order_by=order_by, current_page=current_page, page_size=page_size
         )
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
         output: ListCategory.ListOutput = use_case.execute(input=input)
