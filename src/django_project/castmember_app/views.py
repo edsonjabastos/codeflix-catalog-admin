@@ -37,13 +37,19 @@ from django_project.castmember_app.serializers import (
     ListCastMemberOutputSerializer,
     UpdateCastMemberInputSerializer,
 )
+from config import DEFAULT_PAGE_SIZE
 
 
 class CastMemberViewSet(viewsets.ViewSet):
 
     def list(self, request: Request) -> Response:
-        use_case = ListCastMember(castmember_repository=DjangoORMCastMemberRepository())
-        input: ListCastMember.Input = ListCastMember.Input()
+        order_by: str = request.query_params.get("order_by", "name")
+        current_page: int = int(request.query_params.get("current_page", 1))
+        page_size: int = int(request.query_params.get("page_size", DEFAULT_PAGE_SIZE))
+        input: ListCastMember.Input = ListCastMember.Input(
+            order_by=order_by, current_page=current_page, page_size=page_size
+        )
+        use_case = ListCastMember(repository=DjangoORMCastMemberRepository())
         output: ListCastMember.Output = use_case.execute(input)
 
         serializer: ListCastMemberOutputSerializer = ListCastMemberOutputSerializer(
