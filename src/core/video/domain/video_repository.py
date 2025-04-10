@@ -1,0 +1,27 @@
+from abc import ABC, abstractmethod
+from typing import List
+from uuid import UUID
+
+from core.video.domain.video import Video
+
+
+class VideoRepository(ABC):
+    @abstractmethod
+    def save(self, video: Video) -> Video:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(self, video: Video) -> Video:
+        raise NotImplementedError
+
+    @abstractmethod
+    def list(self) -> List[Video]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_by_id(self, id: UUID) -> Video:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete(self, id: UUID) -> None:
+        raise NotImplementedError
