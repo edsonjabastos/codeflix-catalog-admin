@@ -56,3 +56,65 @@ class Video(Entity):
 
         if self.notification.has_errors:
             raise ValueError(self.notification.messages)
+
+    def update(
+        self,
+        title: str,
+        description: str,
+        launch_year: int,
+        duration: Decimal,
+        published: bool,
+        rating: Rating,
+    ) -> None:
+        self.title = title
+        self.description = description
+        self.launch_year = launch_year
+        self.duration = duration
+        self.published = published
+        self.rating = rating
+
+        self.validate()
+
+    def add_category(self, category_id: UUID) -> None:
+        self.categories.add(category_id)
+        self.validate()
+
+    def remove_category(self, category_id: UUID) -> None:
+        self.categories.remove(category_id)
+        self.validate()
+
+    def add_genre(self, genre_id: UUID) -> None:
+        self.genres.add(genre_id)
+        self.validate()
+
+    def remove_genre(self, genre_id: UUID) -> None:
+        self.genres.remove(genre_id)
+        self.validate()
+
+    def add_cast_member(self, cast_member_id: UUID) -> None:
+        self.cast_members.add(cast_member_id)
+        self.validate()
+
+    def remove_cast_member(self, cast_member_id: UUID) -> None:
+        self.cast_members.remove(cast_member_id)
+        self.validate()
+
+    def update_banner(self, banner: ImageMedia) -> None:
+        self.banner = banner
+        self.validate()
+
+    def update_thumbnail(self, thumbnail: ImageMedia) -> None:
+        self.thumbnail = thumbnail
+        self.validate()
+
+    def update_thumbnail_half(self, thumbnail_half: ImageMedia) -> None:
+        self.thumbnail_half = thumbnail_half
+        self.validate()
+
+    def update_trailer(self, trailer: AudioVideoMedia) -> None:
+        self.trailer = trailer
+        self.validate()
+
+    def update_video(self, video: AudioVideoMedia) -> None:
+        self.video = video
+        self.validate()
