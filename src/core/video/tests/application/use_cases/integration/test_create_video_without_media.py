@@ -2,16 +2,21 @@ import pytest
 from decimal import Decimal
 from uuid import UUID, uuid4
 from core.video.application.exceptions import InvalidVideo, RelatedEntitiesNotFound
-from core.video.application.use_cases.create_video_without_media import CreateVideoWithoutMedia
+from core.video.application.use_cases.create_video_without_media import (
+    CreateVideoWithoutMedia,
+)
 from core.video.domain.value_objects import Rating
 from core.video.infra.in_memory_video_repository import InMemoryVideoRepository
 from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 from core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
-from core.castmember.infra.in_memory_castmember_repository import InMemoryCastMemberRepository
+from core.castmember.infra.in_memory_castmember_repository import (
+    InMemoryCastMemberRepository,
+)
 from core.category.domain.category import Category
 from core.genre.domain.genre import Genre
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.value_objects import CastMemberType
+
 
 @pytest.fixture
 def video_repository() -> InMemoryVideoRepository:
@@ -62,7 +67,9 @@ def cast_members() -> list[CastMember]:
 
 
 @pytest.fixture
-def cast_member_repository(cast_members: list[CastMember]) -> InMemoryCastMemberRepository:
+def cast_member_repository(
+    cast_members: list[CastMember],
+) -> InMemoryCastMemberRepository:
     repo = InMemoryCastMemberRepository()
     for cast_member in cast_members:
         repo.save(cast_member)
@@ -117,7 +124,7 @@ def valid_input(
     )
 
 
-class TestCreateVideoWithoutMediaIntegration:
+class TestCreateVideoWithoutMedia:
     def test_execute_with_valid_data(
         self,
         use_case: CreateVideoWithoutMedia,
@@ -126,11 +133,11 @@ class TestCreateVideoWithoutMediaIntegration:
     ) -> None:
         # Act
         output = use_case.execute(valid_input)
-        
+
         # Assert
         assert output is not None
         assert isinstance(output.id, UUID)
-        
+
         video = video_repository.get_by_id(output.id)
         assert video is not None
         assert video.title == valid_input.title
@@ -159,11 +166,11 @@ class TestCreateVideoWithoutMediaIntegration:
             genres=valid_input.genres,
             cast_members=valid_input.cast_members,
         )
-        
+
         # Act & Assert
         with pytest.raises(RelatedEntitiesNotFound) as exc_info:
             use_case.execute(input_with_invalid_category)
-        
+
         assert "Categories with provided IDs not found" in str(exc_info.value)
         assert str(invalid_category_id) in str(exc_info.value)
 
@@ -184,11 +191,11 @@ class TestCreateVideoWithoutMediaIntegration:
             genres={invalid_genre_id},
             cast_members=valid_input.cast_members,
         )
-        
+
         # Act & Assert
         with pytest.raises(RelatedEntitiesNotFound) as exc_info:
             use_case.execute(input_with_invalid_genre)
-        
+
         assert "Genres with provided IDs not found" in str(exc_info.value)
         assert str(invalid_genre_id) in str(exc_info.value)
 
@@ -209,11 +216,11 @@ class TestCreateVideoWithoutMediaIntegration:
             genres=valid_input.genres,
             cast_members={invalid_cast_member_id},
         )
-        
+
         # Act & Assert
         with pytest.raises(RelatedEntitiesNotFound) as exc_info:
             use_case.execute(input_with_invalid_cast_member)
-        
+
         assert "Cast members with provided IDs not found" in str(exc_info.value)
         assert str(invalid_cast_member_id) in str(exc_info.value)
 
@@ -226,7 +233,7 @@ class TestCreateVideoWithoutMediaIntegration:
         invalid_category_id = uuid4()
         invalid_genre_id = uuid4()
         invalid_cast_member_id = uuid4()
-        
+
         input_with_multiple_invalid_entities = CreateVideoWithoutMedia.Input(
             title=valid_input.title,
             description=valid_input.description,
@@ -237,11 +244,11 @@ class TestCreateVideoWithoutMediaIntegration:
             genres={invalid_genre_id},
             cast_members={invalid_cast_member_id},
         )
-        
+
         # Act & Assert
         with pytest.raises(RelatedEntitiesNotFound) as exc_info:
             use_case.execute(input_with_multiple_invalid_entities)
-        
+
         error_message = str(exc_info.value)
         assert "Categories with provided IDs not found" in error_message
         assert "Genres with provided IDs not found" in error_message
@@ -268,7 +275,7 @@ class TestCreateVideoWithoutMediaIntegration:
             genres=valid_genres_ids,
             cast_members=valid_cast_members_ids,
         )
-        
+
         # Act & Assert
         with pytest.raises(InvalidVideo):
             use_case.execute(invalid_input)
