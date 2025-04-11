@@ -30,7 +30,6 @@ def valid_video_params() -> dict:
 @pytest.fixture
 def image_media() -> ImageMedia:
     return ImageMedia(
-        id=uuid4(),
         name="test_image.png",
         checksum="abc123",
         location="/images/test.png",
@@ -40,7 +39,6 @@ def image_media() -> ImageMedia:
 @pytest.fixture
 def audio_video_media() -> AudioVideoMedia:
     return AudioVideoMedia(
-        id=uuid4(),
         name="test_video.mp4",
         checksum="abc123",
         raw_location="/videos/raw/test.mp4",
