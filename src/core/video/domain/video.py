@@ -5,7 +5,7 @@ from decimal import Decimal
 from uuid import UUID
 
 
-@dataclass
+@dataclass(slots=True, kw_only=True)
 class Video(Entity):
     title: str
     description: str
