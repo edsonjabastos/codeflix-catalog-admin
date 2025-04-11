@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum, auto, unique
-from uuid import UUID
+
 
 @unique
 class Rating(Enum):
@@ -20,9 +20,9 @@ class MediaStatus(Enum):
     COMPLETED = auto()
     ERROR = auto()
 
+
 @dataclass(frozen=True)
 class ImageMedia:
-    id: UUID
     checksum: str
     name: str
     location: str
@@ -30,7 +30,6 @@ class ImageMedia:
 
 @dataclass(frozen=True)
 class AudioVideoMedia:
-    id: UUID
     checksum: str
     name: str
     raw_location: str
