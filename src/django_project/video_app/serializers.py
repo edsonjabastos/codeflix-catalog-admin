@@ -10,7 +10,13 @@ from rest_framework.serializers import (
     BooleanField,
     ChoiceField,
     ListField,
+    ValidationError,
 )
+
+from django_project.castmember_app.models import CastMember
+from django_project.category_app.models import Category
+from django_project.genre_app.models import Genre
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class SetField(ListField):
@@ -30,7 +36,7 @@ class RatingField(ChoiceField):
         return Rating[super().to_internal_value(data)]
 
     def to_representation(self, value):
-        return value.name if value else None
+        return value if value else None
 
 
 class MediaStatusField(ChoiceField):
@@ -101,6 +107,48 @@ class CreateVideoInputSerializer(Serializer):
     genres = SetField(child=UUIDField(), allow_empty=True)
     cast_members = SetField(child=UUIDField(), allow_empty=True)
 
+    def validate_categories(self, value):
+        # Validate that all category UUIDs exist in the database
+        invalid_categories = []
+        for category_id in value:
+            try:
+                Category.objects.get(id=category_id)
+            except ObjectDoesNotExist:
+                invalid_categories.append(category_id)
+        if invalid_categories:
+            raise ValidationError(
+                f"Invalid categorie(s) with provided ID(s) not found: {", ".join(f"'{str(invalid_category)}'" for invalid_category in invalid_categories)}"
+            )
+        return value
+
+    def validate_genres(self, value):
+        # Validate that all genre UUIDs exist in the database
+        invalid_genres = []
+        for genre_id in value:
+            try:
+                Genre.objects.get(id=genre_id)
+            except ObjectDoesNotExist:
+                invalid_genres.append(genre_id)
+        if invalid_genres:
+            raise ValidationError(
+                f"Invalid genre(s) with provided ID(s) not found: {", ".join(f"'{str(invalid_genre)}'" for invalid_genre in invalid_genres)}"
+            )
+        return value
+
+    def validate_cast_members(self, value):
+        # Validate that all cast member UUIDs exist in the database
+        invalid_cast_members = []
+        for cast_member_id in value:
+            try:
+                CastMember.objects.get(id=cast_member_id)
+            except ObjectDoesNotExist:
+                invalid_cast_members.append(cast_member_id)
+        if invalid_cast_members:
+            raise ValidationError(
+                f"Invalid cast member(s) with provided ID(s) not found: {", ".join(f"'{str(invalid_cast_member)}'" for invalid_cast_member in invalid_cast_members)}"
+            )
+        return value
+
 
 class CreateVideoOutputSerializer(Serializer):
     id = UUIDField()
@@ -126,3 +174,10 @@ class DeleteVideoInputSerializer(Serializer):
 class UpdateMediaInputSerializer(Serializer):
     id = UUIDField()
     media_file = CharField()  # This would typically be a FileField in the actual view
+
+
+class GetVideoInputSerializer(Serializer):
+    id = UUIDField()
+
+class GetVideoOutputSerializer(Serializer):
+    data = VideoOutputSerializer(source="*")
