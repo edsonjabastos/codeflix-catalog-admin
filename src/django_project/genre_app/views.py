@@ -25,7 +25,7 @@ from django_project.genre_app.repository import DjangoORMGenreRepository
 from django_project.genre_app.serializers import (
     CreateGenreInputSerializer,
     CreateGenreResponseSerializer,
-    DeleteGenreInputtSerializer,
+    DeleteGenreInputSerializer,
     ListGenreOutputSerializer,
     UpdateGenreInputSerializer,
 )
@@ -78,7 +78,7 @@ class GenreViewSet(viewsets.ViewSet):
         )
 
     def destroy(self, request: Request, pk: UUID) -> Response:
-        serializer: DeleteGenreInputtSerializer = DeleteGenreInputtSerializer(
+        serializer: DeleteGenreInputSerializer = DeleteGenreInputSerializer(
             data={"id": pk}
         )
         serializer.is_valid(raise_exception=True)
