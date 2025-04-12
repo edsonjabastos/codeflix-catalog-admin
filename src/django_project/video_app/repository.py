@@ -3,10 +3,16 @@ from uuid import UUID
 from django.db import transaction
 from core.video.domain.video import Video
 from core.video.domain.video_repository import VideoRepository
-from core.video.domain.value_objects import ImageMedia, AudioVideoMedia, MediaStatus, Rating
+from core.video.domain.value_objects import (
+    ImageMedia,
+    AudioVideoMedia,
+    MediaStatus,
+    Rating,
+)
 from django_project.video_app.models import Video as VideoORM
 from django_project.video_app.models import ImageMedia as ImageMediaORM
 from django_project.video_app.models import AudioVideoMedia as AudioVideoMediaORM
+
 
 class DjangoORMVideoRepository(VideoRepository):
     def __init__(self, video_orm: VideoORM | None = None):
@@ -55,7 +61,7 @@ class VideoModelMapper:
             banner = ImageMedia(
                 checksum=video.banner.checksum,
                 name=video.banner.name,
-                location=video.banner.raw_location
+                location=video.banner.raw_location,
             )
 
         thumbnail = None
@@ -63,7 +69,7 @@ class VideoModelMapper:
             thumbnail = ImageMedia(
                 checksum=video.thumbnail.checksum,
                 name=video.thumbnail.name,
-                location=video.thumbnail.raw_location
+                location=video.thumbnail.raw_location,
             )
 
         thumbnail_half = None
@@ -71,7 +77,7 @@ class VideoModelMapper:
             thumbnail_half = ImageMedia(
                 checksum=video.thumbnail_half.checksum,
                 name=video.thumbnail_half.name,
-                location=video.thumbnail_half.raw_location
+                location=video.thumbnail_half.raw_location,
             )
 
         trailer = None
@@ -81,7 +87,7 @@ class VideoModelMapper:
                 name=video.trailer.name,
                 raw_location=video.trailer.raw_location,
                 encoded_location=video.trailer.encoded_location,
-                status=MediaStatus[video.trailer.status]
+                status=MediaStatus[video.trailer.status],
             )
 
         video_media = None
@@ -91,7 +97,7 @@ class VideoModelMapper:
                 name=video.video.name,
                 raw_location=video.video.raw_location,
                 encoded_location=video.video.encoded_location,
-                status=MediaStatus[video.video.status]
+                status=MediaStatus[video.video.status],
             )
 
         return Video(
@@ -109,7 +115,7 @@ class VideoModelMapper:
             thumbnail=thumbnail,
             thumbnail_half=thumbnail_half,
             trailer=trailer,
-            video=video_media
+            video=video_media,
         )
 
     @staticmethod
@@ -120,11 +126,11 @@ class VideoModelMapper:
             description=video.description,
             launch_year=video.launch_year,
             duration=video.duration,
-            opened=True,  # Default value or need to be added to the domain entity
+            # opened=True,  # Default value or need to be added to the domain entity
             published=video.published,
             rating=video.rating.name,
         )
-        
+
         # The M2M relationships need to be handled after the model is saved
         video_model.categories.set(video.categories)
         video_model.genres.set(video.genres)
@@ -135,7 +141,7 @@ class VideoModelMapper:
             banner_model = ImageMediaORM(
                 checksum=video.banner.checksum,
                 name=video.banner.name,
-                raw_location=video.banner.location
+                raw_location=video.banner.location,
             )
             banner_model.save()
             video_model.banner = banner_model
@@ -144,7 +150,7 @@ class VideoModelMapper:
             thumbnail_model = ImageMediaORM(
                 checksum=video.thumbnail.checksum,
                 name=video.thumbnail.name,
-                raw_location=video.thumbnail.location
+                raw_location=video.thumbnail.location,
             )
             thumbnail_model.save()
             video_model.thumbnail = thumbnail_model
@@ -153,7 +159,7 @@ class VideoModelMapper:
             thumbnail_half_model = ImageMediaORM(
                 checksum=video.thumbnail_half.checksum,
                 name=video.thumbnail_half.name,
-                raw_location=video.thumbnail_half.location
+                raw_location=video.thumbnail_half.location,
             )
             thumbnail_half_model.save()
             video_model.thumbnail_half = thumbnail_half_model
@@ -164,7 +170,7 @@ class VideoModelMapper:
                 name=video.trailer.name,
                 raw_location=video.trailer.raw_location,
                 encoded_location=video.trailer.encoded_location,
-                status=video.trailer.status.name
+                status=video.trailer.status.name,
             )
             trailer_model.save()
             video_model.trailer = trailer_model
@@ -175,9 +181,35 @@ class VideoModelMapper:
                 name=video.video.name,
                 raw_location=video.video.raw_location,
                 encoded_location=video.video.encoded_location,
-                status=video.video.status.name
+                status=video.video.status.name,
             )
             video_media_model.save()
             video_model.video = video_media_model
 
         return video_model
+
+    @staticmethod
+    def to_entity(model: VideoORM) -> Video:
+        video = Video(
+            id=model.id,
+            title=model.title,
+            description=model.description,
+            launch_year=model.launch_year,
+            # opened=model.opened,
+            duration=model.duration,
+            rating=model.rating,
+            published=model.published,
+            categories=set(model.categories.values_list("id", flat=True)),
+            genres=set(model.genres.values_list("id", flat=True)),
+            cast_members=set(model.cast_members.values_list("id", flat=True)),
+        )
+
+        if model.video:
+            video.video = AudioVideoMedia(
+                name=model.video.name,
+                raw_location=model.video.raw_location,
+                encoded_location=model.video.encoded_location,
+                status=model.video.status,
+            )
+
+        return video
