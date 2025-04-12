@@ -13,6 +13,7 @@ from core.video.application.exceptions import (
     RelatedEntitiesNotFound,
 )
 from core.video.domain.video import Video
+from core.video.domain.value_objects import Rating
 
 
 class CreateVideoWithoutMedia:
@@ -34,7 +35,7 @@ class CreateVideoWithoutMedia:
         description: str
         launch_year: int
         duration: Decimal
-        rating: str
+        rating: Rating
 
         categories: set[UUID]
         genres: set[UUID]
@@ -59,7 +60,7 @@ class CreateVideoWithoutMedia:
                 title=input.title,
                 description=input.description,
                 launch_year=input.launch_year,
-                duration=input.duration,
+                duration=Decimal(input.duration),
                 published=False,
                 rating=input.rating,
                 categories=input.categories,
@@ -73,29 +74,38 @@ class CreateVideoWithoutMedia:
         return self.Output(id=video.id)
 
     def validate_categories(self, input: Input, notification: Notification) -> None:
+        if not input.categories:
+            return
         category_ids: Set = {
             category.id for category in self.category_repository.list()
         }
-        if not input.categories.issubset(category_ids):
-            missing_categories = input.categories - category_ids
+        categories_input_set = set(input.categories)
+        if not categories_input_set.issubset(category_ids):
+            missing_categories = categories_input_set - category_ids
             notification.add_error(
                 f"Categories with provided IDs not found: {', '.join(str(missing_category_id) for missing_category_id in missing_categories)}"
             )
 
     def validate_genres(self, input: Input, notification: Notification) -> None:
+        if not input.genres:
+            return
         genre_ids: Set = {genre.id for genre in self.genre_repository.list()}
-        if not input.genres.issubset(genre_ids):
-            missing_genres = input.genres - genre_ids
+        genres_input_set = set(input.genres)
+        if not genres_input_set.issubset(genre_ids):
+            missing_genres = genres_input_set - genre_ids
             notification.add_error(
                 f"Genres with provided IDs not found: {', '.join(str(missing_genre_id) for missing_genre_id in missing_genres)}"
             )
 
     def validate_cast_members(self, input: Input, notification: Notification) -> None:
+        if not input.cast_members:
+            return
         cast_member_ids: Set = {
             cast_member.id for cast_member in self.cast_member_repository.list()
         }
-        if not input.cast_members.issubset(cast_member_ids):
-            missing_cast_members = input.cast_members - cast_member_ids
+        cast_members_input_set = set(input.cast_members)
+        if not cast_members_input_set.issubset(cast_member_ids):
+            missing_cast_members = cast_members_input_set - cast_member_ids
             notification.add_error(
                 f"Cast members with provided IDs not found: {', '.join(str(missing_cast_member_id) for missing_cast_member_id in missing_cast_members)}"
             )
