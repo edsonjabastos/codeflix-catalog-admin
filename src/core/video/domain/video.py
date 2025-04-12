@@ -51,7 +51,7 @@ class Video(Entity):
             self.notification.add_error("duration must be a decimal")
         if not isinstance(self.published, bool):
             self.notification.add_error("published must be a boolean")
-        if not isinstance(self.rating, Rating):
+        if not self.rating in Rating:
             self.notification.add_error("rating must be a Rating")
 
         if self.notification.has_errors:
