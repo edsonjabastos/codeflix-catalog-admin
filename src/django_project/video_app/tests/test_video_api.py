@@ -30,7 +30,9 @@ def category_movie() -> Category:
 
 @pytest.fixture
 def category_documentary() -> Category:
-    return Category(name="Documentary", description="Documentary category", is_active=True)
+    return Category(
+        name="Documentary", description="Documentary category", is_active=True
+    )
 
 
 @pytest.fixture
@@ -103,15 +105,15 @@ class TestCreateVideoAPI:
             "genres": [str(genre_action.id)],
             "cast_members": [str(cast_member_actor.id)],
         }
-        
+
         response: Any = APIClient().post(url, data=data)
-        
+
         assert response.status_code == HTTP_201_CREATED
         assert response.data["id"]
-        
+
         created_video_id: str = response.data["id"]
         created_video = video_repository.get_by_id(created_video_id)
-        
+
         assert created_video.title == "Test Video"
         assert created_video.description == "A test video description"
         assert created_video.launch_year == 2023
@@ -129,9 +131,9 @@ class TestCreateVideoAPI:
             "title": "",
             "description": "",
         }
-        
+
         response: Any = APIClient().post(url, data=data)
-        
+
         assert response.status_code == HTTP_400_BAD_REQUEST
 
     def test_create_video_with_nonexistent_category(
@@ -144,9 +146,9 @@ class TestCreateVideoAPI:
         # Save related entities except category
         genre_repository.save(genre_action)
         cast_member_repository.save(cast_member_actor)
-        
+
         nonexistent_category_id = uuid4()
-        
+
         url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
@@ -159,11 +161,15 @@ class TestCreateVideoAPI:
             "genres": [str(genre_action.id)],
             "cast_members": [str(cast_member_actor.id)],
         }
-        
+
         response: Any = APIClient().post(url, data=data)
-        
+
         assert response.status_code == HTTP_400_BAD_REQUEST
-        assert "error" in response.data
+        assert response.data == {
+            "categories": [
+                f"Invalid categorie(s) with provided ID(s) not found: '{str(nonexistent_category_id)}'"
+            ]
+        }
 
     def test_create_video_with_nonexistent_genre(
         self,
@@ -175,9 +181,9 @@ class TestCreateVideoAPI:
         # Save related entities except genre
         category_repository.save(category_movie)
         cast_member_repository.save(cast_member_actor)
-        
+
         nonexistent_genre_id = uuid4()
-        
+
         url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
@@ -190,11 +196,15 @@ class TestCreateVideoAPI:
             "genres": [str(nonexistent_genre_id)],
             "cast_members": [str(cast_member_actor.id)],
         }
-        
+
         response: Any = APIClient().post(url, data=data)
-        
+
         assert response.status_code == HTTP_400_BAD_REQUEST
-        assert "error" in response.data
+        assert response.data == {
+            "genres": [
+                f"Invalid genre(s) with provided ID(s) not found: '{str(nonexistent_genre_id)}'"
+            ]
+        }
 
     def test_create_video_with_nonexistent_cast_member(
         self,
@@ -206,9 +216,9 @@ class TestCreateVideoAPI:
         # Save related entities except cast member
         category_repository.save(category_movie)
         genre_repository.save(genre_action)
-        
+
         nonexistent_cast_member_id = uuid4()
-        
+
         url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
@@ -221,11 +231,15 @@ class TestCreateVideoAPI:
             "genres": [str(genre_action.id)],
             "cast_members": [str(nonexistent_cast_member_id)],
         }
-        
+
         response: Any = APIClient().post(url, data=data)
-        
+
         assert response.status_code == HTTP_400_BAD_REQUEST
-        assert "error" in response.data
+        assert response.data == {
+            "cast_members": [
+                f"Invalid cast member(s) with provided ID(s) not found: '{str(nonexistent_cast_member_id)}'"
+            ]
+        }
 
     def test_create_video_with_invalid_rating(
         self,
@@ -240,7 +254,7 @@ class TestCreateVideoAPI:
         category_repository.save(category_movie)
         genre_repository.save(genre_action)
         cast_member_repository.save(cast_member_actor)
-        
+
         url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
@@ -253,7 +267,7 @@ class TestCreateVideoAPI:
             "genres": [str(genre_action.id)],
             "cast_members": [str(cast_member_actor.id)],
         }
-        
+
         response: Any = APIClient().post(url, data=data)
-        
+
         assert response.status_code == HTTP_400_BAD_REQUEST
