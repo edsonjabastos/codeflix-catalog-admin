@@ -67,6 +67,7 @@ class TestUploadVideo:
             raw_location=f"videos/{video.id}/test_video.mp4",
             encoded_location="",
             status=MediaStatus.PENDING,
+            media_type="VIDEO",
         )
 
     def test_upload_video_media_not_found(
