@@ -1,11 +1,17 @@
 from dataclasses import dataclass
 from core._shared.entity import Entity
-from core.video.domain.value_objects import AudioVideoMedia, ImageMedia, Rating
+from core.video.domain.value_objects import (
+    AudioVideoMedia,
+    ImageMedia,
+    MediaType,
+    Rating,
+)
 from decimal import Decimal
 from uuid import UUID
+from core.video.domain.events.event import AudioVideoMediaUpdated
 
 
-@dataclass(slots=True, kw_only=True)
+@dataclass(slots=True, kw_only=True, eq=False)
 class Video(Entity):
     title: str
     description: str
@@ -118,3 +124,10 @@ class Video(Entity):
     def update_video(self, video: AudioVideoMedia) -> None:
         self.video = video
         self.validate()
+        self.dispatch(
+            event=AudioVideoMediaUpdated(
+                aggregate_id=self.id,
+                file_path=video.raw_location,
+                media_type=MediaType.VIDEO,
+            )
+        )
