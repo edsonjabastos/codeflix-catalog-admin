@@ -21,6 +21,12 @@ class MediaStatus(StrEnum):
     ERROR = "ERROR"
 
 
+@unique
+class MediaType(StrEnum):
+    VIDEO = "VIDEO"
+    TRAILER = "TRAILER"
+
+
 @dataclass(frozen=True)
 class ImageMedia:
     name: str
@@ -35,3 +41,4 @@ class AudioVideoMedia:
     raw_location: str
     encoded_location: str
     status: MediaStatus
+    media_type: MediaType
