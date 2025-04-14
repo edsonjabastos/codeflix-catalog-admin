@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID
 
-from src.core._shared.abstract_storage_service import AbstractStorageService
-from src.core.video.application.exceptions import VideoNotFound
-from src.core.video.domain.video_repository import VideoRepository
+from core._shared.abstract_storage_service import AbstractStorageService
+from core.video.application.exceptions import VideoNotFound
+from core.video.domain.video_repository import VideoRepository
 from core.video.domain.video import Video
 from core.video.domain.value_objects import MediaStatus, AudioVideoMedia
 

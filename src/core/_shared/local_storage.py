@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.core._shared.abstract_storage_service import AbstractStorageService
+from core._shared.abstract_storage_service import AbstractStorageService
 
 
 class LocalStorage(AbstractStorageService):
