@@ -2,7 +2,7 @@ import pytest
 from decimal import Decimal
 from uuid import UUID, uuid4
 from core.video.domain.video import Video
-from core.video.domain.value_objects import Rating
+from core.video.domain.value_objects import MediaType, Rating
 from unittest.mock import patch
 from core.video.domain.value_objects import (
     Rating,
@@ -10,6 +10,7 @@ from core.video.domain.value_objects import (
     AudioVideoMedia,
     MediaStatus,
 )
+from core.video.domain.events.event import AudioVideoMediaUpdated
 
 
 @pytest.fixture
@@ -44,7 +45,13 @@ def audio_video_media() -> AudioVideoMedia:
         raw_location="/videos/raw/test.mp4",
         encoded_location="/videos/encoded/test.mp4",
         status=MediaStatus.COMPLETED,
+        media_type=MediaType.VIDEO,
     )
+
+
+@pytest.fixture
+def video(valid_video_params: dict) -> Video:
+    return Video(**valid_video_params)
 
 
 class TestVideoCreation:
@@ -313,6 +320,19 @@ class TestVideoMedia:
 
         video.update_video(audio_video_media)
         assert video.video == audio_video_media
+
+    def test_update_video_and_dispactch_event(
+        self, video: Video, audio_video_media: AudioVideoMedia
+    ) -> None:
+        video.update_video(audio_video_media)
+        assert video.video == audio_video_media
+        assert video.events == [
+            AudioVideoMediaUpdated(
+                aggregate_id=video.id,
+                file_path=audio_video_media.raw_location,
+                media_type=MediaType.VIDEO,
+            )
+        ]
 
 
 class TestVideoString:
