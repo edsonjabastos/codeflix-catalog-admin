@@ -31,6 +31,8 @@ from django_project.video_app.serializers import (
     VideoOutputSerializer,
 )
 from core.video.application.use_cases.get_video import GetVideo
+from core._shared.local_storage import LocalStorage
+from core.video.application.use_cases.upload_video import UploadVideo
 
 
 class VideoViewSet(viewsets.ViewSet):
@@ -105,3 +107,27 @@ class VideoViewSet(viewsets.ViewSet):
             status=HTTP_200_OK,
             data=output.data,
         )
+
+    def partial_update(self, request: Request, pk: UUID | None = None) -> Response:
+        file = request.FILES.get("video_file")
+        content = file.read()
+        content_type = file.content_type
+
+        upload_video: UploadVideo = UploadVideo(
+            video_repository=DjangoORMVideoRepository(),
+            storage_service=LocalStorage(),
+        )
+
+        try:
+            upload_video.execute(
+                input=UploadVideo.Input(
+                    video_id=pk,
+                    file_name=file.name,
+                    content=content,
+                    content_type=content_type,
+                )
+            )
+        except VideoNotFound:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        return Response(status=HTTP_200_OK)
