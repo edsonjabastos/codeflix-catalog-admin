@@ -49,6 +49,11 @@ class DjangoORMVideoRepository(VideoRepository):
 
         with transaction.atomic():
             video_model = VideoModelMapper.to_model(video)
+
+            AudioVideoMediaORM.objects.filter(
+                id=video.id,
+            ).delete()
+
             video_model.save()
         return None
 
