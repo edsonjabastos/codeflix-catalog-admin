@@ -39,13 +39,14 @@ class UploadVideo:
             content_type=input.content_type,
         )
 
-        audi_video_media: AudioVideoMedia = AudioVideoMedia(
+        audio_video_media: AudioVideoMedia = AudioVideoMedia(
             name=input.file_name,
             raw_location=file_path,
             encoded_location="",
             status=MediaStatus.PENDING,
+            media_type="VIDEO",
         )
 
         video.update_video(
-            video=audi_video_media,
+            video=audio_video_media,
         )
