@@ -131,3 +131,12 @@ class VideoViewSet(viewsets.ViewSet):
             return Response(status=HTTP_404_NOT_FOUND)
 
         return Response(status=HTTP_200_OK)
+
+    def list(self, request: Request) -> Response:
+        raise NotImplementedError("List method is not implemented.")
+
+    def destroy(self, request: Request, pk: str | None = None) -> Response:
+        raise NotImplementedError("Destroy method is not implemented.")
+
+    def update(self, request: Request, pk: str | None = None) -> Response:
+        raise NotImplementedError("Update method is not implemented.")
