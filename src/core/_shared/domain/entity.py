@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 from abc import ABC
 
-from core._shared.notification import Notification
+from src.core._shared.domain.notification import Notification
 from core._shared.events.abstract_message_bus import AbstractMessageBus
 from core._shared.events.event import Event
 from core._shared.events.message_bus import MessageBus
@@ -20,7 +20,7 @@ class Entity(ABC):
         self.message_bus.handle(events=self.events)
 
     def __eq__(self, other: "Entity") -> bool:
-        print(other, self.__class__)
+
         if not isinstance(other, self.__class__):
             return False
         return self.id == other.id

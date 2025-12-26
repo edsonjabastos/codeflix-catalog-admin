@@ -1,7 +1,7 @@
 from decimal import Decimal
 from unittest.mock import create_autospec
 import pytest
-from core._shared.abstract_storage_service import AbstractStorageService
+from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
 from core.video.application.use_cases.upload_video import UploadVideo
 from core.video.domain.value_objects import MediaStatus, Rating, AudioVideoMedia
 from core.video.domain.video import Video

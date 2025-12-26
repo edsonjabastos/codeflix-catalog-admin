@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Set
 from uuid import UUID
 
-from core._shared.notification import Notification
+from src.core._shared.domain.notification import Notification
 from core.video.domain.video_repository import VideoRepository
 from core.category.domain.category_repository import CategoryRepository
 from core.genre.domain.genre_repository import GenreRepository

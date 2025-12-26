@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from core._shared.abstract_storage_service import AbstractStorageService
+from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
 
 
 class LocalStorage(AbstractStorageService):
@@ -26,7 +26,7 @@ class LocalStorage(AbstractStorageService):
             content_type (str): The MIME type of the file.
         """
         full_path = self.bucket / file_path
-        full_path.parent.mkdir(parents=True)
+        full_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(full_path, "wb") as f:
             f.write(content)

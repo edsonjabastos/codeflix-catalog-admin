@@ -31,7 +31,7 @@ from django_project.video_app.serializers import (
     VideoOutputSerializer,
 )
 from core.video.application.use_cases.get_video import GetVideo
-from core._shared.local_storage import LocalStorage
+from src.core._shared.infrastructure.storage.local_storage import LocalStorage
 from core.video.application.use_cases.upload_video import UploadVideo
 
 

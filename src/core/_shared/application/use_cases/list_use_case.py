@@ -1,8 +1,6 @@
 from typing import TypeVar, Generic, List, Type
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from config import DEFAULT_PAGE_SIZE
-from dataclasses import asdict
-
 T = TypeVar("T")
 R = TypeVar("R")
 
