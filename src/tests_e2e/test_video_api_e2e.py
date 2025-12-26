@@ -1,14 +1,10 @@
-from io import BytesIO
 from typing import Any
 import pytest
 from rest_framework.test import APIClient
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_415_UNSUPPORTED_MEDIA_TYPE,
 )
 from django.core.files.uploadedfile import SimpleUploadedFile
 import os
