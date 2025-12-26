@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum, StrEnum, auto, unique
+from enum import StrEnum, unique
 
 
 @unique
