@@ -13,8 +13,8 @@ class DummyEntity(Entity): ...
 class TestDispactch:
 
     def test_dispatch(self):
-        mock_message_bus = create_autospec(AbstractMessageBus)
-        entity = DummyEntity(message_bus=mock_message_bus)
+        mock_message_bus: AbstractMessageBus = create_autospec(AbstractMessageBus)
+        entity: DummyEntity = DummyEntity(message_bus=mock_message_bus)
         entity.dispatch(DummyEvent())
         assert entity.events == [DummyEvent()]
         mock_message_bus.handle.assert_called_once_with(entity.events)
