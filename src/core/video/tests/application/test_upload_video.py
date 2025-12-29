@@ -10,6 +10,7 @@ from core.video.application.exceptions import VideoNotFound
 from core.video.domain.value_objects import MediaStatus, Rating, AudioVideoMedia, MediaType
 from core.video.domain.video import Video
 from core.video.infra.in_memory_video_repository import InMemoryVideoRepository
+from src.core._shared.utils.checksum import get_file_checksum
 from src.core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
@@ -177,3 +178,44 @@ class TestUploadVideo:
         assert isinstance(call_args[0], AudioVideoMediaUpdatedIntegrationEvent)
         assert call_args[0].resource_id == f"{video.id}.{MediaType.VIDEO}"
         assert call_args[0].file_path == f"videos/{video.id}/upload.mp4"
+    
+    
+    def test_upload_video_calculates_real_checksum(
+        self,
+        video: Video,
+        video_repository: InMemoryVideoRepository,
+        mock_storage_service: AbstractStorageService,
+        mock_message_bus: AbstractMessageBus,
+        tmp_path,
+    ) -> None:
+        upload_video: UploadVideo = UploadVideo(
+            video_repository=video_repository,
+            storage_service=mock_storage_service,
+            message_bus=mock_message_bus,
+        )
+
+        test_content = b"test_video_content_for_checksum"
+        input: UploadVideo.Input = UploadVideo.Input(
+            video_id=video.id,
+            file_name="checksum_test.mp4",
+            content=test_content,
+            content_type="video/mp4",
+        )
+        
+        # Create the actual file to calculate checksum
+        file_path = tmp_path / "videos" / str(video.id) / "checksum_test.mp4"
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_bytes(test_content)
+        
+        with patch('core.video.application.use_cases.upload_video.Path') as mock_path:
+            mock_path.return_value.__truediv__.return_value.__truediv__.return_value = str(file_path)
+            upload_video.execute(input=input)
+        
+        updated_video = video_repository.get_by_id(video.id)
+        assert updated_video.video is not None
+        assert updated_video.video.checksum is not None
+        assert len(updated_video.video.checksum) > 0
+        
+        # Verify checksum is consistent
+        expected_checksum = get_file_checksum(str(file_path))
+        assert updated_video.video.checksum == expected_checksum
