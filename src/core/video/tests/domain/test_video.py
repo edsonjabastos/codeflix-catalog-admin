@@ -366,3 +366,167 @@ class TestVideoEquality:
         fake_video.id = common_id
 
         assert video != fake_video
+
+
+class TestVideoPublish:
+    def test_publish_success_when_video_is_completed(
+        self, valid_video_params: dict
+    ) -> None:
+        video: Video = Video(**valid_video_params)
+        completed_video_media: AudioVideoMedia = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="/videos/encoded/test.mp4",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(completed_video_media)
+
+        assert video.published is True
+        video.publish()
+
+        assert video.published is True
+
+    def test_publish_fails_when_no_video_media(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+
+        assert video.video is None
+
+        with pytest.raises(
+            ValueError, match="Video media is required to publish the video"
+        ):
+            video.publish()
+
+    def test_publish_fails_when_video_not_completed(
+        self, valid_video_params: dict
+    ) -> None:
+        video: Video = Video(**valid_video_params)
+        pending_video_media: AudioVideoMedia = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(pending_video_media)
+
+        with pytest.raises(
+            ValueError, match="Video media must be completed to publish the video"
+        ):
+            video.publish()
+
+    def test_validate_called_on_publish(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+        completed_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="/videos/encoded/test.mp4",
+            status=MediaStatus.COMPLETED,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(completed_video_media)
+
+        with patch.object(video, "validate") as mock_validate:
+            video.publish()
+            mock_validate.assert_called_once()
+
+
+class TestVideoProcess:
+    def test_process_with_completed_status(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(initial_video_media)
+
+        encoded_location = "/videos/encoded/test.mp4"
+        video.process(MediaStatus.COMPLETED, encoded_location)
+
+        assert video.video.status == MediaStatus.COMPLETED
+        assert video.video.encoded_location == encoded_location
+        assert video.published is True
+
+    def test_process_with_error_status(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(initial_video_media)
+
+        video.process(MediaStatus.ERROR, "")
+
+        assert video.video.status == MediaStatus.ERROR
+        assert video.video.encoded_location == ""
+        assert video.published is True  # Was already True from initial creation
+
+    def test_process_calls_publish_when_completed(
+        self, valid_video_params: dict
+    ) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(initial_video_media)
+
+        with patch.object(video, "publish") as mock_publish:
+            encoded_location = "/videos/encoded/test.mp4"
+            video.process(MediaStatus.COMPLETED, encoded_location)
+            mock_publish.assert_called_once()
+
+    def test_validate_called_on_process(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(initial_video_media)
+
+        with patch.object(video, "validate") as mock_validate:
+            encoded_location = "/videos/encoded/test.mp4"
+            video.process(MediaStatus.COMPLETED, encoded_location)
+            # Called twice: once in process, once in publish
+            assert mock_validate.call_count == 2
+
+    def test_process_updates_video_properties_correctly(
+        self, valid_video_params: dict
+    ) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(initial_video_media)
+
+        encoded_location = "/videos/encoded/test.mp4"
+        video.process(MediaStatus.COMPLETED, encoded_location)
+
+        assert video.video.name == "test_video.mp4"
+        assert video.video.checksum == "abc123"
+        assert video.video.raw_location == "/videos/raw/test.mp4"
+        assert video.video.media_type == MediaType.VIDEO
