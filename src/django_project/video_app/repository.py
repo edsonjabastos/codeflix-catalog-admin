@@ -43,18 +43,96 @@ class DjangoORMVideoRepository(VideoRepository):
 
     def update(self, video: Video) -> Video:
         try:
-            self.video_orm.objects.get(id=video.id)
+            video_model = self.video_orm.objects.get(id=video.id)
         except self.video_orm.DoesNotExist:
             return None
 
         with transaction.atomic():
-            video_model = VideoModelMapper.to_model(video)
-
-            AudioVideoMediaORM.objects.filter(
-                id=video.id,
-            ).delete()
-
+            # Update scalar fields
+            video_model.title = video.title
+            video_model.description = video.description
+            video_model.launch_year = video.launch_year
+            video_model.duration = video.duration
+            video_model.published = video.published
+            video_model.rating = video.rating
+            
+            # Save the updated instance (this will UPDATE, not INSERT)
             video_model.save()
+            
+            # Update M2M relationships (must be after save)
+            video_model.categories.set(video.categories)
+            video_model.genres.set(video.genres)
+            video_model.cast_members.set(video.cast_members)
+            
+            # Handle banner media
+            if video.banner:
+                if video_model.banner:
+                    video_model.banner.delete()
+                banner_model = ImageMediaORM(
+                    checksum=video.banner.checksum,
+                    name=video.banner.name,
+                    raw_location=video.banner.location,
+                )
+                banner_model.save()
+                video_model.banner = banner_model
+                video_model.save()
+            
+            # Handle thumbnail media
+            if video.thumbnail:
+                if video_model.thumbnail:
+                    video_model.thumbnail.delete()
+                thumbnail_model = ImageMediaORM(
+                    checksum=video.thumbnail.checksum,
+                    name=video.thumbnail.name,
+                    raw_location=video.thumbnail.location,
+                )
+                thumbnail_model.save()
+                video_model.thumbnail = thumbnail_model
+                video_model.save()
+            
+            # Handle thumbnail_half media
+            if video.thumbnail_half:
+                if video_model.thumbnail_half:
+                    video_model.thumbnail_half.delete()
+                thumbnail_half_model = ImageMediaORM(
+                    checksum=video.thumbnail_half.checksum,
+                    name=video.thumbnail_half.name,
+                    raw_location=video.thumbnail_half.location,
+                )
+                thumbnail_half_model.save()
+                video_model.thumbnail_half = thumbnail_half_model
+                video_model.save()
+            
+            # Handle trailer media
+            if video.trailer:
+                if video_model.trailer:
+                    video_model.trailer.delete()
+                trailer_model = AudioVideoMediaORM(
+                    checksum=video.trailer.checksum,
+                    name=video.trailer.name,
+                    raw_location=video.trailer.raw_location,
+                    encoded_location=video.trailer.encoded_location,
+                    status=video.trailer.status.name,
+                )
+                trailer_model.save()
+                video_model.trailer = trailer_model
+                video_model.save()
+            
+            # Handle video media
+            if video.video:
+                if video_model.video:
+                    video_model.video.delete()
+                video_media_model = AudioVideoMediaORM(
+                    checksum=video.video.checksum,
+                    name=video.video.name,
+                    raw_location=video.video.raw_location,
+                    encoded_location=video.video.encoded_location,
+                    status=video.video.status.name,
+                )
+                video_media_model.save()
+                video_model.video = video_media_model
+                video_model.save()
+                
         return None
 
 
