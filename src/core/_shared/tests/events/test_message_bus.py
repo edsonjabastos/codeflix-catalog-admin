@@ -16,3 +16,14 @@ class TestMessageBus:
         dummy_event: DummyEvent = DummyEvent()
         message_bus.handle([dummy_event])
         dummy_handler.handle.assert_called_once_with(dummy_event)
+
+    def test_calls_multiple_handlers_with_event(self) -> None:
+        message_bus: MessageBus = MessageBus()
+        dummy_handler_1: Handler = create_autospec(Handler)
+        dummy_handler_2: Handler = create_autospec(Handler)
+        message_bus.handlers[DummyEvent] = [dummy_handler_1, dummy_handler_2]
+
+        dummy_event: DummyEvent = DummyEvent()
+        message_bus.handle([dummy_event])
+        dummy_handler_1.handle.assert_called_once_with(dummy_event)
+        dummy_handler_2.handle.assert_called_once_with(dummy_event)
