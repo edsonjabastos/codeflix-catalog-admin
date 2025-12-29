@@ -1,11 +1,18 @@
 from decimal import Decimal
-from unittest.mock import create_autospec
+from unittest.mock import create_autospec, patch
 import pytest
-from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
+from src.core._shared.application.handler import AbstractMessageBus
+from src.core._shared.infrastructure.storage.abstract_storage_service import (
+    AbstractStorageService,
+)
 from core.video.application.use_cases.upload_video import UploadVideo
-from core.video.domain.value_objects import MediaStatus, Rating, AudioVideoMedia
+from core.video.application.exceptions import VideoNotFound
+from core.video.domain.value_objects import MediaStatus, Rating, AudioVideoMedia, MediaType
 from core.video.domain.video import Video
 from core.video.infra.in_memory_video_repository import InMemoryVideoRepository
+from src.core.video.application.events.integrations_events import (
+    AudioVideoMediaUpdatedIntegrationEvent,
+)
 
 
 @pytest.fixture
@@ -29,21 +36,31 @@ def video_repository(video: Video) -> InMemoryVideoRepository:
 
 
 @pytest.fixture
-def mock_storage_service():
+def mock_storage_service() -> AbstractStorageService:
     return create_autospec(AbstractStorageService)
 
 
+@pytest.fixture
+def mock_message_bus() -> AbstractMessageBus:
+    return create_autospec(AbstractMessageBus)
+
+
 class TestUploadVideo:
+    @patch('core.video.application.use_cases.upload_video.get_file_checksum')
     def test_upload_video_media_to_video(
         self,
+        mock_checksum,
         video: Video,
         video_repository: InMemoryVideoRepository,
-        mock_storage_service,
+        mock_storage_service: AbstractStorageService,
+        mock_message_bus: AbstractMessageBus,
     ) -> None:
+        mock_checksum.return_value = "test_checksum"
 
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
+            message_bus=mock_message_bus,
         )
 
         input: UploadVideo.Input = UploadVideo.Input(
@@ -62,22 +79,27 @@ class TestUploadVideo:
 
         video_from_repo = video_repository.get_by_id(video.id)
 
-        video_from_repo.video == AudioVideoMedia(
+        assert video_from_repo.video == AudioVideoMedia(
             name=input.file_name,
+            checksum="test_checksum",
             raw_location=f"videos/{video.id}/test_video.mp4",
             encoded_location="",
             status=MediaStatus.PENDING,
-            media_type="VIDEO",
+            media_type=MediaType.VIDEO,
         )
+
+        mock_message_bus.handle.assert_called_once()
 
     def test_upload_video_media_not_found(
         self,
         video_repository: InMemoryVideoRepository,
-        mock_storage_service,
+        mock_storage_service: AbstractStorageService,
+        mock_message_bus: AbstractMessageBus,
     ) -> None:
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
+            message_bus=mock_message_bus,
         )
 
         input: UploadVideo.Input = UploadVideo.Input(
@@ -87,7 +109,71 @@ class TestUploadVideo:
             content_type="video/mp4",
         )
 
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(VideoNotFound) as excinfo:
             upload_video.execute(input=input)
 
         assert str(excinfo.value) == "Video with id 'non_existent_id' not found."
+
+    @patch('core.video.application.use_cases.upload_video.get_file_checksum')
+    def test_upload_video_updates_repository(
+        self,
+        mock_checksum,
+        video: Video,
+        video_repository: InMemoryVideoRepository,
+        mock_storage_service: AbstractStorageService,
+        mock_message_bus: AbstractMessageBus,
+    ) -> None:
+        mock_checksum.return_value = "checksum123"
+        
+        upload_video: UploadVideo = UploadVideo(
+            video_repository=video_repository,
+            storage_service=mock_storage_service,
+            message_bus=mock_message_bus,
+        )
+
+        input: UploadVideo.Input = UploadVideo.Input(
+            video_id=video.id,
+            file_name="movie.mp4",
+            content=b"video_content",
+            content_type="video/mp4",
+        )
+        
+        upload_video.execute(input=input)
+        
+        updated_video = video_repository.get_by_id(video.id)
+        assert updated_video.video is not None
+        assert updated_video.video.name == "movie.mp4"
+        assert updated_video.video.status == MediaStatus.PENDING
+
+    @patch('core.video.application.use_cases.upload_video.get_file_checksum')
+    def test_upload_video_publishes_integration_event(
+        self,
+        mock_checksum,
+        video: Video,
+        video_repository: InMemoryVideoRepository,
+        mock_storage_service: AbstractStorageService,
+        mock_message_bus: AbstractMessageBus,
+    ) -> None:
+        mock_checksum.return_value = "checksum456"
+        
+        upload_video: UploadVideo = UploadVideo(
+            video_repository=video_repository,
+            storage_service=mock_storage_service,
+            message_bus=mock_message_bus,
+        )
+
+        input: UploadVideo.Input = UploadVideo.Input(
+            video_id=video.id,
+            file_name="upload.mp4",
+            content=b"content",
+            content_type="video/mp4",
+        )
+        
+        upload_video.execute(input=input)
+        
+        mock_message_bus.handle.assert_called_once()
+        call_args = mock_message_bus.handle.call_args[0][0]
+        assert len(call_args) == 1
+        assert isinstance(call_args[0], AudioVideoMediaUpdatedIntegrationEvent)
+        assert call_args[0].resource_id == f"{video.id}.{MediaType.VIDEO}"
+        assert call_args[0].file_path == f"videos/{video.id}/upload.mp4"

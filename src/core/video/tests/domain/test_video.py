@@ -41,7 +41,7 @@ def image_media() -> ImageMedia:
 def audio_video_media() -> AudioVideoMedia:
     return AudioVideoMedia(
         name="test_video.mp4",
-        # checksum="abc123",
+        checksum="abc123",
         raw_location="/videos/raw/test.mp4",
         encoded_location="/videos/encoded/test.mp4",
         status=MediaStatus.COMPLETED,

@@ -133,7 +133,7 @@ class VideoModelMapper:
             duration=video.duration,
             # opened=True,  # Default value or need to be added to the domain entity
             published=video.published,
-            rating=video.rating.name,
+            rating=video.rating,
         )
 
         # The M2M relationships need to be handled after the model is saved

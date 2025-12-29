@@ -1,3 +1,4 @@
+from re import M
 from uuid import UUID
 from rest_framework import viewsets
 from rest_framework.request import Request
@@ -31,6 +32,7 @@ from django_project.video_app.serializers import (
     VideoOutputSerializer,
 )
 from core.video.application.use_cases.get_video import GetVideo
+from src.core._shared.events.message_bus import MessageBus
 from src.core._shared.infrastructure.storage.local_storage import LocalStorage
 from core.video.application.use_cases.upload_video import UploadVideo
 
@@ -116,6 +118,7 @@ class VideoViewSet(viewsets.ViewSet):
         upload_video: UploadVideo = UploadVideo(
             video_repository=DjangoORMVideoRepository(),
             storage_service=LocalStorage(),
+            message_bus=MessageBus(),
         )
 
         try:

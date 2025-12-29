@@ -2,11 +2,19 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID
 
-from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
+
+from src.core._shared.application.handler import AbstractMessageBus
+from src.core._shared.infrastructure.storage.abstract_storage_service import (
+    AbstractStorageService,
+)
 from core.video.application.exceptions import VideoNotFound
 from core.video.domain.video_repository import VideoRepository
 from core.video.domain.video import Video
-from core.video.domain.value_objects import MediaStatus, AudioVideoMedia
+from core.video.domain.value_objects import MediaStatus, AudioVideoMedia, MediaType
+from src.core.video.application.events.integrations_events import (
+    AudioVideoMediaUpdatedIntegrationEvent,
+)
+from src.core._shared.utils.checksum import get_file_checksum
 
 
 class UploadVideo:
@@ -14,9 +22,11 @@ class UploadVideo:
         self,
         video_repository: VideoRepository,
         storage_service: AbstractStorageService,
+        message_bus: AbstractMessageBus,
     ) -> None:
         self.repository: VideoRepository = video_repository
         self.storage_service: AbstractStorageService = storage_service
+        self.message_bus: AbstractMessageBus = message_bus
 
     @dataclass
     class Input:
@@ -41,12 +51,24 @@ class UploadVideo:
 
         audio_video_media: AudioVideoMedia = AudioVideoMedia(
             name=input.file_name,
+            checksum=get_file_checksum(file_path),
             raw_location=file_path,
             encoded_location="",
             status=MediaStatus.PENDING,
-            media_type="VIDEO",
+            media_type=MediaType.VIDEO,
         )
 
         video.update_video(
             video=audio_video_media,
+        )
+
+        self.repository.update(video)
+
+        self.message_bus.handle(
+            [
+                AudioVideoMediaUpdatedIntegrationEvent(
+                    resource_id=f"{video.id}.{MediaType.VIDEO}",
+                    file_path=file_path,
+                )
+            ]
         )

@@ -1,10 +1,10 @@
 from pathlib import Path
-
+from config import TMP_BUCKET
 from src.core._shared.infrastructure.storage.abstract_storage_service import AbstractStorageService
 
 
 class LocalStorage(AbstractStorageService):
-    TMP_BUCKET = "/tmp/codeflix-storage"
+    
 
     def __init__(self, bucket: str = TMP_BUCKET) -> None:
         self.bucket = Path(bucket)
