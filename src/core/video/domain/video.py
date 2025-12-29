@@ -3,6 +3,7 @@ from core._shared.domain.entity import Entity
 from core.video.domain.value_objects import (
     AudioVideoMedia,
     ImageMedia,
+    MediaStatus,
     MediaType,
     Rating,
 )
@@ -17,7 +18,7 @@ class Video(Entity):
     description: str
     launch_year: int
     duration: Decimal
-    published: bool
+    published: bool = False
     rating: Rating
 
     categories: set[UUID]
@@ -131,3 +132,36 @@ class Video(Entity):
                 media_type=MediaType.VIDEO,
             )
         )
+
+    def publish(self) -> None:
+        if not self.video:
+            self.notification.add_error("Video media is required to publish the video")
+        elif self.video.status != MediaStatus.COMPLETED:
+            self.notification.add_error(
+                "Video media must be completed to publish the video"
+            )
+
+        self.published = True
+        self.validate()
+
+    def process(self, status: MediaStatus, encoded_location: str) -> None:
+        if status == MediaStatus.COMPLETED:
+            self.video: AudioVideoMedia = AudioVideoMedia(
+                name=self.video.name,
+                checksum=self.video.checksum,
+                raw_location=self.video.raw_location,
+                media_type=MediaType.VIDEO,
+                encoded_location=encoded_location,
+                status=MediaStatus.COMPLETED,
+            )
+            self.publish()
+        else:
+            self.video: AudioVideoMedia = AudioVideoMedia(
+                name=self.video.name,
+                checksum=self.video.checksum,
+                raw_location=self.video.raw_location,
+                media_type=MediaType.VIDEO,
+                encoded_location="",
+                status=MediaStatus.ERROR,
+            )
+        self.validate()
