@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from core.castmember.domain.value_objects import CastMemberType
-from src.core._shared.domain.entity import Entity
+from core._shared.domain.entity import Entity
 
 
 @dataclass(eq=False)

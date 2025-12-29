@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from uuid import UUID, uuid4
 from abc import ABC
 
-from src.core._shared.domain.notification import Notification
+from core._shared.domain.notification import Notification
 from core._shared.events.abstract_message_bus import AbstractMessageBus
 from core._shared.events.event import Event
 from core._shared.events.message_bus import MessageBus

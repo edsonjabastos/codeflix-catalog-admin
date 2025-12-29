@@ -3,18 +3,18 @@ from pathlib import Path
 from uuid import UUID
 
 
-from src.core._shared.application.handler import AbstractMessageBus
-from src.core._shared.infrastructure.storage.abstract_storage_service import (
+from core._shared.application.handler import AbstractMessageBus
+from core._shared.infrastructure.storage.abstract_storage_service import (
     AbstractStorageService,
 )
 from core.video.application.exceptions import VideoNotFound
 from core.video.domain.video_repository import VideoRepository
 from core.video.domain.video import Video
 from core.video.domain.value_objects import MediaStatus, AudioVideoMedia, MediaType
-from src.core.video.application.events.integrations_events import (
+from core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
-from src.core._shared.utils.checksum import get_file_checksum
+from core._shared.utils.checksum import get_file_checksum
 
 
 class UploadVideo:

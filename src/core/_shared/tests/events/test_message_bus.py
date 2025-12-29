@@ -1,7 +1,7 @@
 from unittest.mock import create_autospec
-from src.core._shared.application.handler import Handler
-from src.core._shared.domain.entity import MessageBus
-from src.core._shared.events.event import Event
+from core._shared.application.handler import Handler
+from core._shared.domain.entity import MessageBus
+from core._shared.events.event import Event
 
 
 class DummyEvent(Event): ...

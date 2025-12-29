@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.core._shared.events.event import Event
+from core._shared.events.event import Event
 
 
 @dataclass(frozen=True)

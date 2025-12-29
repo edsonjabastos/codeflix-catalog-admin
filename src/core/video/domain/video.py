@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from src.core._shared.domain.entity import Entity
+from core._shared.domain.entity import Entity
 from core.video.domain.value_objects import (
     AudioVideoMedia,
     ImageMedia,
