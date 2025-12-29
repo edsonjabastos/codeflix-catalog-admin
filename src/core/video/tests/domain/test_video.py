@@ -448,7 +448,7 @@ class TestVideoProcess:
         video.update_video(initial_video_media)
 
         encoded_location = "/videos/encoded/test.mp4"
-        video.process(MediaStatus.COMPLETED, encoded_location)
+        video.process(MediaStatus.COMPLETED, encoded_location, MediaType.VIDEO)
 
         assert video.video.status == MediaStatus.COMPLETED
         assert video.video.encoded_location == encoded_location
@@ -466,7 +466,7 @@ class TestVideoProcess:
         )
         video.update_video(initial_video_media)
 
-        video.process(MediaStatus.ERROR, "")
+        video.process(MediaStatus.ERROR, "", MediaType.VIDEO)
 
         assert video.video.status == MediaStatus.ERROR
         assert video.video.encoded_location == ""
@@ -488,7 +488,7 @@ class TestVideoProcess:
 
         with patch.object(video, "publish") as mock_publish:
             encoded_location = "/videos/encoded/test.mp4"
-            video.process(MediaStatus.COMPLETED, encoded_location)
+            video.process(MediaStatus.COMPLETED, encoded_location, MediaType.VIDEO)
             mock_publish.assert_called_once()
 
     def test_validate_called_on_process(self, valid_video_params: dict) -> None:
@@ -505,7 +505,7 @@ class TestVideoProcess:
 
         with patch.object(video, "validate") as mock_validate:
             encoded_location = "/videos/encoded/test.mp4"
-            video.process(MediaStatus.COMPLETED, encoded_location)
+            video.process(MediaStatus.COMPLETED, encoded_location, MediaType.VIDEO)
             # Called twice: once in process, once in publish
             assert mock_validate.call_count == 2
 
@@ -524,9 +524,84 @@ class TestVideoProcess:
         video.update_video(initial_video_media)
 
         encoded_location = "/videos/encoded/test.mp4"
-        video.process(MediaStatus.COMPLETED, encoded_location)
+        video.process(MediaStatus.COMPLETED, encoded_location, MediaType.VIDEO)
 
         assert video.video.name == "test_video.mp4"
         assert video.video.checksum == "abc123"
         assert video.video.raw_location == "/videos/raw/test.mp4"
         assert video.video.media_type == MediaType.VIDEO
+
+    def test_process_trailer_with_completed_status(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_trailer_media = AudioVideoMedia(
+            name="test_trailer.mp4",
+            checksum="xyz789",
+            raw_location="/videos/raw/test_trailer.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.TRAILER,
+        )
+        video.update_trailer(initial_trailer_media)
+
+        encoded_location = "/videos/encoded/test_trailer.mp4"
+        video.process(MediaStatus.COMPLETED, encoded_location, MediaType.TRAILER)
+
+        assert video.trailer.status == MediaStatus.COMPLETED
+        assert video.trailer.encoded_location == encoded_location
+
+    def test_process_trailer_with_error_status(self, valid_video_params: dict) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_trailer_media = AudioVideoMedia(
+            name="test_trailer.mp4",
+            checksum="xyz789",
+            raw_location="/videos/raw/test_trailer.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.TRAILER,
+        )
+        video.update_trailer(initial_trailer_media)
+
+        video.process(MediaStatus.ERROR, "", MediaType.TRAILER)
+
+        assert video.trailer.status == MediaStatus.ERROR
+        assert video.trailer.encoded_location == ""
+
+    def test_process_trailer_does_not_publish(self, valid_video_params: dict) -> None:
+        valid_video_params["published"] = False
+        video: Video = Video(**valid_video_params)
+        initial_trailer_media = AudioVideoMedia(
+            name="test_trailer.mp4",
+            checksum="xyz789",
+            raw_location="/videos/raw/test_trailer.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.TRAILER,
+        )
+        video.update_trailer(initial_trailer_media)
+
+        encoded_location = "/videos/encoded/test_trailer.mp4"
+        video.process(MediaStatus.COMPLETED, encoded_location, MediaType.TRAILER)
+
+        assert video.published is False  # Should remain False, not auto-published
+
+    def test_process_trailer_updates_trailer_properties_correctly(
+        self, valid_video_params: dict
+    ) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_trailer_media = AudioVideoMedia(
+            name="test_trailer.mp4",
+            checksum="xyz789",
+            raw_location="/videos/raw/test_trailer.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.TRAILER,
+        )
+        video.update_trailer(initial_trailer_media)
+
+        encoded_location = "/videos/encoded/test_trailer.mp4"
+        video.process(MediaStatus.COMPLETED, encoded_location, MediaType.TRAILER)
+
+        assert video.trailer.name == "test_trailer.mp4"
+        assert video.trailer.checksum == "xyz789"
+        assert video.trailer.raw_location == "/videos/raw/test_trailer.mp4"
+        assert video.trailer.media_type == MediaType.TRAILER
