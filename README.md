@@ -7,9 +7,10 @@ Codeflix is a project designed to manage categories and genres for a media catal
 ## Features
 
 - Create, get, update, list, and delete categories.
-- Create, update, list and delete genres and castmembers.
-- Create video without media and get it.
+- Create, update, list and delete genres and cast members.
+- Create video without media, retrieve video details, and upload video media files.
 - Integration with Django Rest Framework for API endpoints.
+- Local file storage for video media.
 - Comprehensive test coverage using pytest.
 - Docker support for containerized deployment.
 
@@ -43,6 +44,9 @@ Codeflix is a project designed to manage categories and genres for a media catal
 
 - `POST /api/videos/` - Create a new video without media
 - `GET /api/videos/{id}/` - Retrieve a video by ID
+- `PATCH /api/videos/{id}/` - Upload video media file
+
+**Note:** List, update (PUT), and delete endpoints for videos are not yet implemented.
 
 ### Flash test commands
 
@@ -61,7 +65,7 @@ curl --location 'http://localhost:8000/api/categories/' \
 
 #### Creating a genre
 
-- Replace the content of cateogries inside brackets for previous creation response.
+- Replace `{category_id}` with the ID from the previous category creation response.
 
 ```bash
 curl --location 'http://localhost:8000/api/genres/' \
@@ -70,7 +74,7 @@ curl --location 'http://localhost:8000/api/genres/' \
 --data '{
 	"name": "Desenho",
 	"categories": [
-		"d9752a1c-c4bb-4bb0-9afa-12bb6f152cbc"
+		"{category_id}"
 	]
 }'
 ```
@@ -87,7 +91,9 @@ curl --location 'http://localhost:8000/api/cast_members/' \
 }'
 ```
 
-- Replace the content of cateogries, genres and cast_members inside brackets for previous creations response.
+#### Creating a video
+
+- Replace `{category_id}`, `{genre_id}`, and `{cast_member_id}` with IDs from previous creation responses.
 
 ```bash
 curl --location 'http://localhost:8000/api/videos/' \
@@ -100,16 +106,61 @@ curl --location 'http://localhost:8000/api/videos/' \
     "duration": 40,
     "rating": "L",
     "categories": [
-        "d9752a1c-c4bb-4bb0-9afa-12bb6f152cbc"
+        "{category_id}"
     ],
     "genres": [
-        "45567b60-15fa-4896-a18f-ce4ae15cbfe3"
+        "{genre_id}"
     ],
     "cast_members": [
-        "49e20845-e19a-44e9-aa09-8c048fc0b110"
+        "{cast_member_id}"
     ]
 }'
 ```
+
+#### Uploading video media
+
+- Replace `{video_id}` with the ID from the previous video creation response.
+- Ensure `ShowDaXuxa.mp4` exists in your current directory.
+
+```bash
+curl --location --request PATCH 'http://localhost:8000/api/videos/{video_id}/' \
+--header 'Accept: application/json' \
+--form 'video_file=@"ShowDaXuxa.mp4"'
+```
+
+### Automated Testing Script
+
+For convenience, we provide a bash script that automates the entire API testing workflow, including video upload.
+
+#### Requirements
+
+- `jq` - Command-line JSON processor
+  - **Ubuntu/Debian**: `sudo apt-get install jq`
+  - **MacOS**: `brew install jq`
+- Django server running on `http://localhost:8000`
+- `ShowDaXuxa.mp4` file in the project root directory
+
+#### Running the Script
+
+1. Ensure the Django server is running:
+   ```bash
+   python src/manage.py runserver
+   ```
+
+2. In a new terminal, run the test script:
+   ```bash
+   ./test_api.sh
+   ```
+
+The script will automatically:
+- Create a category and capture its ID
+- Create a genre linked to the category
+- Create a cast member
+- Create a video with all relationships
+- Retrieve the video to verify creation
+- Upload the video media file (`ShowDaXuxa.mp4`)
+- Verify the file was saved correctly
+- Display a summary with all created IDs
 
 <p align="center">
   <img src="curl_example.png" alt="alt text" />
@@ -162,10 +213,26 @@ curl --location 'http://localhost:8000/api/videos/' \
 
 ### Running Tests
 
-To run the tests, use the following command:
+The project includes comprehensive test coverage:
 
+**Run all tests:**
 ```sh
 pytest
+```
+
+**Run specific test suites:**
+```sh
+# Unit tests
+pytest src/core/
+
+# E2E tests
+pytest src/tests_e2e/
+
+# Specific test file
+pytest src/tests_e2e/test_video_api_e2e.py
+
+# Specific test class
+pytest src/tests_e2e/test_video_api_e2e.py::TestUploadVideoMediaAPI
 ```
 
 ### Using Docker
