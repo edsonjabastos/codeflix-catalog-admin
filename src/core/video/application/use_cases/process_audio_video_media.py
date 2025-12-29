@@ -30,5 +30,17 @@ class ProcessAudioVideoMedia:
             video.process(
                 status=request.status,
                 encoded_location=request.encoded_location,
+                media_type=request.media_type,
+            )
+            self.video_repository.update(video)
+        elif request.media_type == MediaType.TRAILER:
+            if not video.trailer:
+                raise AudioVideoMediaNotFound(
+                    f"Trailer media not found for video id {request.video_id}"
+                )
+            video.process(
+                status=request.status,
+                encoded_location=request.encoded_location,
+                media_type=request.media_type,
             )
             self.video_repository.update(video)

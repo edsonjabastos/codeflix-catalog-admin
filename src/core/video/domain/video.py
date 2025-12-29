@@ -144,24 +144,44 @@ class Video(Entity):
         self.published = True
         self.validate()
 
-    def process(self, status: MediaStatus, encoded_location: str) -> None:
-        if status == MediaStatus.COMPLETED:
-            self.video: AudioVideoMedia = AudioVideoMedia(
-                name=self.video.name,
-                checksum=self.video.checksum,
-                raw_location=self.video.raw_location,
-                media_type=MediaType.VIDEO,
-                encoded_location=encoded_location,
-                status=MediaStatus.COMPLETED,
-            )
-            self.publish()
-        else:
-            self.video: AudioVideoMedia = AudioVideoMedia(
-                name=self.video.name,
-                checksum=self.video.checksum,
-                raw_location=self.video.raw_location,
-                media_type=MediaType.VIDEO,
-                encoded_location="",
-                status=MediaStatus.ERROR,
-            )
+    def process(self, status: MediaStatus, encoded_location: str, media_type: MediaType) -> None:
+        if media_type == MediaType.VIDEO:
+            if status == MediaStatus.COMPLETED:
+                self.video: AudioVideoMedia = AudioVideoMedia(
+                    name=self.video.name,
+                    checksum=self.video.checksum,
+                    raw_location=self.video.raw_location,
+                    media_type=MediaType.VIDEO,
+                    encoded_location=encoded_location,
+                    status=MediaStatus.COMPLETED,
+                )
+                self.publish()
+            else:
+                self.video: AudioVideoMedia = AudioVideoMedia(
+                    name=self.video.name,
+                    checksum=self.video.checksum,
+                    raw_location=self.video.raw_location,
+                    media_type=MediaType.VIDEO,
+                    encoded_location="",
+                    status=MediaStatus.ERROR,
+                )
+        elif media_type == MediaType.TRAILER:
+            if status == MediaStatus.COMPLETED:
+                self.trailer: AudioVideoMedia = AudioVideoMedia(
+                    name=self.trailer.name,
+                    checksum=self.trailer.checksum,
+                    raw_location=self.trailer.raw_location,
+                    media_type=MediaType.TRAILER,
+                    encoded_location=encoded_location,
+                    status=MediaStatus.COMPLETED,
+                )
+            else:
+                self.trailer: AudioVideoMedia = AudioVideoMedia(
+                    name=self.trailer.name,
+                    checksum=self.trailer.checksum,
+                    raw_location=self.trailer.raw_location,
+                    media_type=MediaType.TRAILER,
+                    encoded_location="",
+                    status=MediaStatus.ERROR,
+                )
         self.validate()
