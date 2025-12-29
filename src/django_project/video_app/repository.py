@@ -290,9 +290,11 @@ class VideoModelMapper:
         if model.video:
             video.video = AudioVideoMedia(
                 name=model.video.name,
+                checksum=model.video.checksum,
                 raw_location=model.video.raw_location,
                 encoded_location=model.video.encoded_location,
                 status=model.video.status,
+                media_type=model.video.media_type,
             )
 
         return video

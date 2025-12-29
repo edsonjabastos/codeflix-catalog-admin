@@ -68,6 +68,7 @@ class ImageMedia(models.Model):
 
 class AudioVideoMedia(models.Model):
     STATUS_CHOICES = [(status.name, status.name) for status in MediaStatus]
+    MEDIA_TYPE_CHOICES = [(status.name, status.name) for status in MediaStatus]
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
@@ -76,3 +77,4 @@ class AudioVideoMedia(models.Model):
     raw_location = models.CharField(max_length=255)
     encoded_location = models.CharField(max_length=255)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
+    media_type = models.CharField(max_length=255, choices=MEDIA_TYPE_CHOICES)
