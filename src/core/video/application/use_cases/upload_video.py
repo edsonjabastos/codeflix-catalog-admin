@@ -34,6 +34,7 @@ class UploadVideo:
         file_name: str
         content: bytes
         content_type: str
+        media_type: MediaType = MediaType.VIDEO
 
     def execute(self, input: Input) -> None:
         video: Video = self.repository.get_by_id(input.video_id)
@@ -55,19 +56,20 @@ class UploadVideo:
             raw_location=file_path,
             encoded_location="",
             status=MediaStatus.PENDING,
-            media_type=MediaType.VIDEO,
+            media_type=input.media_type,
         )
 
-        video.update_video(
-            video=audio_video_media,
-        )
+        if input.media_type == MediaType.VIDEO:
+            video.update_video(video=audio_video_media)
+        else:  # MediaType.TRAILER
+            video.update_trailer(trailer=audio_video_media)
 
         self.repository.update(video)
 
         self.message_bus.handle(
             [
                 AudioVideoMediaUpdatedIntegrationEvent(
-                    resource_id=f"{video.id}.{MediaType.VIDEO}",
+                    resource_id=f"{video.id}.{input.media_type}",
                     file_path=file_path,
                 )
             ]
