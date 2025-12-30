@@ -64,6 +64,33 @@ def video_without_media() -> Video:
 
 
 @pytest.fixture
+def video_with_trailer() -> Video:
+    video = Video(
+        title="Test Video with Trailer",
+        description="Test Description",
+        launch_year=2023,
+        duration=Decimal("105.0"),
+        published=False,
+        rating=Rating.AGE_10,
+        categories=set(),
+        genres=set(),
+        cast_members=set(),
+    )
+    # Add trailer media to the video
+    video.update_trailer(
+        AudioVideoMedia(
+            name="test_trailer.mp4",
+            checksum="def456",
+            raw_location="/videos/raw/trailer.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.TRAILER,
+        )
+    )
+    return video
+
+
+@pytest.fixture
 def use_case(video_repository: MagicMock) -> ProcessAudioVideoMedia:
     return ProcessAudioVideoMedia(video_repository=video_repository)
 
@@ -208,16 +235,16 @@ class TestProcessAudioVideoMedia:
         assert isinstance(call_args, Video)
         assert call_args.id == video_id
 
-    def test_process_only_handles_video_media_type(
+    # Trailer Processing Tests
+    def test_process_trailer_with_completed_status(
         self,
         use_case: ProcessAudioVideoMedia,
         video_repository: MagicMock,
-        video_with_media: Video,
+        video_with_trailer: Video,
     ) -> None:
-        video_id = video_with_media.id
-        video_repository.get_by_id.return_value = video_with_media
+        video_id = video_with_trailer.id
+        video_repository.get_by_id.return_value = video_with_trailer
 
-        # Test with TRAILER media type (should not process)
         input_data = ProcessAudioVideoMedia.Input(
             video_id=video_id,
             media_type=MediaType.TRAILER,
@@ -227,9 +254,132 @@ class TestProcessAudioVideoMedia:
 
         use_case.execute(input_data)
 
-        # Should not call update since media_type is not VIDEO
+        video_repository.get_by_id.assert_called_once_with(id=video_id)
+        video_repository.update.assert_called_once_with(video_with_trailer)
+        assert video_with_trailer.trailer.status == MediaStatus.COMPLETED
+        assert video_with_trailer.trailer.encoded_location == "/videos/encoded/trailer.mp4"
+
+    def test_process_trailer_with_error_status(
+        self,
+        use_case: ProcessAudioVideoMedia,
+        video_repository: MagicMock,
+        video_with_trailer: Video,
+    ) -> None:
+        video_id = video_with_trailer.id
+        video_repository.get_by_id.return_value = video_with_trailer
+
+        input_data = ProcessAudioVideoMedia.Input(
+            video_id=video_id,
+            media_type=MediaType.TRAILER,
+            encoded_location="",
+            status=MediaStatus.ERROR,
+        )
+
+        use_case.execute(input_data)
+
+        video_repository.get_by_id.assert_called_once_with(id=video_id)
+        video_repository.update.assert_called_once_with(video_with_trailer)
+        assert video_with_trailer.trailer.status == MediaStatus.ERROR
+        assert video_with_trailer.trailer.encoded_location == ""
+
+    def test_process_trailer_media_not_found(
+        self,
+        use_case: ProcessAudioVideoMedia,
+        video_repository: MagicMock,
+        video_without_media: Video,
+    ) -> None:
+        video_id = video_without_media.id
+        video_repository.get_by_id.return_value = video_without_media
+
+        input_data = ProcessAudioVideoMedia.Input(
+            video_id=video_id,
+            media_type=MediaType.TRAILER,
+            encoded_location="/videos/encoded/trailer.mp4",
+            status=MediaStatus.COMPLETED,
+        )
+
+        with pytest.raises(AudioVideoMediaNotFound) as exc_info:
+            use_case.execute(input_data)
+
+        assert f"Trailer media not found for video id {video_id}" in str(exc_info.value)
         video_repository.get_by_id.assert_called_once_with(id=video_id)
         video_repository.update.assert_not_called()
+
+    def test_process_calls_trailer_process_method(
+        self,
+        use_case: ProcessAudioVideoMedia,
+        video_repository: MagicMock,
+        video_with_trailer: Video,
+    ) -> None:
+        video_id = video_with_trailer.id
+        video_repository.get_by_id.return_value = video_with_trailer
+        encoded_location = "/videos/encoded/trailer_output.mp4"
+
+        input_data = ProcessAudioVideoMedia.Input(
+            video_id=video_id,
+            media_type=MediaType.TRAILER,
+            encoded_location=encoded_location,
+            status=MediaStatus.COMPLETED,
+        )
+
+        with patch.object(video_with_trailer, "process_trailer") as mock_process_trailer:
+            use_case.execute(input_data)
+            mock_process_trailer.assert_called_once_with(
+                status=MediaStatus.COMPLETED,
+                encoded_location=encoded_location,
+            )
+
+    def test_process_trailer_updates_repository(
+        self,
+        use_case: ProcessAudioVideoMedia,
+        video_repository: MagicMock,
+        video_with_trailer: Video,
+    ) -> None:
+        video_id = video_with_trailer.id
+        video_repository.get_by_id.return_value = video_with_trailer
+
+        input_data = ProcessAudioVideoMedia.Input(
+            video_id=video_id,
+            media_type=MediaType.TRAILER,
+            encoded_location="/videos/encoded/trailer.mp4",
+            status=MediaStatus.COMPLETED,
+        )
+
+        use_case.execute(input_data)
+
+        video_repository.update.assert_called_once()
+        call_args = video_repository.update.call_args[0][0]
+        assert isinstance(call_args, Video)
+        assert call_args.id == video_id
+
+    def test_process_trailer_preserves_video_properties(
+        self,
+        use_case: ProcessAudioVideoMedia,
+        video_repository: MagicMock,
+        video_with_trailer: Video,
+    ) -> None:
+        video_id = video_with_trailer.id
+        original_title = video_with_trailer.title
+        original_description = video_with_trailer.description
+        original_checksum = video_with_trailer.trailer.checksum
+        original_name = video_with_trailer.trailer.name
+
+        video_repository.get_by_id.return_value = video_with_trailer
+
+        input_data = ProcessAudioVideoMedia.Input(
+            video_id=video_id,
+            media_type=MediaType.TRAILER,
+            encoded_location="/videos/encoded/trailer.mp4",
+            status=MediaStatus.COMPLETED,
+        )
+
+        use_case.execute(input_data)
+
+        # Verify video properties are preserved
+        assert video_with_trailer.title == original_title
+        assert video_with_trailer.description == original_description
+        assert video_with_trailer.trailer.checksum == original_checksum
+        assert video_with_trailer.trailer.name == original_name
 
     def test_process_preserves_video_properties(
         self,
