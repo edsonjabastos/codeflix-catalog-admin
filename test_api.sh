@@ -126,16 +126,40 @@ if [ ! -f "$VIDEO_FILE" ]; then
     exit 1
 fi
 
-UPLOAD_RESPONSE=$(curl -s -X PATCH "${BASE_URL}/api/videos/${VIDEO_ID}/" \
-  -H "Accept: application/json" \
-  -F "video_file=@${VIDEO_FILE}")
+# Ask user for media type
+echo -e "${BLUE}Choose media type:${NC}"
+echo "  V - Video"
+echo "  T - Trailer"
+echo -n "Enter choice (V/T): "
+read -r MEDIA_CHOICE < /dev/tty
 
-UPLOAD_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH "${BASE_URL}/api/videos/${VIDEO_ID}/" \
+case "$MEDIA_CHOICE" in
+    [Vv])
+        MEDIA_TYPE="VIDEO"
+        echo -e "${GREEN}Uploading as VIDEO${NC}"
+        ;;
+    [Tt])
+        MEDIA_TYPE="TRAILER"
+        echo -e "${GREEN}Uploading as TRAILER${NC}"
+        ;;
+    *)
+        echo -e "${RED}Invalid choice. Defaulting to VIDEO${NC}"
+        MEDIA_TYPE="VIDEO"
+        ;;
+esac
+
+# Upload media file (single request to avoid double upload)
+HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "${BASE_URL}/api/videos/${VIDEO_ID}/" \
   -H "Accept: application/json" \
-  -F "video_file=@${VIDEO_FILE}")
+  -F "video_file=@${VIDEO_FILE}" \
+  -F "media_type=${MEDIA_TYPE}")
+
+# Extract status code (last line) and response body (everything else)
+UPLOAD_STATUS=$(echo "$HTTP_RESPONSE" | tail -n1)
+UPLOAD_RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
 
 if [ "$UPLOAD_STATUS" = "200" ]; then
-    echo -e "${GREEN}✓ Video media uploaded successfully${NC}"
+    echo -e "${GREEN}✓ ${MEDIA_TYPE} media uploaded successfully${NC}"
     
     # Verify the file was saved
     STORAGE_PATH="/tmp/codeflix-storage/videos/${VIDEO_ID}/${VIDEO_FILE}"
@@ -145,8 +169,21 @@ if [ "$UPLOAD_STATUS" = "200" ]; then
     else
         echo -e "${RED}  Warning: File not found at expected location: $STORAGE_PATH${NC}"
     fi
+    
+    # Retrieve video again to verify media_type was saved
+    echo -e "\n${BLUE}7. Verifying uploaded media...${NC}"
+    VERIFY_RESPONSE=$(curl -s -X GET "${BASE_URL}/api/videos/${VIDEO_ID}/" \
+      -H "Accept: application/json")
+    
+    if [ "$MEDIA_TYPE" = "VIDEO" ]; then
+        SAVED_MEDIA_TYPE=$(echo "$VERIFY_RESPONSE" | jq -r '.data.video.media_type // "null"')
+        echo -e "${GREEN}Video media_type in database: ${SAVED_MEDIA_TYPE}${NC}"
+    else
+        SAVED_MEDIA_TYPE=$(echo "$VERIFY_RESPONSE" | jq -r '.data.trailer.media_type // "null"')
+        echo -e "${GREEN}Trailer media_type in database: ${SAVED_MEDIA_TYPE}${NC}"
+    fi
 else
-    echo -e "${RED}Failed to upload video media (HTTP $UPLOAD_STATUS)${NC}"
+    echo -e "${RED}Failed to upload ${MEDIA_TYPE} media (HTTP $UPLOAD_STATUS)${NC}"
     echo "Response: $UPLOAD_RESPONSE"
 fi
 
@@ -156,6 +193,7 @@ echo -e "Category ID:    ${GREEN}$CATEGORY_ID${NC}"
 echo -e "Genre ID:       ${GREEN}$GENRE_ID${NC}"
 echo -e "Cast Member ID: ${GREEN}$CAST_MEMBER_ID${NC}"
 echo -e "Video ID:       ${GREEN}$VIDEO_ID${NC}"
+echo -e "Media Type:     ${GREEN}$MEDIA_TYPE${NC}"
 echo -e "Upload Status:  ${GREEN}HTTP $UPLOAD_STATUS${NC}"
 
 echo -e "\n${GREEN}✓ All API tests completed successfully!${NC}"
