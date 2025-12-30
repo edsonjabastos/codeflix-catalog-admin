@@ -112,6 +112,17 @@ class VideoViewSet(viewsets.ViewSet):
         file = request.FILES.get("video_file")
         content = file.read()
         content_type = file.content_type
+        
+        # Get media_type from request data (defaults to VIDEO if not provided)
+        media_type_str = request.data.get("media_type", "VIDEO")
+        try:
+            from core.video.domain.value_objects import MediaType
+            media_type = MediaType[media_type_str]
+        except KeyError:
+            return Response(
+                status=HTTP_400_BAD_REQUEST,
+                data={"error": f"Invalid media_type: {media_type_str}. Must be VIDEO or TRAILER."},
+            )
 
         upload_video: UploadVideo = UploadVideo(
             video_repository=DjangoORMVideoRepository(),
@@ -126,6 +137,7 @@ class VideoViewSet(viewsets.ViewSet):
                     file_name=file.name,
                     content=content,
                     content_type=content_type,
+                    media_type=media_type,
                 )
             )
         except VideoNotFound:
