@@ -28,7 +28,6 @@ from django_project.video_app.serializers import (
     CreateVideoOutputSerializer,
     GetVideoInputSerializer,
     GetVideoOutputSerializer,
-    VideoOutputSerializer,
 )
 from core.video.application.use_cases.get_video import GetVideo
 from core._shared.events.message_bus import MessageBus
