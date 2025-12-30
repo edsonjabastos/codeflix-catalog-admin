@@ -1,5 +1,5 @@
 from decimal import Decimal
-from core.video.domain.value_objects import Rating, MediaStatus
+from core.video.domain.value_objects import Rating, MediaStatus, MediaType
 
 from rest_framework.serializers import (
     Serializer,
@@ -51,6 +51,18 @@ class MediaStatusField(ChoiceField):
         return value.name if value else None
 
 
+class MediaTypeField(ChoiceField):
+    def __init__(self, **kwargs):
+        choices = [(media_type.name, media_type.name) for media_type in MediaType]
+        super().__init__(choices=choices, **kwargs)
+
+    def to_internal_value(self, data):
+        return MediaType[super().to_internal_value(data)]
+
+    def to_representation(self, value):
+        return value.name if value else None
+
+
 class ImageMediaSerializer(Serializer):
     checksum = CharField(max_length=255)
     name = CharField(max_length=255)
@@ -63,6 +75,7 @@ class AudioVideoMediaSerializer(Serializer):
     raw_location = CharField(max_length=255)
     encoded_location = CharField(max_length=255)
     status = MediaStatusField()
+    media_type = MediaTypeField()
 
 
 class VideoOutputSerializer(Serializer):
