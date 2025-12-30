@@ -22,11 +22,11 @@ class VideoConvertedRabbitMQConsumer(AbstractConsumer):
         self.connection: BlockingConnection | None = None
         self.channel: BlockingChannel | None = None
 
-    def on_message(self, message):
+    def on_message(self, message: bytes):
         print(f"Received message: {message}")
         try:
             # Body payload
-            message = json.loads(message)
+            message: dict = json.loads(message)
 
             # Tratamento de erro
             error_message = message["error"]
