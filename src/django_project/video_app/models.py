@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from django.db import models
 
-from core.video.domain.value_objects import MediaStatus, Rating
+from core.video.domain.value_objects import MediaStatus, Rating, MediaType
 
 
 class Video(models.Model):
@@ -68,7 +68,7 @@ class ImageMedia(models.Model):
 
 class AudioVideoMedia(models.Model):
     STATUS_CHOICES = [(status.name, status.name) for status in MediaStatus]
-    MEDIA_TYPE_CHOICES = [(status.name, status.name) for status in MediaStatus]
+    MEDIA_TYPE_CHOICES = [(media_type.name, media_type.name) for media_type in MediaType]
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 

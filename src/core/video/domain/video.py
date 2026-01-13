@@ -121,6 +121,13 @@ class Video(Entity):
     def update_trailer(self, trailer: AudioVideoMedia) -> None:
         self.trailer = trailer
         self.validate()
+        self.dispatch(
+            event=AudioVideoMediaUpdated(
+                aggregate_id=self.id,
+                file_path=trailer.raw_location,
+                media_type=MediaType.TRAILER,
+            )
+        )
 
     def update_video(self, video: AudioVideoMedia) -> None:
         self.video = video
@@ -184,4 +191,25 @@ class Video(Entity):
                     encoded_location="",
                     status=MediaStatus.ERROR,
                 )
+        self.validate()
+
+    def process_trailer(self, status: MediaStatus, encoded_location: str) -> None:
+        if status == MediaStatus.COMPLETED:
+            self.trailer: AudioVideoMedia = AudioVideoMedia(
+                name=self.trailer.name,
+                checksum=self.trailer.checksum,
+                raw_location=self.trailer.raw_location,
+                media_type=MediaType.TRAILER,
+                encoded_location=encoded_location,
+                status=MediaStatus.COMPLETED,
+            )
+        else:
+            self.trailer: AudioVideoMedia = AudioVideoMedia(
+                name=self.trailer.name,
+                checksum=self.trailer.checksum,
+                raw_location=self.trailer.raw_location,
+                media_type=MediaType.TRAILER,
+                encoded_location="",
+                status=MediaStatus.ERROR,
+            )
         self.validate()

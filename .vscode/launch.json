@@ -8,7 +8,22 @@
       "name": "Python Debugger: Django",
       "type": "debugpy",
       "request": "launch",
-      "args": ["runserver", "8000"],
+      "args": [
+        "runserver",
+        "8000"
+      ],
+      "django": true,
+      "autoStartBrowser": false,
+      "program": "${workspaceFolder}/src/manage.py",
+      "justMyCode": false
+    },
+    {
+      "name": "Python Debugger: Video Consumer",
+      "type": "debugpy",
+      "request": "launch",
+      "args": [
+        "startconsumer"
+      ],
       "django": true,
       "autoStartBrowser": false,
       "program": "${workspaceFolder}/src/manage.py",
