@@ -6,3 +6,5 @@ ipython
 pika
 pyjwt
 cryptography
+python-dotenv
+requests
