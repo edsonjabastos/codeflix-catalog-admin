@@ -137,6 +137,9 @@ class TestVideoConversionFlowRealDB:
     def test_complete_video_conversion_flow_real_db(self, api_client: APIClient) -> None:
         """
         Test the complete video lifecycle using the real database.
+        This test should run independently and requires all services to be up:
+        - RabbitMQ server
+        - Video conversion consumer
         """
         import django
         from django.conf import settings
