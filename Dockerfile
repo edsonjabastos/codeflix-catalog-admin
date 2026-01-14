@@ -12,10 +12,14 @@ WORKDIR /app
 
 COPY . /app
 
+# Copy and set entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# EXPOSE 5000
+EXPOSE 8000
 
-CMD ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 # docker build -t codeflix-catalog-admin .
 # docker run -d -v ./src:/app codeflix-catalog-admin

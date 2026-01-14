@@ -1,4 +1,20 @@
 services:
+  app:
+    build: .
+    container_name: codeflix-catalog-admin
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.2
     container_name: keycloak
