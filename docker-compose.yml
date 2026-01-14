@@ -1,0 +1,49 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2
+    container_name: keycloak
+    environment:
+      # Admin credentials for master realm
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      # Pass env variables for realm JSON substitution
+      DEFAULT_PROJECT_REALM: ${DEFAULT_PROJECT_REALM}
+      DEFAULT_REALM_ADMIN_ROLE_NAME: ${DEFAULT_REALM_ADMIN_ROLE_NAME}
+      DEFAULT_REALM_ADMIN_USER: ${DEFAULT_REALM_ADMIN_USER}
+      DEFAULT_REALM_ADMIN_PASSWORD: ${DEFAULT_REALM_ADMIN_PASSWORD}
+      DEFAULT_REALM_ADMIN_EMAIL: ${DEFAULT_REALM_ADMIN_EMAIL}
+      DEFAULT_REALM_CLIENT_ID: ${DEFAULT_REALM_CLIENT_ID}
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+      - keycloak_data:/opt/keycloak/data
+    ports:
+      - "8080:8080"
+    command:
+      - start-dev
+      - --import-realm
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  keycloak_data:
+  rabbitmq_data:
