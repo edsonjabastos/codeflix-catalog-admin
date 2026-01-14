@@ -12,9 +12,7 @@ from rest_framework.status import (
 
 @pytest.mark.django_db
 class TestUserCanCreateAndEditCastMember:
-    def test_user_can_create_and_edit_castmember(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_can_create_and_edit_castmember(self, api_client: APIClient):
         # list castmembers
         list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
@@ -98,9 +96,7 @@ class TestUserCanCreateAndEditCastMember:
         #     }
         # }
 
-    def test_user_can_create_and_delete_castmember(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_can_create_and_delete_castmember(self, api_client: APIClient):
         # list castmembers
         list_response: Any = api_client.get("/api/cast_members/")
         assert list_response.status_code == HTTP_200_OK
@@ -164,9 +160,7 @@ class TestUserCanCreateAndEditCastMember:
             "meta": {"current_page": 1, "per_page": 2, "total": 0},
         }
 
-    def test_user_cannot_create_castmember_and_edit_incorrectly(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_cannot_create_castmember_and_edit_incorrectly(self, api_client: APIClient):
         # create castmember with incorrect data
         create_response: Any = api_client.post(
             "/api/cast_members/",

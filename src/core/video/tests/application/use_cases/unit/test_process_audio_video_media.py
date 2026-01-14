@@ -343,7 +343,7 @@ class TestProcessAudioVideoMedia:
         video_repository.get_by_id.return_value = video_with_trailer
         encoded_location = "/videos/encoded/trailer_output.mp4"
 
-        input_data = ProcessAudioVideoMedia.Input(
+        input_data: ProcessAudioVideoMedia.Input = ProcessAudioVideoMedia.Input(
             video_id=video_id,
             media_type=MediaType.TRAILER,
             encoded_location=encoded_location,

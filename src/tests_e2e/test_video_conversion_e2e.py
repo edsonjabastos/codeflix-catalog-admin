@@ -134,7 +134,7 @@ class TestVideoConversionFlowRealDB:
         with django_db_blocker.unblock():
             yield
 
-    def test_complete_video_conversion_flow_real_db(self) -> None:
+    def test_complete_video_conversion_flow_real_db(self, api_client: APIClient) -> None:
         """
         Test the complete video lifecycle using the real database.
         """
@@ -142,7 +142,6 @@ class TestVideoConversionFlowRealDB:
         from django.conf import settings
         
         # Force using the real database
-        api_client: APIClient = APIClient()
 
         # API endpoints
         video_url: str = "/api/videos/"

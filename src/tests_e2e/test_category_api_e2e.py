@@ -13,9 +13,7 @@ from rest_framework.status import (
 @pytest.mark.django_db
 class TestUserCanCreateAndEditCategory:
 
-    def test_user_can_create_and_edit_category(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_can_create_and_edit_category(self, api_client: APIClient):
         # list categories
         list_response: Any = api_client.get("/api/categories/")
         assert list_response.status_code == HTTP_200_OK
@@ -112,9 +110,7 @@ class TestUserCanCreateAndEditCategory:
             }
         }
 
-    def test_user_can_create_and_delete_category(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_can_create_and_delete_category(self, api_client: APIClient):
         # list categories
         list_response: Any = api_client.get("/api/categories/")
         assert list_response.status_code == HTTP_200_OK
@@ -183,9 +179,7 @@ class TestUserCanCreateAndEditCategory:
             "meta": {"current_page": 1, "per_page": 2, "total": 0},
         }
 
-    def test_user_cannot_create_category_and_edit_incorrectly(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_cannot_create_category_and_edit_incorrectly(self, api_client: APIClient):
         # create category with incorrect data
         create_response: Any = api_client.post(
             "/api/categories/",
@@ -230,9 +224,7 @@ class TestUserCanCreateAndEditCategory:
             "is_active": ["Must be a valid boolean."],
         }
 
-    def test_user_can_partial_edit_category(self):
-        api_client: APIClient = APIClient()
-
+    def test_user_can_partial_edit_category(self, api_client: APIClient):
         # create category
         create_response: Any = api_client.post(
             "/api/categories/",

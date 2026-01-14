@@ -4,10 +4,18 @@
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Base URL
 BASE_URL="http://localhost:8000"
+
+# Keycloak configuration (from .env defaults)
+KEYCLOAK_HOST="${KEYCLOAK_HOST:-localhost:8080}"
+KEYCLOAK_REALM="${DEFAULT_PROJECT_REALM:-codeflix}"
+KEYCLOAK_CLIENT_ID="${DEFAULT_REALM_CLIENT_ID:-codeflix-frontend}"
+KEYCLOAK_USERNAME="${DEFAULT_REALM_ADMIN_USER:-admin}"
+KEYCLOAK_PASSWORD="${DEFAULT_REALM_ADMIN_PASSWORD:-admin}"
 
 echo -e "${BLUE}=== Codeflix API Testing Script ===${NC}\n"
 
@@ -19,11 +27,38 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
+# 0. Acquire JWT token from Keycloak
+echo -e "${BLUE}0. Acquiring JWT token from Keycloak...${NC}"
+
+TOKEN_URL="http://${KEYCLOAK_HOST}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token"
+
+TOKEN_RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=${KEYCLOAK_CLIENT_ID}" \
+  -d "username=${KEYCLOAK_USERNAME}" \
+  -d "password=${KEYCLOAK_PASSWORD}")
+
+ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token')
+
+if [ "$ACCESS_TOKEN" = "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+    echo -e "${RED}Failed to acquire token from Keycloak${NC}"
+    echo -e "${YELLOW}Make sure Keycloak is running: docker compose up -d keycloak${NC}"
+    echo "Response: $TOKEN_RESPONSE"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Token acquired successfully${NC}\n"
+
+# Set Authorization header for all subsequent requests
+AUTH_HEADER="Authorization: Bearer ${ACCESS_TOKEN}"
+
 # 1. Create a Category
 echo -e "${BLUE}1. Creating a category...${NC}"
 CATEGORY_RESPONSE=$(curl -s -X POST "${BASE_URL}/api/categories/" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
+  -H "$AUTH_HEADER" \
   -d '{
     "name": "Infantil",
     "description": "Indicado para o público menor de 10 anos",
@@ -45,6 +80,7 @@ echo -e "${BLUE}2. Creating a genre...${NC}"
 GENRE_RESPONSE=$(curl -s -X POST "${BASE_URL}/api/genres/" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
+  -H "$AUTH_HEADER" \
   -d "{
     \"name\": \"Desenho\",
     \"is_active\": true,
@@ -66,6 +102,7 @@ echo -e "${BLUE}3. Creating a cast member...${NC}"
 CAST_MEMBER_RESPONSE=$(curl -s -X POST "${BASE_URL}/api/cast_members/" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
+  -H "$AUTH_HEADER" \
   -d '{
     "name": "Docinho",
     "type": "ACTOR"
@@ -86,6 +123,7 @@ echo -e "${BLUE}4. Creating a video...${NC}"
 VIDEO_RESPONSE=$(curl -s -X POST "${BASE_URL}/api/videos/" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
+  -H "$AUTH_HEADER" \
   -d "{
     \"title\": \"Meninas Superpoderosas\",
     \"description\": \"As defensoras de Townsville\",
@@ -110,7 +148,8 @@ echo -e "${GREEN}✓ Video created with ID: $VIDEO_ID${NC}\n"
 # 5. Retrieve the video
 echo -e "${BLUE}5. Retrieving the video...${NC}"
 VIDEO_GET_RESPONSE=$(curl -s -X GET "${BASE_URL}/api/videos/${VIDEO_ID}/" \
-  -H "Accept: application/json")
+  -H "Accept: application/json" \
+  -H "$AUTH_HEADER")
 
 echo -e "${GREEN}✓ Video retrieved successfully${NC}"
 echo "$VIDEO_GET_RESPONSE" | jq '.'
@@ -151,6 +190,7 @@ esac
 # Upload media file (single request to avoid double upload)
 HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "${BASE_URL}/api/videos/${VIDEO_ID}/" \
   -H "Accept: application/json" \
+  -H "$AUTH_HEADER" \
   -F "video_file=@${VIDEO_FILE}" \
   -F "media_type=${MEDIA_TYPE}")
 
@@ -173,7 +213,8 @@ if [ "$UPLOAD_STATUS" = "200" ]; then
     # Retrieve video again to verify media_type was saved
     echo -e "\n${BLUE}7. Verifying uploaded media...${NC}"
     VERIFY_RESPONSE=$(curl -s -X GET "${BASE_URL}/api/videos/${VIDEO_ID}/" \
-      -H "Accept: application/json")
+      -H "Accept: application/json" \
+      -H "$AUTH_HEADER")
     
     if [ "$MEDIA_TYPE" = "VIDEO" ]; then
         SAVED_MEDIA_TYPE=$(echo "$VERIFY_RESPONSE" | jq -r '.data.video.media_type // "null"')

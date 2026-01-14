@@ -22,6 +22,7 @@ class ProcessAudioVideoMedia:
         video: Video = self.video_repository.get_by_id(id=request.video_id)
         if video is None:
             raise VideoNotFound(f"Video with id {request.video_id} not found")
+        
         if request.media_type == MediaType.VIDEO:
             if not video.video:
                 raise AudioVideoMediaNotFound(
@@ -33,18 +34,7 @@ class ProcessAudioVideoMedia:
                 media_type=request.media_type,
             )
             self.video_repository.update(video)
-        elif request.media_type == MediaType.TRAILER:
-            if not video.trailer:
-                raise AudioVideoMediaNotFound(
-                    f"Trailer media not found for video id {request.video_id}"
-                )
-            video.process(
-                status=request.status,
-                encoded_location=request.encoded_location,
-                media_type=request.media_type,
-            )
-            self.video_repository.update(video)
-
+        
         elif request.media_type == MediaType.TRAILER:
             if not video.trailer:
                 raise AudioVideoMediaNotFound(
@@ -55,3 +45,4 @@ class ProcessAudioVideoMedia:
                 encoded_location=request.encoded_location,
             )
             self.video_repository.update(video)
+

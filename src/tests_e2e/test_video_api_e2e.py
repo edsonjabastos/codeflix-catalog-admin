@@ -15,8 +15,8 @@ import shutil
 class TestCreateVideoWithoutMediaAPI:
     def test_create_video_without_media(
         self,
+        api_client: APIClient,
     ) -> None:
-        api_client: APIClient = APIClient()
         # Create a video without media flux
         video_url: str = "/api/videos/"
         category_url: str = "/api/categories/"
@@ -121,8 +121,8 @@ class TestCreateVideoWithoutMediaAPI:
 
     def test_create_video_without_media_fail(
         self,
+        api_client: APIClient,
     ) -> None:
-        api_client: APIClient = APIClient()
         # Create a video without media flux
         video_url: str = "/api/videos/"
         category_url: str = "/api/categories/"
@@ -286,8 +286,8 @@ class TestCreateVideoWithoutMediaAPI:
 class TestUploadVideoMediaAPI:
     def test_upload_video_media(
         self,
+        api_client: APIClient,
     ) -> None:
-        api_client: APIClient = APIClient()
         # Create a video without media flux
         video_url: str = "/api/videos/"
         category_url: str = "/api/categories/"
