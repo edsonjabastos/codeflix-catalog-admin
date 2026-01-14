@@ -30,9 +30,12 @@ from django_project.genre_app.serializers import (
     UpdateGenreInputSerializer,
 )
 from config import DEFAULT_PAGE_SIZE
+from django_project.permissions import IsAuthenticated, IsAdmin
+
 
 
 class GenreViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated & IsAdmin]
 
     def list(self, request: Request) -> Response:
         order_by: str = request.query_params.get("order_by", "name")

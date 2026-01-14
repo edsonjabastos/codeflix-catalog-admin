@@ -38,9 +38,11 @@ from django_project.castmember_app.serializers import (
     UpdateCastMemberInputSerializer,
 )
 from config import DEFAULT_PAGE_SIZE
+from django_project.permissions import IsAuthenticated, IsAdmin
 
 
 class CastMemberViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated & IsAdmin]
 
     def list(self, request: Request) -> Response:
         order_by: str = request.query_params.get("order_by", "name")

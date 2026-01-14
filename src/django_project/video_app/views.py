@@ -33,9 +33,11 @@ from core.video.application.use_cases.get_video import GetVideo
 from core._shared.events.message_bus import MessageBus
 from core._shared.infrastructure.storage.local_storage import LocalStorage
 from core.video.application.use_cases.upload_video import UploadVideo
-
+from django_project.permissions import IsAuthenticated, IsAdmin
 
 class VideoViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated & IsAdmin]
+
     def create(self, request: Request) -> Response:
         serializer: CreateVideoInputSerializer = CreateVideoInputSerializer(
             data=request.data

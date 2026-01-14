@@ -1,5 +1,5 @@
 from uuid import UUID
-from rest_framework import viewsets
+from rest_framework.viewsets import ViewSet
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -40,9 +40,11 @@ from django_project.category_app.serializers import (
     UpdateCategoryRequestSerializer,
 )
 from config import DEFAULT_PAGE_SIZE
+from django_project.permissions import IsAuthenticated, IsAdmin
 
 
-class CategoryViewSet(viewsets.ViewSet):
+class CategoryViewSet(ViewSet):
+    permission_classes = [IsAuthenticated & IsAdmin]
 
     def list(self, request: Request) -> Response:
         order_by: str = request.query_params.get("order_by", "name")
