@@ -6,7 +6,7 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ADD ./requirements.txt /
 RUN pip install -r /requirements.txt
-ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONDONTWRITEBYTECODE=1
 # don't use above command in production
 WORKDIR /app
 
