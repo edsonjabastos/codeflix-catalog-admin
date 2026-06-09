@@ -321,7 +321,7 @@ class TestVideoMedia:
         video.update_video(audio_video_media)
         assert video.video == audio_video_media
 
-    def test_update_video_and_dispactch_event(
+    def test_update_video_and_record_event(
         self, video: Video, audio_video_media: AudioVideoMedia
     ) -> None:
         video.update_video(audio_video_media)
