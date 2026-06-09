@@ -10,26 +10,13 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
 )
 
-from core.castmember.application.use_cases.create_castmember import (
-    CreateCastMember,
-)
-from core.castmember.application.use_cases.delete_castmember import (
-    DeleteCastMember,
-)
-from core.castmember.application.use_cases.list_castmember import (
-    ListCastMember,
-)
-from core.castmember.application.use_cases.update_castmember import (
-    UpdateCastMember,
-)
-
-
-from core.castmember.application.exceptions import (
-    CastMemberNotFound,
-    InvalidCastMember,
-)
-from django_project.castmember_app.repository import DjangoORMCastMemberRepository
-
+from core.castmember.application.use_cases.create_castmember import CreateCastMember
+from core.castmember.application.use_cases.delete_castmember import DeleteCastMember
+from core.castmember.application.use_cases.list_castmember import ListCastMember
+from core.castmember.application.use_cases.update_castmember import UpdateCastMember
+from core.castmember.application.exceptions import CastMemberNotFound, InvalidCastMember
+from config import DEFAULT_PAGE_SIZE
+from django_project.adapters.composition.container import get_container
 from django_project.castmember_app.serializers import (
     CreateCastMemberInputSerializer,
     CreateCastMemberOutputSerializer,
@@ -37,7 +24,6 @@ from django_project.castmember_app.serializers import (
     ListCastMemberOutputSerializer,
     UpdateCastMemberInputSerializer,
 )
-from config import DEFAULT_PAGE_SIZE
 from django_project.permissions import IsAuthenticated, IsAdmin
 
 
@@ -51,8 +37,7 @@ class CastMemberViewSet(viewsets.ViewSet):
         input: ListCastMember.Input = ListCastMember.Input(
             order_by=order_by, current_page=current_page, page_size=page_size
         )
-        use_case = ListCastMember(repository=DjangoORMCastMemberRepository())
-        output: ListCastMember.Output = use_case.execute(input)
+        output = get_container().list_castmember().execute(input)
 
         serializer: ListCastMemberOutputSerializer = ListCastMemberOutputSerializer(
             instance=output
@@ -70,12 +55,10 @@ class CastMemberViewSet(viewsets.ViewSet):
             **serializer.validated_data
         )
 
-        use_case = CreateCastMember(
-            castmember_repository=DjangoORMCastMemberRepository()
-        )
-
         try:
-            output: CreateCastMember.Output = use_case.execute(input)
+            output: CreateCastMember.Output = (
+                get_container().create_castmember().execute(input)
+            )
         except InvalidCastMember as e:
             return Response(
                 status=HTTP_400_BAD_REQUEST,
@@ -95,11 +78,8 @@ class CastMemberViewSet(viewsets.ViewSet):
             **serializer.validated_data
         )
 
-        use_case = DeleteCastMember(
-            castmember_repository=DjangoORMCastMemberRepository()
-        )
         try:
-            use_case.execute(input)
+            get_container().delete_castmember().execute(input)
         except CastMemberNotFound:
             return Response(status=HTTP_404_NOT_FOUND)
 
@@ -115,11 +95,8 @@ class CastMemberViewSet(viewsets.ViewSet):
             **serializer.validated_data
         )
 
-        use_case = UpdateCastMember(
-            castmember_repository=DjangoORMCastMemberRepository()
-        )
         try:
-            use_case.execute(input)
+            get_container().update_castmember().execute(input)
         except CastMemberNotFound as e:
             return Response(
                 status=HTTP_404_NOT_FOUND,

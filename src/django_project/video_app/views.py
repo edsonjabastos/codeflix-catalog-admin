@@ -10,30 +10,24 @@ from core.video.application.exceptions import (
     RelatedEntitiesNotFound,
     VideoNotFound,
 )
-from django_project.video_app.repository import DjangoORMVideoRepository
-from django_project.category_app.repository import DjangoORMCategoryRepository
-from django_project.genre_app.repository import DjangoORMGenreRepository
-from django_project.castmember_app.repository import DjangoORMCastMemberRepository
-
-from rest_framework.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-)
-
-
+from core.video.application.use_cases.get_video import GetVideo
+from core.video.application.use_cases.upload_video import UploadVideo
+from core.video.domain.value_objects import MediaType
+from django_project.adapters.composition.container import get_container
 from django_project.video_app.serializers import (
     CreateVideoInputSerializer,
     CreateVideoOutputSerializer,
     GetVideoInputSerializer,
     GetVideoOutputSerializer,
 )
-from core.video.application.use_cases.get_video import GetVideo
-from core._shared.events.message_bus import MessageBus
-from core._shared.infrastructure.storage.local_storage import LocalStorage
-from core.video.application.use_cases.upload_video import UploadVideo
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+)
 from django_project.permissions import IsAuthenticated, IsAdmin
+
 
 class VideoViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated & IsAdmin]
@@ -46,19 +40,6 @@ class VideoViewSet(viewsets.ViewSet):
 
         input_data = serializer.validated_data
 
-        # request_data = request.data
-        input_data = {
-            "title": input_data.get("title"),
-            "description": input_data.get("description"),
-            "launch_year": input_data.get("launch_year"),
-            "duration": input_data.get("duration"),
-            "rating": input_data.get("rating"),
-            "categories": input_data.get("categories"),
-            "genres": input_data.get("genres"),
-            "cast_members": input_data.get("cast_members"),
-        }
-
-        # Create the Input object for use case
         input_obj = CreateVideoWithoutMedia.Input(
             title=input_data["title"],
             description=input_data["description"],
@@ -70,15 +51,8 @@ class VideoViewSet(viewsets.ViewSet):
             cast_members=input_data["cast_members"],
         )
 
-        use_case = CreateVideoWithoutMedia(
-            video_repository=DjangoORMVideoRepository(),
-            category_repository=DjangoORMCategoryRepository(),
-            genre_repository=DjangoORMGenreRepository(),
-            cast_member_repository=DjangoORMCastMemberRepository(),
-        )
-
         try:
-            output = use_case.execute(input=input_obj)
+            output = get_container().create_video_without_media().execute(input=input_obj)
         except (InvalidVideo, RelatedEntitiesNotFound) as e:
             return Response(
                 status=HTTP_400_BAD_REQUEST,
@@ -94,10 +68,8 @@ class VideoViewSet(viewsets.ViewSet):
         serializer: GetVideoInputSerializer = GetVideoInputSerializer(data={"id": pk})
         serializer.is_valid(raise_exception=True)
 
-        use_case: GetVideo = GetVideo(video_repository=DjangoORMVideoRepository())
-
         try:
-            result: GetVideo.Output = use_case.execute(
+            result: GetVideo.Output = get_container().get_video().execute(
                 input=GetVideo.Input(id=serializer.validated_data["id"])
             )
         except VideoNotFound:
@@ -114,26 +86,20 @@ class VideoViewSet(viewsets.ViewSet):
         file = request.FILES.get("video_file")
         content = file.read()
         content_type = file.content_type
-        
-        # Get media_type from request data (defaults to VIDEO if not provided)
+
         media_type_str = request.data.get("media_type", "VIDEO")
         try:
-            from core.video.domain.value_objects import MediaType
             media_type = MediaType[media_type_str]
         except KeyError:
             return Response(
                 status=HTTP_400_BAD_REQUEST,
-                data={"error": f"Invalid media_type: {media_type_str}. Must be VIDEO or TRAILER."},
+                data={
+                    "error": f"Invalid media_type: {media_type_str}. Must be VIDEO or TRAILER."
+                },
             )
 
-        upload_video: UploadVideo = UploadVideo(
-            video_repository=DjangoORMVideoRepository(),
-            storage_service=LocalStorage(),
-            message_bus=MessageBus(),
-        )
-
         try:
-            upload_video.execute(
+            get_container().upload_video().execute(
                 input=UploadVideo.Input(
                     video_id=pk,
                     file_name=file.name,
