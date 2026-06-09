@@ -202,6 +202,18 @@ echo -e "${BLUE}[6/6] Running tests...${NC}\n"
 
 cd "$SRC_DIR"
 
+echo -e "${BLUE}Checking Clean Architecture import boundaries...${NC}"
+if command -v lint-imports &> /dev/null; then
+    if lint-imports; then
+        echo -e "${GREEN}✓ Import boundaries OK${NC}\n"
+    else
+        echo -e "${RED}Import boundary check failed (run: cd src && lint-imports)${NC}"
+        exit 1
+    fi
+else
+    echo -e "${YELLOW}Skipping lint-imports (not installed)${NC}\n"
+fi
+
 # Build pytest command based on test type
 PYTEST_ARGS="-v"
 

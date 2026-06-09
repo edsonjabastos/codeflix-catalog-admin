@@ -4,7 +4,9 @@ pytest-django
 django-extensions
 ipython
 pika
+pytest
 pyjwt
 cryptography
 python-dotenv
 requests
+import-linter
