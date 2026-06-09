@@ -1,7 +1,8 @@
 from unittest.mock import create_autospec
+
 from core._shared.application.handler import Handler
-from core._shared.domain.entity import MessageBus
 from core._shared.events.event import Event
+from django_project.adapters.messaging.message_bus import MessageBus
 
 
 class DummyEvent(Event): ...
@@ -14,7 +15,7 @@ class TestMessageBus:
         message_bus.handlers[DummyEvent] = [dummy_handler]
 
         dummy_event: DummyEvent = DummyEvent()
-        message_bus.handle([dummy_event])
+        message_bus.publish([dummy_event])
         dummy_handler.handle.assert_called_once_with(dummy_event)
 
     def test_calls_multiple_handlers_with_event(self) -> None:
@@ -24,6 +25,6 @@ class TestMessageBus:
         message_bus.handlers[DummyEvent] = [dummy_handler_1, dummy_handler_2]
 
         dummy_event: DummyEvent = DummyEvent()
-        message_bus.handle([dummy_event])
+        message_bus.publish([dummy_event])
         dummy_handler_1.handle.assert_called_once_with(dummy_event)
         dummy_handler_2.handle.assert_called_once_with(dummy_event)

@@ -1,5 +1,5 @@
 from core._shared.application.handler import Handler
-from core._shared.events.event_dispatcher import EventDispatcher
+from core._shared.application.ports.event_dispatcher import EventDispatcher
 from core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
