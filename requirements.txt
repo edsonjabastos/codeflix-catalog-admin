@@ -10,3 +10,4 @@ cryptography
 python-dotenv
 requests
 import-linter
+pytest-cov
