@@ -118,8 +118,18 @@ def video_with_trailer() -> Video:
 
 
 @pytest.fixture
-def use_case(video_repository: MagicMock) -> ProcessAudioVideoMedia:
-    return ProcessAudioVideoMedia(video_repository=video_repository)
+def event_publisher() -> MagicMock:
+    return MagicMock()
+
+
+@pytest.fixture
+def use_case(
+    video_repository: MagicMock, event_publisher: MagicMock
+) -> ProcessAudioVideoMedia:
+    return ProcessAudioVideoMedia(
+        video_repository=video_repository,
+        event_publisher=event_publisher,
+    )
 
 
 class TestProcessAudioVideoMedia:

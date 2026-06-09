@@ -62,7 +62,7 @@ class TestListCastMember:
         ]
         assert output.meta == ListCastMember.OutputMeta(
             current_page=1,
-            per_page=2,
+            per_page=10,
             total=2,
         )
         mock_castmember_repository.list.assert_called_once()
@@ -81,7 +81,7 @@ class TestListCastMember:
         assert output.data == []
         assert output.meta == ListCastMember.OutputMeta(
             current_page=1,
-            per_page=2,
+            per_page=10,
             total=0,
         )
         mock_castmember_repository.list.assert_called_once()

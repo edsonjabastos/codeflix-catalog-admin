@@ -2,8 +2,8 @@ from uuid import uuid4
 import pytest
 from core.genre.domain.genre import Genre
 from django_project.category_app.models import Category
-from django_project.category_app.repository import DjangoORMCategoryRepository
-from django_project.genre_app.repository import DjangoORMGenreRepository
+from django_project.adapters.persistence.django.category_repository import DjangoORMCategoryRepository
+from django_project.adapters.persistence.django.genre_repository import DjangoORMGenreRepository
 from django_project.genre_app.models import Genre as GenreORM
 
 

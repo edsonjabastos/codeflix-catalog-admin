@@ -13,7 +13,7 @@ class TestListCategory:
         use_case = ListCategory(repository=mock_repository)
         request = ListCategory.Input()
         response = use_case.execute(request)
-        default_meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=0)
+        default_meta = ListCategory.OutputMeta(current_page=1, per_page=10, total=0)
 
         assert response == ListCategory.ListOutput(data=[], meta=default_meta)
 
@@ -31,7 +31,7 @@ class TestListCategory:
         request = ListCategory.Input()
         response = use_case.execute(request)
         total = len(mock_repository.list())
-        meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=total)
+        meta = ListCategory.OutputMeta(current_page=1, per_page=10, total=total)
 
         assert response == ListCategory.ListOutput(
             data=[

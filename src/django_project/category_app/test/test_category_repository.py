@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django_project.category_app.models import Category as CategoryORM
 from django_project.category_app.models import Category
-from django_project.category_app.repository import DjangoORMCategoryRepository
+from django_project.adapters.persistence.django.category_repository import DjangoORMCategoryRepository
 
 import pytest
 

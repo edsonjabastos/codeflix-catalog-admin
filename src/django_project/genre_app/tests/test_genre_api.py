@@ -14,9 +14,9 @@ import pytest
 from rest_framework.test import APIClient
 from core.category.domain.category import Category
 from core.genre.domain.genre import Genre
-from django_project.category_app.repository import DjangoORMCategoryRepository
+from django_project.adapters.persistence.django.category_repository import DjangoORMCategoryRepository
 from django_project.genre_app.models import Genre as GenreORM
-from django_project.genre_app.repository import DjangoORMGenreRepository
+from django_project.adapters.persistence.django.genre_repository import DjangoORMGenreRepository
 
 
 @pytest.fixture

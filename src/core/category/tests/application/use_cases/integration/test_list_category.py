@@ -1,6 +1,6 @@
 from core.category.application.use_cases.list_category import ListCategory
 from core.category.domain.category import Category
-from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
+from django_project.adapters.persistence.in_memory.category_repository import InMemoryCategoryRepository
 
 
 class TestListCategory:
@@ -11,7 +11,7 @@ class TestListCategory:
         use_case: ListCategory = ListCategory(repository=repository)
         request: ListCategory.Input = ListCategory.Input()
         response: ListCategory.ListOutput = use_case.execute(request)
-        default_meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=0)
+        default_meta = ListCategory.OutputMeta(current_page=1, per_page=10, total=0)
 
         assert response == ListCategory.ListOutput(data=[], meta=default_meta)
 
@@ -30,7 +30,7 @@ class TestListCategory:
         request: ListCategory.Input = ListCategory.Input()
         response: ListCategory.ListOutput = use_case.execute(request)
         total = len(repository.categories)
-        default_meta = ListCategory.OutputMeta(current_page=1, per_page=2, total=total)
+        default_meta = ListCategory.OutputMeta(current_page=1, per_page=10, total=total)
 
         assert response == ListCategory.ListOutput(
             data=[

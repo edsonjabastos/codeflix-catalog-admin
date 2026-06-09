@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import MagicMock
 from uuid import uuid4, UUID
 import pytest
 from core.video.application.exceptions import VideoNotFound, AudioVideoMediaNotFound
@@ -12,7 +13,7 @@ from core.video.domain.value_objects import (
     AudioVideoMedia,
 )
 from core.video.domain.video import Video
-from core.video.infra.in_memory_video_repository import InMemoryVideoRepository
+from django_project.adapters.persistence.in_memory.video_repository import InMemoryVideoRepository
 
 
 @pytest.fixture
@@ -90,8 +91,18 @@ def video_with_trailer() -> Video:
 
 
 @pytest.fixture
-def use_case(video_repository: InMemoryVideoRepository) -> ProcessAudioVideoMedia:
-    return ProcessAudioVideoMedia(video_repository=video_repository)
+def event_publisher() -> MagicMock:
+    return MagicMock()
+
+
+@pytest.fixture
+def use_case(
+    video_repository: InMemoryVideoRepository, event_publisher: MagicMock
+) -> ProcessAudioVideoMedia:
+    return ProcessAudioVideoMedia(
+        video_repository=video_repository,
+        event_publisher=event_publisher,
+    )
 
 
 class TestProcessAudioVideoMediaIntegration:
