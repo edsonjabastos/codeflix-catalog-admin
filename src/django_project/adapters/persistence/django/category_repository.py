@@ -67,6 +67,19 @@ class DjangoORMCategoryRepository(CategoryRepository):
             )
         return None
 
+    def exists_by_ids(self, ids: set[UUID]) -> bool:
+        if not ids:
+            return True
+        return self.category_orm.objects.filter(id__in=ids).count() == len(ids)
+
+    def find_missing_ids(self, ids: set[UUID]) -> set[UUID]:
+        if not ids:
+            return set()
+        existing = set(
+            self.category_orm.objects.filter(id__in=ids).values_list("id", flat=True)
+        )
+        return ids - existing
+
 
 class CategoryModelMapper:
 

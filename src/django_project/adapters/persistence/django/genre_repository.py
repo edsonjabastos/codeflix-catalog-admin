@@ -69,6 +69,19 @@ class DjangoORMGenreRepository(GenreRepository):
 
         return None
 
+    def exists_by_ids(self, ids: set[UUID]) -> bool:
+        if not ids:
+            return True
+        return self.genre_orm.objects.filter(id__in=ids).count() == len(ids)
+
+    def find_missing_ids(self, ids: set[UUID]) -> set[UUID]:
+        if not ids:
+            return set()
+        existing = set(
+            self.genre_orm.objects.filter(id__in=ids).values_list("id", flat=True)
+        )
+        return ids - existing
+
 
 class GenreModelMapper:
     @staticmethod
