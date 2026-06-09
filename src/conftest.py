@@ -1,46 +1,73 @@
 """
 Global pytest configuration and fixtures for all tests.
 
-This module provides:
-- mock_jwt_auth: Auto-used fixture that mocks JWT authentication for unit/integration tests
-- authenticated_client: APIClient with real Keycloak token for E2E tests
-- keycloak_token: Session-scoped fixture for cached token acquisition
+Provides JWT mocking for fast tests, marker auto-registration, and shared clients.
+E2E-specific Keycloak fixtures live in tests_e2e/conftest.py.
 """
 
-import os
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from rest_framework.test import APIClient
 
-# Check if we're running E2E tests (need real Keycloak or/and RabbitMQ consumer)
-E2E_TEST_MARKERS = ["e2e", "integration"]
+pytest_plugins = [
+    "testing.fixtures.categories",
+    "testing.fixtures.genres",
+    "testing.fixtures.castmembers",
+    "testing.fixtures.videos",
+]
+
+TEST_BEARER_TOKEN = "Bearer test-token"
 
 
 def is_e2e_test(item) -> bool:
-    """Check if a test item is marked as E2E or integration test."""
-    for marker in item.iter_markers():
-        if marker.name in E2E_TEST_MARKERS:
-            return True
-    # Also check if test is in tests_e2e directory
-    if "tests_e2e" in str(item.fspath):
+    """Tests that must use real Keycloak instead of the JWT mock."""
+    if item.get_closest_marker("e2e"):
         return True
-    return False
+    return "tests_e2e" in str(item.fspath)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Assign markers from directory layout so tests are selectable by layer."""
+    for item in items:
+        path = str(item.fspath).replace("\\", "/")
+
+        if "tests_e2e" in path:
+            item.add_marker(pytest.mark.e2e)
+            continue
+
+        if "_app/tests/" in path or "_app/test/" in path:
+            item.add_marker(pytest.mark.api)
+            continue
+
+        if "/adapters/" in path and "/tests/" in path:
+            if "integration" in path or "test_video_conversion_integration" in path:
+                item.add_marker(pytest.mark.integration)
+            else:
+                item.add_marker(pytest.mark.unit)
+            continue
+
+        if "/integration/" in path:
+            item.add_marker(pytest.mark.integration)
+            continue
+
+        if any(segment in path for segment in ("/unit/", "/domain/", "/infra/")):
+            item.add_marker(pytest.mark.unit)
+            continue
+
+        if "/core/" in path and "/tests/" in path:
+            item.add_marker(pytest.mark.unit)
 
 
 @pytest.fixture(autouse=True)
 def mock_jwt_auth(request):
     """
-    Automatically mock JWT authentication for all tests EXCEPT E2E tests.
-    
-    This fixture patches the composition root auth service to always return
-    authenticated=True and has_role=True, allowing unit/integration tests to run
-    without Keycloak dependency.
-    
-    E2E tests (in tests_e2e/ directory or marked with @pytest.mark.e2e)
-    will skip this mock and use real authentication.
+    Mock JWT authentication for fast tests.
+
+    Treats any non-empty Authorization header as an authenticated admin user.
+    E2E and consumer tests skip this fixture and use real Keycloak.
     """
-    # Skip mocking for E2E tests - they need real Keycloak
-    if is_e2e_test(request.node):
+    if is_e2e_test(request.node) or request.node.get_closest_marker("real_auth"):
         yield None
         return
 
@@ -54,48 +81,15 @@ def mock_jwt_auth(request):
         yield mock_get_container
 
 
-@pytest.fixture(scope="session")
-def keycloak_token() -> str:
-    """
-    Session-scoped fixture that acquires a token from Keycloak once per test session.
-    
-    Uses OAuth2 Resource Owner Password Credentials (direct grant) flow.
-    Requires Keycloak to be running and configured with the realm/user from .env
-    
-    Returns:
-        str: The access token from Keycloak
-    """
-    from django_project.adapters.auth.keycloak_token_helper import get_keycloak_token
-    
-    try:
-        token = get_keycloak_token()
-        return token
-    except Exception as e:
-        pytest.skip(f"Keycloak not available: {e}")
-
-
 @pytest.fixture
-def authenticated_client(keycloak_token: str) -> APIClient:
-    """
-    Provides an APIClient pre-configured with a valid JWT token from Keycloak.
-    
-    Use this fixture for E2E tests that need to make authenticated API calls.
-    
-    Example:
-        def test_create_category(authenticated_client):
-            response = authenticated_client.post("/api/categories/", data={...})
-            assert response.status_code == 201
-    """
+def api_client() -> APIClient:
+    """APIClient with a test bearer token (works with mock_jwt_auth)."""
     client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION=f"Bearer {keycloak_token}")
+    client.credentials(HTTP_AUTHORIZATION=TEST_BEARER_TOKEN)
     return client
 
 
 @pytest.fixture
 def unauthenticated_client() -> APIClient:
-    """
-    Provides an APIClient without authentication.
-    
-    Use this fixture to test that endpoints properly reject unauthenticated requests.
-    """
+    """APIClient without authentication headers."""
     return APIClient()
