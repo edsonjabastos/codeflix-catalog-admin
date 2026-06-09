@@ -4,16 +4,13 @@ from typing import Set
 from uuid import UUID
 
 from core._shared.domain.notification import Notification
-from core.video.domain.video_repository import VideoRepository
+from core.castmember.domain.castmember_repository import CastMemberRepository
 from core.category.domain.category_repository import CategoryRepository
 from core.genre.domain.genre_repository import GenreRepository
-from core.castmember.domain.castmember_repository import CastMemberRepository
-from core.video.application.exceptions import (
-    InvalidVideo,
-    RelatedEntitiesNotFound,
-)
-from core.video.domain.video import Video
+from core.video.application.exceptions import InvalidVideo, RelatedEntitiesNotFound
 from core.video.domain.value_objects import Rating
+from core.video.domain.video import Video
+from core.video.domain.video_repository import VideoRepository
 
 
 class CreateVideoWithoutMedia:
@@ -76,12 +73,10 @@ class CreateVideoWithoutMedia:
     def validate_categories(self, input: Input, notification: Notification) -> None:
         if not input.categories:
             return
-        category_ids: Set = {
-            category.id for category in self.category_repository.list()
-        }
-        categories_input_set = set(input.categories)
-        if not categories_input_set.issubset(category_ids):
-            missing_categories = categories_input_set - category_ids
+        if not self.category_repository.exists_by_ids(input.categories):
+            missing_categories = self.category_repository.find_missing_ids(
+                input.categories
+            )
             notification.add_error(
                 f"Categories with provided IDs not found: {', '.join(str(missing_category_id) for missing_category_id in missing_categories)}"
             )
@@ -89,10 +84,8 @@ class CreateVideoWithoutMedia:
     def validate_genres(self, input: Input, notification: Notification) -> None:
         if not input.genres:
             return
-        genre_ids: Set = {genre.id for genre in self.genre_repository.list()}
-        genres_input_set = set(input.genres)
-        if not genres_input_set.issubset(genre_ids):
-            missing_genres = genres_input_set - genre_ids
+        if not self.genre_repository.exists_by_ids(input.genres):
+            missing_genres = self.genre_repository.find_missing_ids(input.genres)
             notification.add_error(
                 f"Genres with provided IDs not found: {', '.join(str(missing_genre_id) for missing_genre_id in missing_genres)}"
             )
@@ -100,12 +93,10 @@ class CreateVideoWithoutMedia:
     def validate_cast_members(self, input: Input, notification: Notification) -> None:
         if not input.cast_members:
             return
-        cast_member_ids: Set = {
-            cast_member.id for cast_member in self.cast_member_repository.list()
-        }
-        cast_members_input_set = set(input.cast_members)
-        if not cast_members_input_set.issubset(cast_member_ids):
-            missing_cast_members = cast_members_input_set - cast_member_ids
+        if not self.cast_member_repository.exists_by_ids(input.cast_members):
+            missing_cast_members = self.cast_member_repository.find_missing_ids(
+                input.cast_members
+            )
             notification.add_error(
                 f"Cast members with provided IDs not found: {', '.join(str(missing_cast_member_id) for missing_cast_member_id in missing_cast_members)}"
             )

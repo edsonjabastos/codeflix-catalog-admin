@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Set
 from uuid import UUID
 
-from core.category.domain.category import Category
 from core.category.domain.category_repository import CategoryRepository
 from core.genre.application.exceptions import (
     GenreNotFound,
@@ -51,12 +50,12 @@ class UpdateGenre:
         if input.is_active is False:
             genre_to_update.deactivate()
 
-        registered_category_ids: Set[UUID] = {
-            category.id for category in self.category_repository.list()
-        }
-
-        if not input.categories.issubset(registered_category_ids):
-            missing_categories = input.categories - registered_category_ids
+        if input.categories and not self.category_repository.exists_by_ids(
+            input.categories
+        ):
+            missing_categories = self.category_repository.find_missing_ids(
+                input.categories
+            )
             raise RelatedCategoriesNotFound(
                 f"Categories with provided IDs not found: {', '.join(str(missing_category_id) for missing_category_id in missing_categories)}"
             )

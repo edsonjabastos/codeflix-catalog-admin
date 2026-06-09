@@ -23,3 +23,11 @@ class CategoryRepository(ABC):
     @abstractmethod
     def list(self) -> list[Category]:
         raise NotImplementedError
+
+    @abstractmethod
+    def exists_by_ids(self, ids: set[UUID]) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def find_missing_ids(self, ids: set[UUID]) -> set[UUID]:
+        raise NotImplementedError

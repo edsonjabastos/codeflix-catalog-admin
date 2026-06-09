@@ -1,6 +1,6 @@
-from typing import TypeVar, Generic, List, Type
 from dataclasses import dataclass, field, asdict
-from config import DEFAULT_PAGE_SIZE
+from typing import Generic, List, Type, TypeVar
+
 T = TypeVar("T")
 R = TypeVar("R")
 
@@ -14,7 +14,7 @@ class ListUseCase(Generic[T, R]):
     class Input:
         order_by: str = "name"
         current_page: int = 1
-        page_size: int = DEFAULT_PAGE_SIZE
+        page_size: int = 10
 
     @dataclass
     class OutputMeta:
