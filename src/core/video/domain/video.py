@@ -121,8 +121,8 @@ class Video(Entity):
     def update_trailer(self, trailer: AudioVideoMedia) -> None:
         self.trailer = trailer
         self.validate()
-        self.dispatch(
-            event=AudioVideoMediaUpdated(
+        self.record_event(
+            AudioVideoMediaUpdated(
                 aggregate_id=self.id,
                 file_path=trailer.raw_location,
                 media_type=MediaType.TRAILER,
@@ -132,8 +132,8 @@ class Video(Entity):
     def update_video(self, video: AudioVideoMedia) -> None:
         self.video = video
         self.validate()
-        self.dispatch(
-            event=AudioVideoMediaUpdated(
+        self.record_event(
+            AudioVideoMediaUpdated(
                 aggregate_id=self.id,
                 file_path=video.raw_location,
                 media_type=MediaType.VIDEO,

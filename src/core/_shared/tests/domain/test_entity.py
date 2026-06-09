@@ -1,7 +1,5 @@
-from unittest.mock import create_autospec
 from core._shared.events.event import Event
 from core._shared.domain.entity import Entity
-from core._shared.events.abstract_message_bus import AbstractMessageBus
 
 
 class DummyEvent(Event): ...
@@ -10,11 +8,18 @@ class DummyEvent(Event): ...
 class DummyEntity(Entity): ...
 
 
-class TestDispactch:
+class TestRecordEvent:
 
-    def test_dispatch(self):
-        mock_message_bus: AbstractMessageBus = create_autospec(AbstractMessageBus)
-        entity: DummyEntity = DummyEntity(message_bus=mock_message_bus)
-        entity.dispatch(DummyEvent())
-        assert entity.events == [DummyEvent()]
-        mock_message_bus.handle.assert_called_once_with(entity.events)
+    def test_record_event(self):
+        entity: DummyEntity = DummyEntity()
+        event = DummyEvent()
+        entity.record_event(event)
+        assert entity.events == [event]
+
+    def test_pull_events(self):
+        entity: DummyEntity = DummyEntity()
+        event = DummyEvent()
+        entity.record_event(event)
+        pulled = entity.pull_events()
+        assert pulled == [event]
+        assert entity.events == []
