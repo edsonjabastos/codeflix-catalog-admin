@@ -1,8 +1,9 @@
 import os
+
 import dotenv
 import jwt
 
-from core._shared.infrastructure.auth.auth_interface import AuthService
+from core._shared.application.ports.auth_service import AuthService
 
 dotenv.load_dotenv()
 
@@ -10,7 +11,9 @@ dotenv.load_dotenv()
 class JwtAuthService(AuthService):
     def __init__(self, token: str = "") -> None:
         raw_public_key = os.getenv("AUTH_PUBLIC_KEY", "")
-        self.public_key: str = f"-----BEGIN PUBLIC KEY-----\n{raw_public_key}\n-----END PUBLIC KEY-----"
+        self.public_key: str = (
+            f"-----BEGIN PUBLIC KEY-----\n{raw_public_key}\n-----END PUBLIC KEY-----"
+        )
         self.token: str = token.replace("Bearer ", "", 1)
 
     def _decode_token(self) -> dict:
