@@ -128,7 +128,7 @@ def get_token_with_retry(max_retries: int = 30, retry_delay: float = 2.0, **kwar
 
 
 if __name__ == "__main__":
-    # CLI usage: python -m core._shared.infrastructure.auth.keycloak_token_helper
+    # CLI usage: python -m django_project.adapters.auth.keycloak_token_helper
     try:
         token = get_keycloak_token()
         print(token)
