@@ -3,7 +3,7 @@ from core.genre.application.use_cases.delete_genre import (
     DeleteGenre,
 )
 from core.genre.domain.genre import Genre
-from django_project.adapters.persistence.in_memory.genre_repository import InMemoryGenreRepository
+from core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
 
 
 class TestDeleteGenre:

@@ -6,7 +6,7 @@ from core.category.application.use_cases.get_category import (
     GetCategoryRequest,
 )
 from core.category.domain.category import Category
-from django_project.adapters.persistence.in_memory.category_repository import (
+from core.category.infra.in_memory_category_repository import (
     CategoryRepository,
 )
 

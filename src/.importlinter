@@ -15,8 +15,3 @@ forbidden_modules =
     django
     pika
     config
-ignore_imports =
-    core.castmember.tests.use_cases.integration.test_create_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
-    core.castmember.tests.use_cases.integration.test_delete_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
-    core.castmember.tests.use_cases.integration.test_list_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
-    core.castmember.tests.use_cases.integration.test_update_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
