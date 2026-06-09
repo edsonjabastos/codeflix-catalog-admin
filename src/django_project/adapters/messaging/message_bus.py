@@ -1,19 +1,20 @@
-from core._shared.events.abstract_message_bus import AbstractMessageBus
-from core._shared.events.event import Event
+from typing import Type
+
 from core._shared.application.handler import Handler
-from core._shared.application.use_cases.list_use_case import Type
+from core._shared.application.ports.event_publisher import EventPublisher
+from core._shared.events.event import Event
 from core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
-from core._shared.infrastructure.events.rabbitmq_dispatcher import (
-    RabbitMQEventDispatcher,
-)
-from core.video.application.events.handlers import (
+from django_project.adapters.messaging.publish_handler import (
     PublishAudioVideoMediaUpdatedHandler,
 )
+from django_project.adapters.messaging.rabbitmq_dispatcher import (
+    RabbitMQEventDispatcher,
+)
 
 
-class MessageBus(AbstractMessageBus):
+class MessageBus(EventPublisher):
     def __init__(self) -> None:
         self.handlers: dict[Type[Event], list[Handler]] = {
             AudioVideoMediaUpdatedIntegrationEvent: [
@@ -23,7 +24,7 @@ class MessageBus(AbstractMessageBus):
             ],
         }
 
-    def handle(self, events: list[Event]) -> None:
+    def publish(self, events: list[Event]) -> None:
         for event in events:
             handlers: list[Handler] = self.handlers.get(type(event), [])
             for handler in handlers:
