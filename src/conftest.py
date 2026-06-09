@@ -32,9 +32,9 @@ def mock_jwt_auth(request):
     """
     Automatically mock JWT authentication for all tests EXCEPT E2E tests.
     
-    This fixture patches JwtAuthService to always return authenticated=True
-    and has_role=True, allowing unit/integration tests to run without
-    Keycloak dependency.
+    This fixture patches the composition root auth service to always return
+    authenticated=True and has_role=True, allowing unit/integration tests to run
+    without Keycloak dependency.
     
     E2E tests (in tests_e2e/ directory or marked with @pytest.mark.e2e)
     will skip this mock and use real authentication.
@@ -44,12 +44,14 @@ def mock_jwt_auth(request):
         yield None
         return
 
-    with patch("django_project.permissions.JwtAuthService") as mock_jwt:
-        mock_instance = MagicMock()
-        mock_instance.is_authenticated.return_value = True
-        mock_instance.has_role.return_value = True
-        mock_jwt.return_value = mock_instance
-        yield mock_jwt
+    with patch("django_project.permissions.get_container") as mock_get_container:
+        mock_container = MagicMock()
+        mock_auth = MagicMock()
+        mock_auth.is_authenticated.return_value = True
+        mock_auth.has_role.return_value = True
+        mock_container.auth_service.return_value = mock_auth
+        mock_get_container.return_value = mock_container
+        yield mock_get_container
 
 
 @pytest.fixture(scope="session")
@@ -63,7 +65,7 @@ def keycloak_token() -> str:
     Returns:
         str: The access token from Keycloak
     """
-    from core._shared.infrastructure.auth.keycloak_token_helper import get_keycloak_token
+    from django_project.adapters.auth.keycloak_token_helper import get_keycloak_token
     
     try:
         token = get_keycloak_token()

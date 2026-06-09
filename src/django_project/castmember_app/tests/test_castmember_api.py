@@ -14,7 +14,7 @@ import pytest
 from rest_framework.test import APIClient
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.value_objects import CastMemberType
-from django_project.castmember_app.repository import DjangoORMCastMemberRepository
+from django_project.adapters.persistence.django.castmember_repository import DjangoORMCastMemberRepository
 from django_project.castmember_app.models import CastMember as CastMemberORM
 
 

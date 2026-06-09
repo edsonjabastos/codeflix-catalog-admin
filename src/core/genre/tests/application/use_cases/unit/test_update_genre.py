@@ -58,6 +58,7 @@ def mock_category_repository_with_categories(
 ) -> CategoryRepository:
     repository = create_autospec(CategoryRepository)
     repository.list.return_value = [movie_category, documentary_category]
+    repository.exists_by_ids.return_value = True
     return repository
 
 
@@ -76,6 +77,8 @@ def update_genre_use_case(
 def mock_empty_category_repository() -> CategoryRepository:
     repository = create_autospec(CategoryRepository)
     repository.list.return_value = []
+    repository.exists_by_ids.return_value = False
+    repository.find_missing_ids.side_effect = lambda ids: ids
     return repository
 
 
@@ -223,11 +226,16 @@ class TestUpdateGenre:
         update_genre_use_case: UpdateGenre,
     ) -> None:
         mock_genre_repository.get_by_id.return_value = sci_fi_genre
+        invalid_category_id = uuid4()
+        update_genre_use_case.category_repository.exists_by_ids.return_value = False
+        update_genre_use_case.category_repository.find_missing_ids.return_value = {
+            invalid_category_id
+        }
         update_genre_input: UpdateGenre.Input = UpdateGenre.Input(
             id=sci_fi_genre.id,
             name="Sci-fi",
             is_active=True,
-            categories={uuid4()},  # non-existent category
+            categories={invalid_category_id},
         )
 
         with pytest.raises(

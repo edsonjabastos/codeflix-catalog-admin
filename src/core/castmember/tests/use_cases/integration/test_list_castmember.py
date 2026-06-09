@@ -3,7 +3,7 @@ from core.castmember.application.use_cases.list_castmember import ListCastMember
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.castmember_repository import CastMemberRepository
 from core.castmember.domain.value_objects import CastMemberType
-from core.castmember.infra.in_memory_castmember_repository import (
+from django_project.adapters.persistence.in_memory.castmember_repository import (
     InMemoryCastMemberRepository,
 )
 
@@ -69,7 +69,7 @@ class TestListCastMember:
 
         assert output.meta == ListCastMember.OutputMeta(
             current_page=1,
-            per_page=2,
+            per_page=10,
             total=2,
         )
 
@@ -86,6 +86,6 @@ class TestListCastMember:
 
         assert output.meta == ListCastMember.OutputMeta(
             current_page=1,
-            per_page=2,
+            per_page=10,
             total=0,
         )

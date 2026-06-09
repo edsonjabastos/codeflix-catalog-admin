@@ -35,6 +35,7 @@ def mock_category_repository_with_categories(
 ) -> CategoryRepository:
     repository = create_autospec(CategoryRepository)
     repository.list.return_value = [movie_category, documentary_category]
+    repository.exists_by_ids.return_value = True
     return repository
 
 
@@ -42,6 +43,8 @@ def mock_category_repository_with_categories(
 def mock_empty_category_repository() -> CategoryRepository:
     repository = create_autospec(CategoryRepository)
     repository.list.return_value = []
+    repository.exists_by_ids.return_value = False
+    repository.find_missing_ids.side_effect = lambda ids: ids
     return repository
 
 

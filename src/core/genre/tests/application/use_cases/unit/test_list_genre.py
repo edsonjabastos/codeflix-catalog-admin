@@ -20,7 +20,7 @@ class TestListGenre:
         response: ListGenre.Output = use_case.execute(request)
 
         assert response == ListGenre.ListOutput(
-            data=[], meta=ListGenre.OutputMeta(current_page=1, per_page=2, total=0)
+            data=[], meta=ListGenre.OutputMeta(current_page=1, per_page=10, total=0)
         )
 
     def test_when_genres_in_repository_then_return_list_of_genres(self) -> None:
@@ -54,12 +54,6 @@ class TestListGenre:
 
         assert response == ListGenre.ListOutput(
             data=[
-                # ListGenre.Output(
-                #     id=sports_genre.id,
-                #     name=sports_genre.name,
-                #     is_active=sports_genre.is_active,
-                #     categories={documentary_category.id},
-                # ),
                 ListGenre.Output(
                     id=romance_genre.id,
                     name=romance_genre.name,
@@ -72,6 +66,12 @@ class TestListGenre:
                     is_active=special_genre.is_active,
                     categories=set(),
                 ),
+                ListGenre.Output(
+                    id=sports_genre.id,
+                    name=sports_genre.name,
+                    is_active=sports_genre.is_active,
+                    categories={documentary_category.id},
+                ),
             ],
-            meta=ListGenre.OutputMeta(current_page=1, per_page=2, total=3),
+            meta=ListGenre.OutputMeta(current_page=1, per_page=10, total=3),
         )

@@ -6,7 +6,7 @@ from core.category.application.use_cases.update_category import (
     UpdateCategoryRequest,
 )
 from core.category.domain.category import Category
-from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
+from django_project.adapters.persistence.in_memory.category_repository import InMemoryCategoryRepository
 
 
 class TestUpdateCategory:

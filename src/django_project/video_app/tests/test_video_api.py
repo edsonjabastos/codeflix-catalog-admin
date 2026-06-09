@@ -9,10 +9,10 @@ from core.category.domain.category import Category
 from core.genre.domain.genre import Genre
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.value_objects import CastMemberType
-from django_project.category_app.repository import DjangoORMCategoryRepository
-from django_project.genre_app.repository import DjangoORMGenreRepository
-from django_project.castmember_app.repository import DjangoORMCastMemberRepository
-from django_project.video_app.repository import DjangoORMVideoRepository
+from django_project.adapters.persistence.django.category_repository import DjangoORMCategoryRepository
+from django_project.adapters.persistence.django.genre_repository import DjangoORMGenreRepository
+from django_project.adapters.persistence.django.castmember_repository import DjangoORMCastMemberRepository
+from django_project.adapters.persistence.django.video_repository import DjangoORMVideoRepository
 
 from rest_framework.status import (
     HTTP_200_OK,

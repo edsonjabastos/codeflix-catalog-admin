@@ -7,7 +7,7 @@ These tests require Keycloak to be running with the configured realm/user.
 import pytest
 from rest_framework.test import APIClient
 
-from core._shared.infrastructure.auth.keycloak_token_helper import (
+from django_project.adapters.auth.keycloak_token_helper import (
     get_keycloak_token,
     get_token_with_retry,
     KeycloakTokenError,

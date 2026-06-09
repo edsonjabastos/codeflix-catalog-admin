@@ -92,6 +92,9 @@ class TestCreateVideoWithoutMedia:
         valid_cast_members_ids: set[UUID],
     ) -> None:
         # Mock the repositories to return valid entities
+        category_repository.exists_by_ids.return_value = True
+        genre_repository.exists_by_ids.return_value = True
+        cast_member_repository.exists_by_ids.return_value = True
         category_repository.list.return_value = [
             MagicMock(id=category_id) for category_id in valid_categories_ids
         ]
@@ -121,6 +124,10 @@ class TestCreateVideoWithoutMedia:
         valid_cast_members_ids: set[UUID],
     ) -> None:
         # Mock repositories with missing categories
+        category_repository.exists_by_ids.return_value = False
+        category_repository.find_missing_ids.return_value = valid_input.categories
+        genre_repository.exists_by_ids.return_value = True
+        cast_member_repository.exists_by_ids.return_value = True
         category_repository.list.return_value = []
         genre_repository.list.return_value = [
             MagicMock(id=genre_id) for genre_id in valid_genres_ids
@@ -146,6 +153,10 @@ class TestCreateVideoWithoutMedia:
         valid_cast_members_ids: set[UUID],
     ) -> None:
         # Mock repositories with missing genres
+        category_repository.exists_by_ids.return_value = True
+        genre_repository.exists_by_ids.return_value = False
+        genre_repository.find_missing_ids.return_value = valid_input.genres
+        cast_member_repository.exists_by_ids.return_value = True
         category_repository.list.return_value = [
             MagicMock(id=category_id) for category_id in valid_categories_ids
         ]
@@ -171,6 +182,10 @@ class TestCreateVideoWithoutMedia:
         valid_genres_ids: set[UUID],
     ) -> None:
         # Mock repositories with missing cast members
+        category_repository.exists_by_ids.return_value = True
+        genre_repository.exists_by_ids.return_value = True
+        cast_member_repository.exists_by_ids.return_value = False
+        cast_member_repository.find_missing_ids.return_value = valid_input.cast_members
         category_repository.list.return_value = [
             MagicMock(id=category_id) for category_id in valid_categories_ids
         ]
@@ -197,6 +212,9 @@ class TestCreateVideoWithoutMedia:
         valid_cast_members_ids: set[UUID],
     ) -> None:
         # Mock the repositories to return valid entities
+        category_repository.exists_by_ids.return_value = True
+        genre_repository.exists_by_ids.return_value = True
+        cast_member_repository.exists_by_ids.return_value = True
         category_repository.list.return_value = [
             MagicMock(id=category_id) for category_id in valid_categories_ids
         ]
@@ -232,6 +250,12 @@ class TestCreateVideoWithoutMedia:
         cast_member_repository: MagicMock,
     ) -> None:
         # Mock all repositories to return empty lists
+        category_repository.exists_by_ids.return_value = False
+        genre_repository.exists_by_ids.return_value = False
+        cast_member_repository.exists_by_ids.return_value = False
+        category_repository.find_missing_ids.return_value = valid_input.categories
+        genre_repository.find_missing_ids.return_value = valid_input.genres
+        cast_member_repository.find_missing_ids.return_value = valid_input.cast_members
         category_repository.list.return_value = []
         genre_repository.list.return_value = []
         cast_member_repository.list.return_value = []
