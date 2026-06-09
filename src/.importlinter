@@ -1,0 +1,22 @@
+[importlinter]
+root_packages =
+    core
+    django_project
+include_external_packages = True
+unmatched_ignore_imports_alerting = none
+
+[importlinter:contract:core-isolation]
+name = Core must not depend on outer layers
+type = forbidden
+source_modules =
+    core
+forbidden_modules =
+    django_project
+    django
+    pika
+    config
+ignore_imports =
+    core.castmember.tests.use_cases.integration.test_create_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
+    core.castmember.tests.use_cases.integration.test_delete_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
+    core.castmember.tests.use_cases.integration.test_list_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
+    core.castmember.tests.use_cases.integration.test_update_castmember -> django_project.adapters.persistence.in_memory.castmember_repository
