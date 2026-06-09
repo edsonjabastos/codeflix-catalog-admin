@@ -1,78 +1,27 @@
 import pytest
-from typing import Any, Set
-from uuid import UUID, uuid4
 from decimal import Decimal
+from typing import Any
+from uuid import uuid4
+
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.test import APIClient
-from core.video.domain.value_objects import Rating
-from core.video.domain.video import Video
+
+from core.castmember.domain.castmember import CastMember
 from core.category.domain.category import Category
 from core.genre.domain.genre import Genre
-from core.castmember.domain.castmember import CastMember
-from core.castmember.domain.value_objects import CastMemberType
-from django_project.adapters.persistence.django.category_repository import DjangoORMCategoryRepository
-from django_project.adapters.persistence.django.genre_repository import DjangoORMGenreRepository
-from django_project.adapters.persistence.django.castmember_repository import DjangoORMCastMemberRepository
-from django_project.adapters.persistence.django.video_repository import DjangoORMVideoRepository
-
-from rest_framework.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
+from core.video.domain.value_objects import Rating
+from django_project.adapters.persistence.django.castmember_repository import (
+    DjangoORMCastMemberRepository,
 )
-
-
-@pytest.fixture
-def category_movie() -> Category:
-    return Category(name="Movie", description="Movie category", is_active=True)
-
-
-@pytest.fixture
-def category_documentary() -> Category:
-    return Category(
-        name="Documentary", description="Documentary category", is_active=True
-    )
-
-
-@pytest.fixture
-def genre_action() -> Genre:
-    return Genre(name="Action", is_active=True, categories=set())
-
-
-@pytest.fixture
-def genre_drama() -> Genre:
-    return Genre(name="Drama", is_active=True, categories=set())
-
-
-@pytest.fixture
-def cast_member_actor() -> CastMember:
-    return CastMember(name="Actor Name", type=CastMemberType.ACTOR)
-
-
-@pytest.fixture
-def cast_member_director() -> CastMember:
-    return CastMember(name="Director Name", type=CastMemberType.DIRECTOR)
-
-
-@pytest.fixture
-def category_repository() -> DjangoORMCategoryRepository:
-    return DjangoORMCategoryRepository()
-
-
-@pytest.fixture
-def genre_repository() -> DjangoORMGenreRepository:
-    return DjangoORMGenreRepository()
-
-
-@pytest.fixture
-def cast_member_repository() -> DjangoORMCastMemberRepository:
-    return DjangoORMCastMemberRepository()
-
-
-@pytest.fixture
-def video_repository() -> DjangoORMVideoRepository:
-    return DjangoORMVideoRepository()
+from django_project.adapters.persistence.django.category_repository import (
+    DjangoORMCategoryRepository,
+)
+from django_project.adapters.persistence.django.genre_repository import (
+    DjangoORMGenreRepository,
+)
+from django_project.adapters.persistence.django.video_repository import (
+    DjangoORMVideoRepository,
+)
 
 
 @pytest.mark.django_db
@@ -80,6 +29,7 @@ class TestCreateVideoAPI:
 
     def test_create_video_with_valid_data(
         self,
+        api_client: APIClient,
         category_movie: Category,
         genre_action: Genre,
         cast_member_actor: CastMember,
@@ -88,12 +38,10 @@ class TestCreateVideoAPI:
         cast_member_repository: DjangoORMCastMemberRepository,
         video_repository: DjangoORMVideoRepository,
     ) -> None:
-        # Save related entities first
         category_repository.save(category_movie)
         genre_repository.save(genre_action)
         cast_member_repository.save(cast_member_actor)
 
-        url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
             "description": "A test video description",
@@ -106,7 +54,7 @@ class TestCreateVideoAPI:
             "cast_members": [str(cast_member_actor.id)],
         }
 
-        response: Any = APIClient().post(url, data=data)
+        response: Any = api_client.post("/api/videos/", data=data)
 
         assert response.status_code == HTTP_201_CREATED
         assert response.data["id"]
@@ -124,32 +72,28 @@ class TestCreateVideoAPI:
         assert genre_action.id in created_video.genres
         assert cast_member_actor.id in created_video.cast_members
 
-    def test_create_video_with_invalid_data(self) -> None:
-        url: str = "/api/videos/"
+    def test_create_video_with_invalid_data(self, api_client: APIClient) -> None:
         data: dict[str, Any] = {
-            # Missing required fields
             "title": "",
             "description": "",
         }
-
-        response: Any = APIClient().post(url, data=data)
+        response: Any = api_client.post("/api/videos/", data=data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
 
     def test_create_video_with_nonexistent_category(
         self,
+        api_client: APIClient,
         genre_action: Genre,
         cast_member_actor: CastMember,
         genre_repository: DjangoORMGenreRepository,
         cast_member_repository: DjangoORMCastMemberRepository,
     ) -> None:
-        # Save related entities except category
         genre_repository.save(genre_action)
         cast_member_repository.save(cast_member_actor)
 
         nonexistent_category_id = uuid4()
 
-        url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
             "description": "A test video description",
@@ -162,7 +106,7 @@ class TestCreateVideoAPI:
             "cast_members": [str(cast_member_actor.id)],
         }
 
-        response: Any = APIClient().post(url, data=data)
+        response: Any = api_client.post("/api/videos/", data=data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
@@ -173,18 +117,17 @@ class TestCreateVideoAPI:
 
     def test_create_video_with_nonexistent_genre(
         self,
+        api_client: APIClient,
         category_movie: Category,
         cast_member_actor: CastMember,
         category_repository: DjangoORMCategoryRepository,
         cast_member_repository: DjangoORMCastMemberRepository,
     ) -> None:
-        # Save related entities except genre
         category_repository.save(category_movie)
         cast_member_repository.save(cast_member_actor)
 
         nonexistent_genre_id = uuid4()
 
-        url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
             "description": "A test video description",
@@ -197,7 +140,7 @@ class TestCreateVideoAPI:
             "cast_members": [str(cast_member_actor.id)],
         }
 
-        response: Any = APIClient().post(url, data=data)
+        response: Any = api_client.post("/api/videos/", data=data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
@@ -208,18 +151,17 @@ class TestCreateVideoAPI:
 
     def test_create_video_with_nonexistent_cast_member(
         self,
+        api_client: APIClient,
         category_movie: Category,
         genre_action: Genre,
         category_repository: DjangoORMCategoryRepository,
         genre_repository: DjangoORMGenreRepository,
     ) -> None:
-        # Save related entities except cast member
         category_repository.save(category_movie)
         genre_repository.save(genre_action)
 
         nonexistent_cast_member_id = uuid4()
 
-        url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
             "description": "A test video description",
@@ -232,7 +174,7 @@ class TestCreateVideoAPI:
             "cast_members": [str(nonexistent_cast_member_id)],
         }
 
-        response: Any = APIClient().post(url, data=data)
+        response: Any = api_client.post("/api/videos/", data=data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
@@ -243,6 +185,7 @@ class TestCreateVideoAPI:
 
     def test_create_video_with_invalid_rating(
         self,
+        api_client: APIClient,
         category_movie: Category,
         genre_action: Genre,
         cast_member_actor: CastMember,
@@ -250,24 +193,22 @@ class TestCreateVideoAPI:
         genre_repository: DjangoORMGenreRepository,
         cast_member_repository: DjangoORMCastMemberRepository,
     ) -> None:
-        # Save related entities
         category_repository.save(category_movie)
         genre_repository.save(genre_action)
         cast_member_repository.save(cast_member_actor)
 
-        url: str = "/api/videos/"
         data: dict[str, Any] = {
             "title": "Test Video",
             "description": "A test video description",
             "launch_year": 2023,
             "duration": "90.5",
-            "rating": "INVALID_RATING",  # Invalid rating value
+            "rating": "INVALID_RATING",
             "published": False,
             "categories": [str(category_movie.id)],
             "genres": [str(genre_action.id)],
             "cast_members": [str(cast_member_actor.id)],
         }
 
-        response: Any = APIClient().post(url, data=data)
+        response: Any = api_client.post("/api/videos/", data=data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
