@@ -1,0 +1,96 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: Fast tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r ../requirements.txt
+
+      - name: Check import boundaries
+        run: lint-imports
+
+      - name: Run fast test suite with coverage
+        run: >
+          pytest -m "not e2e"
+          --cov=core
+          --cov=django_project
+          --cov-report=term-missing
+          -o addopts=
+
+  e2e:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    needs: fast
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r ../requirements.txt
+
+      - name: Prepare environment
+        run: cp ../.env.example ../.env
+
+      - name: Start Keycloak
+        run: docker compose -f ../docker-compose.yml up -d keycloak
+
+      - name: Wait for Keycloak
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/realms/codeflix > /dev/null; then
+              echo "Keycloak is ready"
+              exit 0
+            fi
+            echo "Waiting for Keycloak... ($i/60)"
+            sleep 2
+          done
+          echo "Keycloak failed to start"
+          docker compose -f ../docker-compose.yml logs keycloak --tail=50
+          exit 1
+
+      - name: Configure Keycloak public key
+        run: |
+          PUBLIC_KEY=$(curl -s http://localhost:8080/realms/codeflix | jq -r '.public_key')
+          sed -i "s|^AUTH_PUBLIC_KEY=.*|AUTH_PUBLIC_KEY=\"$PUBLIC_KEY\"|" ../.env
+
+      - name: Run E2E tests
+        run: pytest -m e2e -o addopts=
+
+      - name: Stop services
+        if: always()
+        run: docker compose -f ../docker-compose.yml down -v
