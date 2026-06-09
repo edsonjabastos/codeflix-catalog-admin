@@ -1,8 +1,9 @@
 from typing import Set
 from uuid import UUID
 from dataclasses import dataclass, field
-from core.genre.application.exceptions import InvalidGenre, RelatedCategoriesNotFound
+
 from core.category.domain.category_repository import CategoryRepository
+from core.genre.application.exceptions import InvalidGenre, RelatedCategoriesNotFound
 from core.genre.domain.genre import Genre
 from core.genre.domain.genre_repository import GenreRepository
 
@@ -25,13 +26,14 @@ class CreateGenre:
         id: UUID
 
     def execute(self, input: Input) -> Output:
-        category_ids: Set = {
-            category.id for category in self.category_repository.list()
-        }
-        if not input.categories.issubset(category_ids):
-            missing_categories = input.categories - category_ids
+        if input.categories and not self.category_repository.exists_by_ids(
+            input.categories
+        ):
+            missing_categories = self.category_repository.find_missing_ids(
+                input.categories
+            )
             raise RelatedCategoriesNotFound(
-                f"Categories with provided IDs not found: {', '.join(str(missing_category_id) for missing_category_id in missing_categories)}"
+                f"Categories with provided IDs not found: {', '.join(str(category_id) for category_id in missing_categories)}"
             )
 
         try:

@@ -2,31 +2,31 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID
 
-
-from core._shared.application.handler import AbstractMessageBus
-from core._shared.infrastructure.storage.abstract_storage_service import (
-    AbstractStorageService,
-)
-from core.video.application.exceptions import VideoNotFound
-from core.video.domain.video_repository import VideoRepository
-from core.video.domain.video import Video
-from core.video.domain.value_objects import MediaStatus, AudioVideoMedia, MediaType
+from core._shared.application.ports.event_publisher import EventPublisher
+from core._shared.application.ports.storage_service import StorageService
+from core._shared.utils.checksum import get_file_checksum
 from core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
-from core._shared.utils.checksum import get_file_checksum
+from core.video.application.exceptions import VideoNotFound
+from core.video.domain.events.event import AudioVideoMediaUpdated
+from core.video.domain.video import Video
+from core.video.domain.video_repository import VideoRepository
+from core.video.domain.value_objects import AudioVideoMedia, MediaStatus, MediaType
 
 
 class UploadVideo:
     def __init__(
         self,
         video_repository: VideoRepository,
-        storage_service: AbstractStorageService,
-        message_bus: AbstractMessageBus,
+        storage_service: StorageService,
+        event_publisher: EventPublisher,
+        storage_base_path: str,
     ) -> None:
         self.repository: VideoRepository = video_repository
-        self.storage_service: AbstractStorageService = storage_service
-        self.message_bus: AbstractMessageBus = message_bus
+        self.storage_service: StorageService = storage_service
+        self.event_publisher: EventPublisher = event_publisher
+        self.storage_base_path: str = storage_base_path
 
     @dataclass
     class Input:
@@ -52,7 +52,7 @@ class UploadVideo:
 
         audio_video_media: AudioVideoMedia = AudioVideoMedia(
             name=input.file_name,
-            checksum=get_file_checksum(file_path),
+            checksum=get_file_checksum(file_path, self.storage_base_path),
             raw_location=file_path,
             encoded_location="",
             status=MediaStatus.PENDING,
@@ -61,16 +61,25 @@ class UploadVideo:
 
         if input.media_type == MediaType.VIDEO:
             video.update_video(video=audio_video_media)
-        else:  # MediaType.TRAILER
+        else:
             video.update_trailer(trailer=audio_video_media)
 
         self.repository.update(video)
 
-        self.message_bus.handle(
-            [
-                AudioVideoMediaUpdatedIntegrationEvent(
-                    resource_id=f"{video.id}.{input.media_type}",
-                    file_path=file_path,
+        integration_events = self._map_domain_events(video.pull_events())
+        if integration_events:
+            self.event_publisher.publish(integration_events)
+
+    def _map_domain_events(
+        self, events: list
+    ) -> list[AudioVideoMediaUpdatedIntegrationEvent]:
+        integration_events: list[AudioVideoMediaUpdatedIntegrationEvent] = []
+        for event in events:
+            if isinstance(event, AudioVideoMediaUpdated):
+                integration_events.append(
+                    AudioVideoMediaUpdatedIntegrationEvent(
+                        resource_id=f"{event.aggregate_id}.{event.media_type}",
+                        file_path=event.file_path,
+                    )
                 )
-            ]
-        )
+        return integration_events
