@@ -8,7 +8,7 @@ from core.category.application.use_cases.create_category import (
     CreateCategoryResponse,
 )
 from core.category.application.use_cases.exceptions import InvalidCategoryData
-from django_project.adapters.persistence.in_memory.category_repository import (
+from core.category.infra.in_memory_category_repository import (
     InMemoryCategoryRepository,
 )
 

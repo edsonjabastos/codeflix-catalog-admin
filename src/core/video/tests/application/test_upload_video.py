@@ -12,7 +12,7 @@ from core.video.domain.value_objects import (
     MediaType,
 )
 from core.video.domain.video import Video
-from django_project.adapters.persistence.in_memory.video_repository import (
+from core.video.infra.in_memory_video_repository import (
     InMemoryVideoRepository,
 )
 from core._shared.utils.checksum import get_file_checksum

@@ -13,7 +13,7 @@ from core.video.domain.value_objects import (
     AudioVideoMedia,
 )
 from core.video.domain.video import Video
-from django_project.adapters.persistence.in_memory.video_repository import InMemoryVideoRepository
+from core.video.infra.in_memory_video_repository import InMemoryVideoRepository
 
 
 @pytest.fixture

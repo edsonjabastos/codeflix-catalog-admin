@@ -3,7 +3,7 @@ from core.castmember.application.use_cases.list_castmember import ListCastMember
 from core.castmember.domain.castmember import CastMember
 from core.castmember.domain.castmember_repository import CastMemberRepository
 from core.castmember.domain.value_objects import CastMemberType
-from django_project.adapters.persistence.in_memory.castmember_repository import (
+from core.castmember.infra.in_memory_castmember_repository import (
     InMemoryCastMemberRepository,
 )
 

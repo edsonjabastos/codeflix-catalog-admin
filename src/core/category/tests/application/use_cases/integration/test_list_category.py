@@ -1,6 +1,6 @@
 from core.category.application.use_cases.list_category import ListCategory
 from core.category.domain.category import Category
-from django_project.adapters.persistence.in_memory.category_repository import InMemoryCategoryRepository
+from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
 
 
 class TestListCategory:

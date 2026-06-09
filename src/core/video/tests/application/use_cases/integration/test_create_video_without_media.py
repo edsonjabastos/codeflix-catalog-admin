@@ -6,10 +6,10 @@ from core.video.application.use_cases.create_video_without_media import (
     CreateVideoWithoutMedia,
 )
 from core.video.domain.value_objects import Rating
-from django_project.adapters.persistence.in_memory.video_repository import InMemoryVideoRepository
-from django_project.adapters.persistence.in_memory.category_repository import InMemoryCategoryRepository
-from django_project.adapters.persistence.in_memory.genre_repository import InMemoryGenreRepository
-from django_project.adapters.persistence.in_memory.castmember_repository import (
+from core.video.infra.in_memory_video_repository import InMemoryVideoRepository
+from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
+from core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
+from core.castmember.infra.in_memory_castmember_repository import (
     InMemoryCastMemberRepository,
 )
 from core.category.domain.category import Category
