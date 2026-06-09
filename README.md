@@ -213,27 +213,41 @@ The script will automatically:
 
 ### Running Tests
 
-The project includes comprehensive test coverage:
+Tests are organized by **pytest markers** (see `src/pytest.ini`):
 
-**Run all tests:**
+| Marker | Description | External deps |
+|--------|-------------|---------------|
+| `unit` | Domain, use case unit, adapter unit | None |
+| `integration` | Use cases with in-memory adapters; consumer→use case→DB flow | None / SQLite test DB |
+| `api` | Django/DRF HTTP tests (mocked JWT) | SQLite test DB |
+| `e2e` | Full stack with real Keycloak | Keycloak |
+
+**Fast default (no Docker):**
 ```sh
-pytest
+cd src && pytest
 ```
 
-**Run specific test suites:**
+**Run by layer:**
 ```sh
-# Unit tests
-pytest src/core/
-
-# E2E tests
-pytest src/tests_e2e/
-
-# Specific test file
-pytest src/tests_e2e/test_video_api_e2e.py
-
-# Specific test class
-pytest src/tests_e2e/test_video_api_e2e.py::TestUploadVideoMediaAPI
+cd src && pytest -m unit
+cd src && pytest -m integration
+cd src && pytest -m api
+cd src && pytest -m e2e          # requires Keycloak
 ```
+
+**Coverage report:**
+```sh
+cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
+```
+
+**Orchestrated runner (Docker + import-linter):**
+```sh
+./run_tests.sh --fast-only       # no Docker — recommended for local dev
+./run_tests.sh                 # fast + e2e (starts Keycloak)
+./run_tests.sh --e2e-only      # e2e smoke tests only
+```
+
+**CI (GitHub Actions):** fast tests + coverage on every PR; E2E smoke tests on push to `main`.
 
 ### Using Docker
 
@@ -399,9 +413,10 @@ pytest src/tests_e2e/test_video_api_e2e.py::TestUploadVideoMediaAPI
 │   │   │   ├── models.py
 │   │   │   ├── repository.py
 │   │   │   ├── serializers.py
-│   │   │   ├── test
+│   │   │   ├── tests
 │   │   │   │   ├── test_category_api.py
-│   │   │   │   └── test_category_repository.py
+│   │   │   │   ├── test_category_repository.py
+│   │   │   │   └── test_auth_api.py
 │   │   │   └── views.py
 │   │   ├── genre_app
 │   │   │   ├── admin.py
@@ -433,9 +448,19 @@ pytest src/tests_e2e/test_video_api_e2e.py::TestUploadVideoMediaAPI
 │   │   └── wsgi.py
 │   ├── manage.py
 │   ├── pytest.ini
+│   ├── testing
+│   │   ├── fixtures
+│   │   │   ├── categories.py
+│   │   │   ├── genres.py
+│   │   │   ├── castmembers.py
+│   │   │   └── videos.py
+│   │   └── helpers
+│   │       └── auth.py
 │   └── tests_e2e
+│       ├── test_auth_e2e.py
 │       ├── test_castmember_api_e2e.py
 │       ├── test_category_api_e2e.py
+│       ├── test_genre_api_e2e.py
 │       └── test_video_api_e2e.py
 └── vscode
     └── settings.json
