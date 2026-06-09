@@ -167,24 +167,3 @@ class TestUpdate:
         assert category_from_database.name == category.name
         assert category_from_database.description == category.description
         assert category_from_database.is_active == category.is_active
-
-    # def test_update_category_with_invalid_name(self):
-    #     category = Category(
-    #         name="Movie",
-    #         description="Movie category",
-    #     )
-    #     category_repository = DjangoORMCategoryRepository()
-    #     category_repository.save(category)
-
-    #     new_category = Category(
-    #         id=category.id,
-    #         name="",
-    #         description="Documentary category",
-    #     )
-    #     category_repository.update(new_category)
-
-    #     category_from_database = CategoryModel.objects.get()
-    #     assert category_from_database.id == category.id
-    #     assert category_from_database.name == category.name
-    #     assert category_from_database.description == category.description
-    #     assert category_from_database.is_active == category.is_active

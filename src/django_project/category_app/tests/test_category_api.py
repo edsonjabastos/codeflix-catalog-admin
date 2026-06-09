@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID, uuid4
+
 import pytest
-from rest_framework.test import APIClient
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -9,30 +9,12 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
 )
+from rest_framework.test import APIClient
 
 from core.category.domain.category import Category
-from django_project.adapters.persistence.django.category_repository import DjangoORMCategoryRepository
-
-
-@pytest.fixture
-def category_movie():
-    return Category(
-        name="Movie",
-        description="Movie description",
-    )
-
-
-@pytest.fixture
-def category_documentary():
-    return Category(
-        name="Documentary",
-        description="Documentary description",
-    )
-
-
-@pytest.fixture
-def category_repository() -> DjangoORMCategoryRepository:
-    return DjangoORMCategoryRepository()
+from django_project.adapters.persistence.django.category_repository import (
+    DjangoORMCategoryRepository,
+)
 
 
 @pytest.mark.django_db
@@ -40,6 +22,7 @@ class TestCategoryListAPI:
 
     def test_list_categories(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_documentary: Category,
         category_repository: DjangoORMCategoryRepository,
@@ -48,7 +31,7 @@ class TestCategoryListAPI:
         category_repository.save(category_documentary)
 
         url: str = "/api/categories/"
-        response: Any = APIClient().get(url)
+        response: Any = api_client.get(url)
 
         expected_data = {
             "data": [
@@ -80,34 +63,35 @@ class TestCategoryListAPI:
 @pytest.mark.django_db
 class TestCategoryRetrieveAPI:
 
-    def test_retrieve_category_bad_request(self) -> None:
+    def test_retrieve_category_bad_request(self, api_client: APIClient) -> None:
         url: str = "/api/categories/123/"
-        response: Any = APIClient().get(url)
+        response: Any = api_client.get(url)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
 
-    def test_retrieve_category_not_found(self) -> None:
+    def test_retrieve_category_not_found(self, api_client: APIClient) -> None:
         non_existent_id: UUID = uuid4()
         url: str = f"/api/categories/{non_existent_id}/"
-        response: Any = APIClient().get(url)
+        response: Any = api_client.get(url)
 
         assert response.status_code == HTTP_404_NOT_FOUND
 
     def test_retrieve_category(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
         category_repository.save(category_movie)
 
         url: str = f"/api/categories/{category_movie.id}/"
-        response: Any = APIClient().get(url)
+        response: Any = api_client.get(url)
 
         expected_data = {
             "data": {
                 "id": str(category_movie.id),
                 "name": category_movie.name,
-                "description": category_movie.description,  # + " false positive test",
+                "description": category_movie.description,
                 "is_active": category_movie.is_active,
             }
         }
@@ -119,19 +103,20 @@ class TestCategoryRetrieveAPI:
 @pytest.mark.django_db
 class TestCategoryCreateAPI:
 
-    def test_create_category_with_invalid_data(self) -> None:
+    def test_create_category_with_invalid_data(self, api_client: APIClient) -> None:
         url: str = "/api/categories/"
         data: dict = {
             "name": "",
             "description": "Movie description",
         }
-        response: Any = APIClient().post(url, data)
+        response: Any = api_client.post(url, data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {"name": ["This field may not be blank."]}
 
     def test_create_category(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
@@ -140,7 +125,7 @@ class TestCategoryCreateAPI:
             "name": category_movie.name,
             "description": category_movie.description,
         }
-        response: Any = APIClient().post(url, data)
+        response: Any = api_client.post(url, data)
 
         assert response.status_code == HTTP_201_CREATED
         created_category_id: UUID = UUID(response.data["id"])
@@ -165,13 +150,13 @@ class TestCategoryCreateAPI:
 @pytest.mark.django_db
 class TestCategoryUpdateAPI:
 
-    def test_update_category_with_invalid_data(self) -> None:
+    def test_update_category_with_invalid_data(self, api_client: APIClient) -> None:
         url: str = "/api/categories/123/"
         data: dict = {
             "name": "",
             "description": "Movie description",
         }
-        response: Any = APIClient().put(url, data)
+        response: Any = api_client.put(url, data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
@@ -180,7 +165,7 @@ class TestCategoryUpdateAPI:
             "is_active": ["This field is required."],
         }
 
-    def test_update_category_bad_request(self) -> None:
+    def test_update_category_bad_request(self, api_client: APIClient) -> None:
         url: str = "/api/categories/123/"
         data: dict = {
             "id": "123",
@@ -188,11 +173,11 @@ class TestCategoryUpdateAPI:
             "description": "Movie description",
             "is_active": True,
         }
-        response: Any = APIClient().put(url, data)
+        response: Any = api_client.put(url, data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
 
-    def test_update_category_not_found(self) -> None:
+    def test_update_category_not_found(self, api_client: APIClient) -> None:
         non_existent_id: UUID = uuid4()
         url: str = f"/api/categories/{non_existent_id}/"
         data: dict = {
@@ -201,12 +186,13 @@ class TestCategoryUpdateAPI:
             "description": "Movie description",
             "is_active": True,
         }
-        response: Any = APIClient().put(url, data)
+        response: Any = api_client.put(url, data)
 
         assert response.status_code == HTTP_404_NOT_FOUND
 
     def test_update_category(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
@@ -219,7 +205,7 @@ class TestCategoryUpdateAPI:
             "description": "Movie description updated",
             "is_active": False,
         }
-        response: Any = APIClient().put(url, data)
+        response: Any = api_client.put(url, data)
 
         assert response.status_code == HTTP_204_NO_CONTENT
 
@@ -243,28 +229,29 @@ class TestCategoryUpdateAPI:
 @pytest.mark.django_db
 class TestCategoryDeleteAPI:
 
-    def test_delete_category_bad_request(self) -> None:
+    def test_delete_category_bad_request(self, api_client: APIClient) -> None:
         url: str = "/api/categories/123/"
-        response: Any = APIClient().delete(url)
+        response: Any = api_client.delete(url)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
 
-    def test_delete_category_not_found(self) -> None:
+    def test_delete_category_not_found(self, api_client: APIClient) -> None:
         non_existent_id: UUID = uuid4()
         url: str = f"/api/categories/{non_existent_id}/"
-        response: Any = APIClient().delete(url)
+        response: Any = api_client.delete(url)
 
         assert response.status_code == HTTP_404_NOT_FOUND
 
     def test_delete_category(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
         category_repository.save(category_movie)
 
         url: str = f"/api/categories/{category_movie.id}/"
-        response: Any = APIClient().delete(url)
+        response: Any = api_client.delete(url)
 
         assert response.status_code == HTTP_204_NO_CONTENT
         assert category_repository.list() == []
@@ -274,13 +261,13 @@ class TestCategoryDeleteAPI:
 @pytest.mark.django_db
 class TestCategoryPatchAPI:
 
-    def test_patch_category_with_invalid_data(self) -> None:
+    def test_patch_category_with_invalid_data(self, api_client: APIClient) -> None:
         url: str = "/api/categories/123/"
         data: dict = {
             "name": "",
             "description": "Movie description",
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
@@ -288,7 +275,7 @@ class TestCategoryPatchAPI:
             "id": ["Must be a valid UUID."],
         }
 
-    def test_patch_category_bad_request(self) -> None:
+    def test_patch_category_bad_request(self, api_client: APIClient) -> None:
         url: str = "/api/categories/123/"
         data: dict = {
             "id": "123",
@@ -296,11 +283,11 @@ class TestCategoryPatchAPI:
             "description": "Movie description",
             "is_active": True,
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
 
-    def test_patch_category_not_found(self) -> None:
+    def test_patch_category_not_found(self, api_client: APIClient) -> None:
         non_existent_id: UUID = uuid4()
         url: str = f"/api/categories/{non_existent_id}/"
         data: dict = {
@@ -309,12 +296,13 @@ class TestCategoryPatchAPI:
             "description": "Movie description",
             "is_active": True,
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_404_NOT_FOUND
 
     def test_update_name_with_blank(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
@@ -325,13 +313,14 @@ class TestCategoryPatchAPI:
             "id": str(category_movie.id),
             "name": "",
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {"name": ["This field may not be blank."]}
 
     def test_update_name(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
@@ -342,7 +331,7 @@ class TestCategoryPatchAPI:
             "id": str(category_movie.id),
             "name": "Movie updated",
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_204_NO_CONTENT
 
@@ -364,6 +353,7 @@ class TestCategoryPatchAPI:
 
     def test_update_description(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
@@ -374,7 +364,7 @@ class TestCategoryPatchAPI:
             "id": str(category_movie.id),
             "description": "Movie description updated",
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_204_NO_CONTENT
 
@@ -396,6 +386,7 @@ class TestCategoryPatchAPI:
 
     def test_update_is_active(
         self,
+        api_client: APIClient,
         category_movie: Category,
         category_repository: DjangoORMCategoryRepository,
     ) -> None:
@@ -406,7 +397,7 @@ class TestCategoryPatchAPI:
             "id": str(category_movie.id),
             "is_active": False,
         }
-        response: Any = APIClient().patch(url, data)
+        response: Any = api_client.patch(url, data)
 
         assert response.status_code == HTTP_204_NO_CONTENT
 
