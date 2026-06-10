@@ -51,7 +51,14 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
             continue
 
-        if any(segment in path for segment in ("/unit/", "/domain/", "/infra/")):
+        if any(
+            segment in path
+            for segment in (
+                "/unit/",
+                "/domain/",
+                "/in_memory/tests/",
+            )
+        ):
             item.add_marker(pytest.mark.unit)
             continue
 
