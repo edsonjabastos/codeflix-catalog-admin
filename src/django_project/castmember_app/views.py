@@ -12,6 +12,7 @@ from rest_framework.status import (
 
 from core.castmember.application.use_cases.create_castmember import CreateCastMember
 from core.castmember.application.use_cases.delete_castmember import DeleteCastMember
+from core.castmember.application.use_cases.get_castmember import GetCastMember
 from core.castmember.application.use_cases.list_castmember import ListCastMember
 from core.castmember.application.use_cases.update_castmember import UpdateCastMember
 from core.castmember.application.exceptions import CastMemberNotFound, InvalidCastMember
@@ -22,6 +23,8 @@ from django_project.castmember_app.serializers import (
     CreateCastMemberOutputSerializer,
     DeleteCastMemberInputSerializer,
     ListCastMemberOutputSerializer,
+    RetrieveCastMemberRequestSerializer,
+    RetrieveCastMemberResponseSerializer,
     UpdateCastMemberInputSerializer,
 )
 from django_project.permissions import IsAuthenticated, IsAdmin
@@ -44,6 +47,28 @@ class CastMemberViewSet(viewsets.ViewSet):
         )
 
         return Response(data=serializer.data, status=HTTP_200_OK)
+
+    def retrieve(self, request: Request, pk: str | None = None) -> Response:
+        serializer: RetrieveCastMemberRequestSerializer = (
+            RetrieveCastMemberRequestSerializer(data={"id": pk})
+        )
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result: GetCastMember.Output = get_container().get_castmember().execute(
+                input=GetCastMember.Input(id=serializer.validated_data["id"])
+            )
+        except CastMemberNotFound:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        output: RetrieveCastMemberResponseSerializer = (
+            RetrieveCastMemberResponseSerializer(instance=result)
+        )
+
+        return Response(
+            status=HTTP_200_OK,
+            data=output.data,
+        )
 
     def create(self, request: Request) -> Response:
         serializer: CreateCastMemberInputSerializer = CreateCastMemberInputSerializer(

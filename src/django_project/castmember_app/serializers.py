@@ -50,6 +50,14 @@ class CreateCastMemberOutputSerializer(Serializer):
     id: UUIDField = UUIDField()
 
 
+class RetrieveCastMemberRequestSerializer(Serializer):
+    id: UUIDField = UUIDField()
+
+
+class RetrieveCastMemberResponseSerializer(Serializer):
+    data: CastMemberOutputSerializer = CastMemberOutputSerializer(source="*")
+
+
 class DeleteCastMemberInputSerializer(Serializer):
     id: UUIDField = UUIDField()
 

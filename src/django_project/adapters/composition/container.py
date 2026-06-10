@@ -9,6 +9,7 @@ from core.category.application.use_cases.list_category import ListCategory
 from core.category.application.use_cases.update_category import UpdateCategory
 from core.castmember.application.use_cases.create_castmember import CreateCastMember
 from core.castmember.application.use_cases.delete_castmember import DeleteCastMember
+from core.castmember.application.use_cases.get_castmember import GetCastMember
 from core.castmember.application.use_cases.list_castmember import ListCastMember
 from core.castmember.application.use_cases.update_castmember import UpdateCastMember
 from core.genre.application.use_cases.create_genre import CreateGenre
@@ -107,6 +108,9 @@ class Container:
 
     def create_castmember(self) -> CreateCastMember:
         return CreateCastMember(castmember_repository=self.castmember_repository())
+
+    def get_castmember(self) -> GetCastMember:
+        return GetCastMember(castmember_repository=self.castmember_repository())
 
     def update_castmember(self) -> UpdateCastMember:
         return UpdateCastMember(castmember_repository=self.castmember_repository())
