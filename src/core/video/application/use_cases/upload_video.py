@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID
 
+from core._shared.application.ports.checksum_service import ChecksumService
 from core._shared.application.ports.event_publisher import EventPublisher
 from core._shared.application.ports.storage_service import StorageService
-from core._shared.utils.checksum import get_file_checksum
 from core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
@@ -21,11 +21,13 @@ class UploadVideo:
         video_repository: VideoRepository,
         storage_service: StorageService,
         event_publisher: EventPublisher,
+        checksum_service: ChecksumService,
         storage_base_path: str,
     ) -> None:
         self.repository: VideoRepository = video_repository
         self.storage_service: StorageService = storage_service
         self.event_publisher: EventPublisher = event_publisher
+        self.checksum_service: ChecksumService = checksum_service
         self.storage_base_path: str = storage_base_path
 
     @dataclass
@@ -52,7 +54,7 @@ class UploadVideo:
 
         audio_video_media: AudioVideoMedia = AudioVideoMedia(
             name=input.file_name,
-            checksum=get_file_checksum(file_path, self.storage_base_path),
+            checksum=self.checksum_service.compute(file_path, self.storage_base_path),
             raw_location=file_path,
             encoded_location="",
             status=MediaStatus.PENDING,

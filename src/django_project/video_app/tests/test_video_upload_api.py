@@ -25,10 +25,13 @@ from django_project.adapters.persistence.django.video_repository import (
 
 @pytest.mark.django_db
 class TestVideoUploadAPI:
-    @patch("core.video.application.use_cases.upload_video.get_file_checksum")
+    @patch(
+        "django_project.adapters.storage.file_checksum_service.FileChecksumService.compute",
+        return_value="test-checksum",
+    )
     def test_upload_video_media_via_api(
         self,
-        mock_checksum,
+        _mock_checksum,
         api_client: APIClient,
         category_movie: Category,
         genre_action: Genre,
@@ -38,8 +41,6 @@ class TestVideoUploadAPI:
         cast_member_repository: DjangoORMCastMemberRepository,
         video_repository: DjangoORMVideoRepository,
     ) -> None:
-        mock_checksum.return_value = "test-checksum"
-
         category_repository.save(category_movie)
         genre_repository.save(genre_action)
         cast_member_repository.save(cast_member_actor)
