@@ -25,7 +25,7 @@ class DjangoORMVideoRepository(VideoRepository):
             video_model.save()
         return None
 
-    def get_by_id(self, id: UUID) -> Video:
+    def get_by_id(self, id: UUID) -> Video | None:
         try:
             video_model = self.video_orm.objects.get(id=id)
         except VideoORM.DoesNotExist:
@@ -42,7 +42,7 @@ class DjangoORMVideoRepository(VideoRepository):
             for video_model in self.video_orm.objects.all()
         ]
 
-    def update(self, video: Video) -> Video:
+    def update(self, video: Video) -> None:
         try:
             video_model = self.video_orm.objects.get(id=video.id)
         except self.video_orm.DoesNotExist:

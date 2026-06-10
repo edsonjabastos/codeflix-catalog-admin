@@ -446,6 +446,7 @@ class TestVideoProcess:
             media_type=MediaType.VIDEO,
         )
         video.update_video(initial_video_media)
+        video.pull_events()
 
         encoded_location = "/videos/encoded/test.mp4"
         video.process(MediaStatus.COMPLETED, encoded_location, MediaType.VIDEO)
@@ -453,6 +454,32 @@ class TestVideoProcess:
         assert video.video.status == MediaStatus.COMPLETED
         assert video.video.encoded_location == encoded_location
         assert video.published is True
+
+    def test_process_records_event_when_completed(
+        self, valid_video_params: dict
+    ) -> None:
+        video: Video = Video(**valid_video_params)
+        initial_video_media = AudioVideoMedia(
+            name="test_video.mp4",
+            checksum="abc123",
+            raw_location="/videos/raw/test.mp4",
+            encoded_location="",
+            status=MediaStatus.PENDING,
+            media_type=MediaType.VIDEO,
+        )
+        video.update_video(initial_video_media)
+        video.pull_events()
+
+        encoded_location = "/videos/encoded/test.mp4"
+        video.process(MediaStatus.COMPLETED, encoded_location, MediaType.VIDEO)
+
+        assert video.events == [
+            AudioVideoMediaUpdated(
+                aggregate_id=video.id,
+                file_path=encoded_location,
+                media_type=MediaType.VIDEO,
+            )
+        ]
 
     def test_process_with_error_status(self, valid_video_params: dict) -> None:
         video: Video = Video(**valid_video_params)

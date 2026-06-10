@@ -110,9 +110,9 @@ class TestCreateVideoAPI:
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
-            "categories": [
-                f"Invalid categorie(s) with provided ID(s) not found: '{str(nonexistent_category_id)}'"
-            ]
+            "error": (
+                f"Categories with provided IDs not found: {nonexistent_category_id}"
+            )
         }
 
     def test_create_video_with_nonexistent_genre(
@@ -144,9 +144,7 @@ class TestCreateVideoAPI:
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
-            "genres": [
-                f"Invalid genre(s) with provided ID(s) not found: '{str(nonexistent_genre_id)}'"
-            ]
+            "error": f"Genres with provided IDs not found: {nonexistent_genre_id}"
         }
 
     def test_create_video_with_nonexistent_cast_member(
@@ -178,9 +176,9 @@ class TestCreateVideoAPI:
 
         assert response.status_code == HTTP_400_BAD_REQUEST
         assert response.data == {
-            "cast_members": [
-                f"Invalid cast member(s) with provided ID(s) not found: '{str(nonexistent_cast_member_id)}'"
-            ]
+            "error": (
+                f"Cast members with provided IDs not found: {nonexistent_cast_member_id}"
+            )
         }
 
     def test_create_video_with_invalid_rating(

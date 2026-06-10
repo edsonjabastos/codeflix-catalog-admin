@@ -2,12 +2,12 @@ import pytest
 
 from core.category.domain.category import Category
 from core.category.domain.category_repository import CategoryRepository
-from core.category.infra.in_memory_category_repository import InMemoryCategoryRepository
+from django_project.adapters.persistence.in_memory.category_repository import InMemoryCategoryRepository
 from core.genre.application.use_cases.list_genre import ListGenre
 
 from core.genre.domain.genre import Genre
 from core.genre.domain.genre_repository import GenreRepository
-from core.genre.infra.in_memory_genre_repository import InMemoryGenreRepository
+from django_project.adapters.persistence.in_memory.genre_repository import InMemoryGenreRepository
 
 
 @pytest.fixture

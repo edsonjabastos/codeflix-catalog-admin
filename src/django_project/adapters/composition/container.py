@@ -2,11 +2,17 @@ import os
 
 from config import TMP_BUCKET
 
+from core._shared.application.ports.auth_service import AuthService
+from core._shared.application.ports.checksum_service import ChecksumService
+from core._shared.application.ports.event_publisher import EventPublisher
+from core._shared.application.ports.storage_service import StorageService
+from core.castmember.domain.castmember_repository import CastMemberRepository
 from core.category.application.use_cases.create_category import CreateCategory
 from core.category.application.use_cases.delete_category import DeleteCategory
 from core.category.application.use_cases.get_category import GetCategory
 from core.category.application.use_cases.list_category import ListCategory
 from core.category.application.use_cases.update_category import UpdateCategory
+from core.category.domain.category_repository import CategoryRepository
 from core.castmember.application.use_cases.create_castmember import CreateCastMember
 from core.castmember.application.use_cases.delete_castmember import DeleteCastMember
 from core.castmember.application.use_cases.get_castmember import GetCastMember
@@ -17,6 +23,7 @@ from core.genre.application.use_cases.delete_genre import DeleteGenre
 from core.genre.application.use_cases.get_genre import GetGenre
 from core.genre.application.use_cases.list_genre import ListGenre
 from core.genre.application.use_cases.update_genre import UpdateGenre
+from core.genre.domain.genre_repository import GenreRepository
 from core.video.application.use_cases.create_video_without_media import (
     CreateVideoWithoutMedia,
 )
@@ -25,6 +32,7 @@ from core.video.application.use_cases.process_audio_video_media import (
     ProcessAudioVideoMedia,
 )
 from core.video.application.use_cases.upload_video import UploadVideo
+from core.video.domain.video_repository import VideoRepository
 from django_project.adapters.auth.jwt_auth_service import JwtAuthService
 from django_project.adapters.messaging.message_bus import MessageBus
 from django_project.adapters.messaging.video_converted_consumer import (
@@ -42,29 +50,33 @@ from django_project.adapters.persistence.django.genre_repository import (
 from django_project.adapters.persistence.django.video_repository import (
     DjangoORMVideoRepository,
 )
+from django_project.adapters.storage.file_checksum_service import FileChecksumService
 from django_project.adapters.storage.local_storage import LocalStorage
 
 
 class Container:
-    def category_repository(self) -> DjangoORMCategoryRepository:
+    def category_repository(self) -> CategoryRepository:
         return DjangoORMCategoryRepository()
 
-    def genre_repository(self) -> DjangoORMGenreRepository:
+    def genre_repository(self) -> GenreRepository:
         return DjangoORMGenreRepository()
 
-    def castmember_repository(self) -> DjangoORMCastMemberRepository:
+    def castmember_repository(self) -> CastMemberRepository:
         return DjangoORMCastMemberRepository()
 
-    def video_repository(self) -> DjangoORMVideoRepository:
+    def video_repository(self) -> VideoRepository:
         return DjangoORMVideoRepository()
 
-    def storage_service(self) -> LocalStorage:
+    def storage_service(self) -> StorageService:
         return LocalStorage(bucket=TMP_BUCKET)
 
-    def event_publisher(self) -> MessageBus:
+    def checksum_service(self) -> ChecksumService:
+        return FileChecksumService()
+
+    def event_publisher(self) -> EventPublisher:
         return MessageBus()
 
-    def auth_service(self, token: str = "") -> JwtAuthService:
+    def auth_service(self, token: str = "") -> AuthService:
         return JwtAuthService(token=token)
 
     def list_category(self) -> ListCategory:
@@ -134,6 +146,7 @@ class Container:
             video_repository=self.video_repository(),
             storage_service=self.storage_service(),
             event_publisher=self.event_publisher(),
+            checksum_service=self.checksum_service(),
             storage_base_path=TMP_BUCKET,
         )
 

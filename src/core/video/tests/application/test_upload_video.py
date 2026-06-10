@@ -1,6 +1,7 @@
 from decimal import Decimal
 from unittest.mock import create_autospec, patch
 import pytest
+from core._shared.application.ports.checksum_service import ChecksumService
 from core._shared.application.ports.event_publisher import EventPublisher
 from core._shared.application.ports.storage_service import StorageService
 from core.video.application.use_cases.upload_video import UploadVideo
@@ -12,10 +13,10 @@ from core.video.domain.value_objects import (
     MediaType,
 )
 from core.video.domain.video import Video
-from core.video.infra.in_memory_video_repository import (
+from django_project.adapters.persistence.in_memory.video_repository import (
     InMemoryVideoRepository,
 )
-from core._shared.utils.checksum import get_file_checksum
+from django_project.adapters.storage.file_checksum_service import FileChecksumService
 from core.video.application.events.integrations_events import (
     AudioVideoMediaUpdatedIntegrationEvent,
 )
@@ -52,27 +53,32 @@ def mock_event_publisher() -> EventPublisher:
 
 
 @pytest.fixture
+def mock_checksum_service() -> ChecksumService:
+    return create_autospec(ChecksumService)
+
+
+@pytest.fixture
 def storage_base_path(tmp_path) -> str:
     return str(tmp_path)
 
 
 class TestUploadVideo:
-    @patch("core.video.application.use_cases.upload_video.get_file_checksum")
     def test_upload_video_media_to_video(
         self,
-        mock_checksum,
         video: Video,
         video_repository: InMemoryVideoRepository,
         mock_storage_service: StorageService,
         mock_event_publisher: EventPublisher,
+        mock_checksum_service: ChecksumService,
         storage_base_path: str,
     ) -> None:
-        mock_checksum.return_value = "test_checksum"
+        mock_checksum_service.compute.return_value = "test_checksum"
 
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
             event_publisher=mock_event_publisher,
+            checksum_service=mock_checksum_service,
             storage_base_path=storage_base_path,
         )
 
@@ -110,12 +116,14 @@ class TestUploadVideo:
         video_repository: InMemoryVideoRepository,
         mock_storage_service: StorageService,
         mock_event_publisher: EventPublisher,
+        mock_checksum_service: ChecksumService,
         storage_base_path: str,
     ) -> None:
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
             event_publisher=mock_event_publisher,
+            checksum_service=mock_checksum_service,
             storage_base_path=storage_base_path,
         )
 
@@ -131,22 +139,22 @@ class TestUploadVideo:
 
         assert str(excinfo.value) == "Video with id 'non_existent_id' not found."
 
-    @patch("core.video.application.use_cases.upload_video.get_file_checksum")
     def test_upload_video_updates_repository(
         self,
-        mock_checksum,
         video: Video,
         video_repository: InMemoryVideoRepository,
         mock_storage_service: StorageService,
         mock_event_publisher: EventPublisher,
+        mock_checksum_service: ChecksumService,
         storage_base_path: str,
     ) -> None:
-        mock_checksum.return_value = "checksum123"
+        mock_checksum_service.compute.return_value = "checksum123"
 
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
             event_publisher=mock_event_publisher,
+            checksum_service=mock_checksum_service,
             storage_base_path=storage_base_path,
         )
 
@@ -164,22 +172,22 @@ class TestUploadVideo:
         assert updated_video.video.name == "movie.mp4"
         assert updated_video.video.status == MediaStatus.PENDING
 
-    @patch("core.video.application.use_cases.upload_video.get_file_checksum")
     def test_upload_video_publishes_integration_event(
         self,
-        mock_checksum,
         video: Video,
         video_repository: InMemoryVideoRepository,
         mock_storage_service: StorageService,
         mock_event_publisher: EventPublisher,
+        mock_checksum_service: ChecksumService,
         storage_base_path: str,
     ) -> None:
-        mock_checksum.return_value = "checksum456"
+        mock_checksum_service.compute.return_value = "checksum456"
 
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
             event_publisher=mock_event_publisher,
+            checksum_service=mock_checksum_service,
             storage_base_path=storage_base_path,
         )
 
@@ -208,10 +216,12 @@ class TestUploadVideo:
         tmp_path,
     ) -> None:
         storage_base_path = str(tmp_path)
+        checksum_service = FileChecksumService()
         upload_video: UploadVideo = UploadVideo(
             video_repository=video_repository,
             storage_service=mock_storage_service,
             event_publisher=mock_event_publisher,
+            checksum_service=checksum_service,
             storage_base_path=storage_base_path,
         )
 
@@ -238,7 +248,7 @@ class TestUploadVideo:
         assert updated_video.video.checksum is not None
         assert len(updated_video.video.checksum) > 0
 
-        expected_checksum = get_file_checksum(
+        expected_checksum = checksum_service.compute(
             f"videos/{video.id}/checksum_test.mp4", storage_base_path
         )
         assert updated_video.video.checksum == expected_checksum

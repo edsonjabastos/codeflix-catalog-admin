@@ -9,9 +9,40 @@ unmatched_ignore_imports_alerting = none
 name = Core must not depend on outer layers
 type = forbidden
 source_modules =
-    core
+    core._shared.application
+    core._shared.domain
+    core._shared.events
+    core.category.application
+    core.category.domain
+    core.genre.application
+    core.genre.domain
+    core.castmember.application
+    core.castmember.domain
+    core.video.application
+    core.video.domain
 forbidden_modules =
     django_project
     django
     pika
     config
+
+[importlinter:contract:core-no-infra]
+name = Core must not import infra adapters
+type = forbidden
+source_modules =
+    core._shared.application
+    core._shared.domain
+    core._shared.events
+    core.category.application
+    core.category.domain
+    core.genre.application
+    core.genre.domain
+    core.castmember.application
+    core.castmember.domain
+    core.video.application
+    core.video.domain
+forbidden_modules =
+    core.category.infra
+    core.genre.infra
+    core.castmember.infra
+    core.video.infra
