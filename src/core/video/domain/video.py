@@ -163,6 +163,13 @@ class Video(Entity):
                     status=MediaStatus.COMPLETED,
                 )
                 self.publish()
+                self.record_event(
+                    AudioVideoMediaUpdated(
+                        aggregate_id=self.id,
+                        file_path=encoded_location,
+                        media_type=MediaType.VIDEO,
+                    )
+                )
             else:
                 self.video: AudioVideoMedia = AudioVideoMedia(
                     name=self.video.name,
@@ -181,6 +188,13 @@ class Video(Entity):
                     media_type=MediaType.TRAILER,
                     encoded_location=encoded_location,
                     status=MediaStatus.COMPLETED,
+                )
+                self.record_event(
+                    AudioVideoMediaUpdated(
+                        aggregate_id=self.id,
+                        file_path=encoded_location,
+                        media_type=MediaType.TRAILER,
+                    )
                 )
             else:
                 self.trailer: AudioVideoMedia = AudioVideoMedia(
@@ -202,6 +216,13 @@ class Video(Entity):
                 media_type=MediaType.TRAILER,
                 encoded_location=encoded_location,
                 status=MediaStatus.COMPLETED,
+            )
+            self.record_event(
+                AudioVideoMediaUpdated(
+                    aggregate_id=self.id,
+                    file_path=encoded_location,
+                    media_type=MediaType.TRAILER,
+                )
             )
         else:
             self.trailer: AudioVideoMedia = AudioVideoMedia(
