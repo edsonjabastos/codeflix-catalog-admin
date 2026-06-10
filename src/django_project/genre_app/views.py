@@ -12,6 +12,7 @@ from rest_framework.status import (
 
 from core.genre.application.use_cases.create_genre import CreateGenre
 from core.genre.application.use_cases.delete_genre import DeleteGenre
+from core.genre.application.use_cases.get_genre import GetGenre
 from core.genre.application.exceptions import (
     GenreNotFound,
     InvalidGenre,
@@ -26,6 +27,8 @@ from django_project.genre_app.serializers import (
     CreateGenreResponseSerializer,
     DeleteGenreInputSerializer,
     ListGenreOutputSerializer,
+    RetrieveGenreRequestSerializer,
+    RetrieveGenreResponseSerializer,
     UpdateGenreInputSerializer,
 )
 from django_project.permissions import IsAuthenticated, IsAdmin
@@ -50,6 +53,28 @@ class GenreViewSet(viewsets.ViewSet):
         return Response(
             status=HTTP_200_OK,
             data=serializer.data,
+        )
+
+    def retrieve(self, request: Request, pk: str | None = None) -> Response:
+        serializer: RetrieveGenreRequestSerializer = RetrieveGenreRequestSerializer(
+            data={"id": pk}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            result: GetGenre.Output = get_container().get_genre().execute(
+                input=GetGenre.Input(id=serializer.validated_data["id"])
+            )
+        except GenreNotFound:
+            return Response(status=HTTP_404_NOT_FOUND)
+
+        output: RetrieveGenreResponseSerializer = RetrieveGenreResponseSerializer(
+            instance=result
+        )
+
+        return Response(
+            status=HTTP_200_OK,
+            data=output.data,
         )
 
     def create(self, request: Request) -> Response:

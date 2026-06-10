@@ -13,6 +13,7 @@ from core.castmember.application.use_cases.list_castmember import ListCastMember
 from core.castmember.application.use_cases.update_castmember import UpdateCastMember
 from core.genre.application.use_cases.create_genre import CreateGenre
 from core.genre.application.use_cases.delete_genre import DeleteGenre
+from core.genre.application.use_cases.get_genre import GetGenre
 from core.genre.application.use_cases.list_genre import ListGenre
 from core.genre.application.use_cases.update_genre import UpdateGenre
 from core.video.application.use_cases.create_video_without_media import (
@@ -88,6 +89,9 @@ class Container:
             genre_repository=self.genre_repository(),
             category_repository=self.category_repository(),
         )
+
+    def get_genre(self) -> GetGenre:
+        return GetGenre(repository=self.genre_repository())
 
     def update_genre(self) -> UpdateGenre:
         return UpdateGenre(

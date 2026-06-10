@@ -44,6 +44,14 @@ class CreateGenreResponseSerializer(Serializer):
     id: UUIDField = UUIDField()
 
 
+class RetrieveGenreRequestSerializer(Serializer):
+    id: UUIDField = UUIDField()
+
+
+class RetrieveGenreResponseSerializer(Serializer):
+    data: GenreOutputSerializer = GenreOutputSerializer(source="*")
+
+
 class DeleteGenreInputSerializer(Serializer):
     id: UUIDField = UUIDField()
 
