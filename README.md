@@ -285,8 +285,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   │   ├── castmember.py
 │   │   │   │   ├── castmember_repository.py
 │   │   │   │   └── value_objects.py
-│   │   │   ├── infra
-│   │   │   │   └── in_memory_castmember_repository.py
 │   │   │   └── tests
 │   │   │       ├── domain
 │   │   │       │   └── test_castmember.py
@@ -313,8 +311,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   ├── domain
 │   │   │   │   ├── category.py
 │   │   │   │   └── category_repository.py
-│   │   │   ├── infra
-│   │   │   │   └── in_memory_category_repository.py
 │   │   │   └── tests
 │   │   │       ├── application
 │   │   │       │   └── use_cases
@@ -330,10 +326,8 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │       │           ├── test_get_category.py
 │   │   │       │           ├── test_list_category.py
 │   │   │       │           └── test_update_category.py
-│   │   │       ├── domain
-│   │   │       │   └── test_category.py
-│   │   │       └── infra
-│   │   │           └── test_in_memory_category_repository.py
+│   │   │       └── domain
+│   │   │           └── test_category.py
 │   │   ├── genre
 │   │   │   ├── application
 │   │   │   │   ├── exceptions.py
@@ -345,8 +339,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   ├── domain
 │   │   │   │   ├── genre.py
 │   │   │   │   └── genre_repository.py
-│   │   │   ├── infra
-│   │   │   │   └── in_memory_genre_repository.py
 │   │   │   └── tests
 │   │   │       ├── application
 │   │   │       │   └── use_cases
@@ -363,34 +355,42 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │       └── domain
 │   │   │           └── test_genre.py
 │   │   ├── _shared
-│   │   │   ├── entity.py
-│   │   │   ├── list_use_case.py
-│   │   │   └── notification.py
+│   │   │   ├── application
+│   │   │   │   ├── ports
+│   │   │   │   └── use_cases
+│   │   │   ├── domain
+│   │   │   └── events
 │   │   └── video
 │   │       ├── application
 │   │       │   ├── exceptions.py
 │   │       │   └── use_cases
 │   │       │       ├── create_video_without_media.py
-│   │       │       └── get_video.py
+│   │       │       ├── get_video.py
+│   │       │       ├── process_audio_video_media.py
+│   │       │       └── upload_video.py
 │   │       ├── domain
 │   │       │   ├── value_objects.py
 │   │       │   ├── video.py
 │   │       │   └── video_repository.py
-│   │       ├── infra
-│   │       │   └── in_memory_video_repository.py
 │   │       └── tests
 │   │           ├── application
 │   │           │   └── use_cases
 │   │           │       ├── integration
-│   │           │       │   └── test_create_video_without_media.py
 │   │           │       └── unit
-│   │           │           └── test_create_video_without_media.py
-│   │           ├── domain
-│   │           │   └── test_video.py
-│   │           └── infra
-│   │               └── test_in_memory_video_repository.py
+│   │           └── domain
+│   │               └── test_video.py
+│   ├── .importlinter
 │   ├── db.sqlite3
 │   ├── django_project
+│   │   ├── adapters
+│   │   │   ├── auth
+│   │   │   ├── composition
+│   │   │   │   └── container.py
+│   │   │   ├── messaging
+│   │   │   ├── persistence
+│   │   │   │   ├── django
+│   │   │   │   └── in_memory
+│   │   │   └── storage
 │   │   ├── asgi.py
 │   │   ├── castmember_app
 │   │   │   ├── admin.py
@@ -398,7 +398,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   ├── migrations
 │   │   │   │   └── 0001_initial.py
 │   │   │   ├── models.py
-│   │   │   ├── repository.py
 │   │   │   ├── serializers.py
 │   │   │   ├── tests
 │   │   │   │   ├── test_castmember_api.py
@@ -411,7 +410,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   │   ├── 0001_initial.py
 │   │   │   │   └── 0002_alter_category_table.py
 │   │   │   ├── models.py
-│   │   │   ├── repository.py
 │   │   │   ├── serializers.py
 │   │   │   ├── tests
 │   │   │   │   ├── test_category_api.py
@@ -425,7 +423,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   │   ├── 0001_initial.py
 │   │   │   │   └── 0002_genre_categories_alter_genre_table.py
 │   │   │   ├── models.py
-│   │   │   ├── repository.py
 │   │   │   ├── serializers.py
 │   │   │   ├── tests
 │   │   │   │   ├── test_genre_api.py
@@ -440,7 +437,6 @@ cd src && pytest --cov=core --cov=django_project --cov-report=term-missing
 │   │   │   │   ├── 0001_initial.py
 │   │   │   │   └── 0002_remove_video_opened_alter_video_rating.py
 │   │   │   ├── models.py
-│   │   │   ├── repository.py
 │   │   │   ├── serializers.py
 │   │   │   ├── tests
 │   │   │   │   └── test_video_api.py
